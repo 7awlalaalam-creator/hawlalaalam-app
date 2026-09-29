@@ -1,0 +1,60 @@
+name: بناء تطبيق أندرويد
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: فك ضغط المشروع
+        run: |
+          Z=$(ls *.zip | grep -vi keys | head -1)
+          unzip -o -q "$Z" -d /tmp/p
+          R=$(dirname "$(find /tmp/p -name settings.gradle.kts | head -1)")
+          cp -r "$R"/. .
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.11.1'
+      - name: تجهيز مفتاح التوقيع
+        env:
+          KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
+        run: |
+          if [ -n "$KEYSTORE_BASE64" ]; then
+            echo "$KEYSTORE_BASE64" | base64 -d > "$RUNNER_TEMP/release.jks"
+            echo "KEYSTORE_FILE=$RUNNER_TEMP/release.jks" >> "$GITHUB_ENV"
+          fi
+      - name: البناء
+        env:
+          KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
+        run: |
+          if [ -n "$KEYSTORE_FILE" ]; then
+            gradle --no-daemon assembleRelease bundleRelease
+          else
+            gradle --no-daemon assembleDebug
+          fi
+      - name: تجميع الملفات
+        run: |
+          mkdir -p out
+          for f in app/build/outputs/apk/*/*.apk; do [ -e "$f" ] && cp "$f" out/hawlalaalam-quran.apk; done
+          for f in app/build/outputs/bundle/*/*.aab; do [ -e "$f" ] && cp "$f" out/hawlalaalam-quran.aab; done
+      - uses: actions/upload-artifact@v4
+        with:
+          name: hawlalaalam-app
+          path: out/
+      - name: نشر إصدار للتحميل
+        if: env.KEYSTORE_FILE != ''
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v1.0.${{ github.run_number }}
+          name: حول العالم | القرآن 1.0.${{ github.run_number }}
+          files: out/*
