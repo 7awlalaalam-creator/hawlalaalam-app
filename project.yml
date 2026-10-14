@@ -1,0 +1,79 @@
+# مشروع iOS لتطبيق «حول العالم | القرآن الكريم»
+# يُولَّد ملف Xcode منه تلقائيًا على GitHub (XcodeGen) — لا تحتاج جهاز ماك.
+# بيانات المصحف والخطوط مأخوذة مباشرة من مشروع أندرويد (نسخة واحدة للنظامين).
+name: Hawl
+options:
+  bundleIdPrefix: com.hawlalaalam
+  deploymentTarget:
+    iOS: "16.0"
+  developmentLanguage: ar
+  createIntermediateGroups: true
+settings:
+  base:
+    SWIFT_VERSION: "5.0"
+    MARKETING_VERSION: "1.0"
+    CURRENT_PROJECT_VERSION: "1"
+targets:
+  Hawl:
+    type: application
+    platform: iOS
+    sources:
+      - path: Hawl/Sources
+      - path: Hawl/Assets.xcassets
+      - path: ../app/src/main/assets/quran
+        type: folder
+        buildPhase: resources
+      - path: ../app/src/main/res/font/tajawal_regular.ttf
+        buildPhase: resources
+      - path: ../app/src/main/res/font/tajawal_medium.ttf
+        buildPhase: resources
+      - path: ../app/src/main/res/font/tajawal_bold.ttf
+        buildPhase: resources
+      - path: ../app/src/main/res/font/hafs.ttf
+        buildPhase: resources
+      - path: ../app/src/main/res/drawable-nodpi/app_logo_png.png
+        buildPhase: resources
+    info:
+      path: Hawl/Info.plist
+      properties:
+        CFBundleDisplayName: "حول العالم"
+        CFBundleDevelopmentRegion: ar
+        CFBundleShortVersionString: $(MARKETING_VERSION)
+        CFBundleVersion: $(CURRENT_PROJECT_VERSION)
+        UILaunchScreen:
+          UIColorName: LaunchBackground
+        UIApplicationSceneManifest:
+          UIApplicationSupportsMultipleScenes: false
+        UISupportedInterfaceOrientations:
+          - UIInterfaceOrientationPortrait
+        UISupportedInterfaceOrientations~ipad:
+          - UIInterfaceOrientationPortrait
+          - UIInterfaceOrientationPortraitUpsideDown
+          - UIInterfaceOrientationLandscapeLeft
+          - UIInterfaceOrientationLandscapeRight
+        UIAppFonts:
+          - tajawal_regular.ttf
+          - tajawal_medium.ttf
+          - tajawal_bold.ttf
+          - hafs.ttf
+        UIBackgroundModes:
+          - audio
+        NSLocationWhenInUseUsageDescription: "نستخدم موقعك لحساب مواقيت الصلاة واتجاه القبلة في مدينتك، ولا يُرسل إلى أي جهة."
+        ITSAppUsesNonExemptEncryption: false
+        LSApplicationQueriesSchemes:
+          - whatsapp
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.hawlalaalam.quran
+        TARGETED_DEVICE_FAMILY: "1,2"
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+        ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME: AccentColor
+        CODE_SIGN_STYLE: Automatic
+        ENABLE_PREVIEWS: NO
+schemes:
+  Hawl:
+    build:
+      targets:
+        Hawl: all
+    archive:
+      config: Release

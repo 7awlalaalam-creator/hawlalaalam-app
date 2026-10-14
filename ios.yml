@@ -1,0 +1,118 @@
+name: بناء تطبيق iOS
+
+# يعمل عند أي تعديل في مجلد ios أو في بيانات المصحف والخطوط المشتركة مع أندرويد
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'ios/**'
+      - 'app/src/main/assets/quran/**'
+      - 'app/src/main/res/font/**'
+      - '.github/workflows/ios.yml'
+  workflow_dispatch:
+
+jobs:
+  # ١) فحص البناء على محاكي آيفون: يعمل الآن دون حساب Apple Developer
+  build:
+    runs-on: macos-15
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: تثبيت XcodeGen
+        run: brew install xcodegen
+
+      - name: توليد مشروع Xcode
+        working-directory: ios
+        run: xcodegen generate
+
+      - name: البناء للمحاكي
+        working-directory: ios
+        run: |
+          set -o pipefail
+          xcodebuild -project Hawl.xcodeproj -scheme Hawl -configuration Debug \
+            -sdk iphonesimulator -destination 'generic/platform=iOS Simulator' \
+            CODE_SIGNING_ALLOWED=NO build 2>&1 | tee build.log | grep -E "error:|warning: |BUILD (SUCCEEDED|FAILED)" || true
+          grep -q "BUILD SUCCEEDED" build.log
+
+      - name: حفظ سجل البناء (عند الفشل أرسله لنصلحه)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ios-build-log
+          path: ios/build.log
+
+  # ٢) الرفع إلى TestFlight: يعمل تلقائيًا بعد إضافة أسرار حساب Apple (انظر ios/README.md)
+  testflight:
+    needs: build
+    runs-on: macos-15
+    env:
+      HAWL_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+      ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
+      ASC_ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
+      ASC_KEY_P8: ${{ secrets.ASC_KEY_P8 }}
+    steps:
+      - name: التحقق من أسرار Apple
+        id: check
+        run: |
+          if [ -n "$HAWL_TEAM_ID" ] && [ -n "$ASC_KEY_ID" ] && [ -n "$ASC_ISSUER_ID" ] && [ -n "$ASC_KEY_P8" ]; then
+            echo "ready=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "::notice::لم تُضف أسرار حساب Apple بعد؛ تخطّي الرفع إلى TestFlight"
+            echo "ready=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - uses: actions/checkout@v4
+        if: steps.check.outputs.ready == 'true'
+
+      - name: تجهيز مفتاح App Store Connect
+        if: steps.check.outputs.ready == 'true'
+        run: |
+          mkdir -p "$RUNNER_TEMP/keys"
+          printf '%s' "$ASC_KEY_P8" > "$RUNNER_TEMP/keys/AuthKey_$ASC_KEY_ID.p8"
+          echo "ASC_KEY_PATH=$RUNNER_TEMP/keys/AuthKey_$ASC_KEY_ID.p8" >> "$GITHUB_ENV"
+
+      - name: توليد المشروع
+        if: steps.check.outputs.ready == 'true'
+        working-directory: ios
+        run: |
+          brew install xcodegen
+          xcodegen generate
+
+      - name: الأرشفة والتوقيع
+        if: steps.check.outputs.ready == 'true'
+        working-directory: ios
+        run: |
+          set -o pipefail
+          xcodebuild -project Hawl.xcodeproj -scheme Hawl -configuration Release \
+            -destination 'generic/platform=iOS' -archivePath build/Hawl.xcarchive \
+            -allowProvisioningUpdates \
+            -authenticationKeyPath "$ASC_KEY_PATH" -authenticationKeyID "$ASC_KEY_ID" -authenticationKeyIssuerID "$ASC_ISSUER_ID" \
+            DEVELOPMENT_TEAM="$HAWL_TEAM_ID" CURRENT_PROJECT_VERSION="${{ github.run_number }}" \
+            archive 2>&1 | tee archive.log | grep -E "error:|ARCHIVE (SUCCEEDED|FAILED)" || true
+          grep -q "ARCHIVE SUCCEEDED" archive.log
+
+      - name: الرفع إلى App Store Connect (TestFlight)
+        if: steps.check.outputs.ready == 'true'
+        working-directory: ios
+        run: |
+          cat > build/ExportOptions.plist <<EOF
+          <?xml version="1.0" encoding="UTF-8"?>
+          <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+          <plist version="1.0"><dict>
+            <key>method</key><string>app-store-connect</string>
+            <key>destination</key><string>upload</string>
+            <key>teamID</key><string>$HAWL_TEAM_ID</string>
+            <key>signingStyle</key><string>automatic</string>
+            <key>manageAppVersionAndBuildNumber</key><false/>
+          </dict></plist>
+          EOF
+          xcodebuild -exportArchive -archivePath build/Hawl.xcarchive -exportOptionsPlist build/ExportOptions.plist \
+            -exportPath build/export -allowProvisioningUpdates \
+            -authenticationKeyPath "$ASC_KEY_PATH" -authenticationKeyID "$ASC_KEY_ID" -authenticationKeyIssuerID "$ASC_ISSUER_ID"
+
+      - name: حفظ سجلات الرفع
+        if: always() && steps.check.outputs.ready == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: ios-release-logs
+          path: ios/*.log
