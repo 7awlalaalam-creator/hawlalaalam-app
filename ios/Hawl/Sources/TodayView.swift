@@ -70,7 +70,7 @@ struct TodayView: View {
 
     @ViewBuilder private var prayerStrip: some View {
         if let lat = state.lat, let lng = state.lng {
-            TimelineView(.periodic(from: .now, by: 1)) { ctx in
+            TimelineView(.everyMinute) { ctx in
                 let nx = Prayer.next(lat: lat, lng: lng, now: ctx.date)
                 let idx = nx.0, at = nx.1
                 NavigationLink { PrayerTimesView() } label: {
@@ -79,12 +79,10 @@ struct TodayView: View {
                         Text(Prayer.displayName(idx, on: at)).font(AppFont.ui(15, 700)).foregroundColor(.white)
                         Text(formatTime(at)).font(AppFont.ui(13)).foregroundColor(Palette.onDarkMuted)
                         Spacer()
-                        Text("بعد").font(AppFont.ui(13)).foregroundColor(Palette.onDarkMuted)
-                        Text(countdown(to: at, from: ctx.date))
+                        // «بعد ٥٢ دقيقة» / «بعد ١:٠٥ ساعة» (نفس صيغة أندرويد)
+                        Text(Prayer.remaining(at.timeIntervalSince(ctx.date), after: true))
                             .font(AppFont.ui(15, 700))
-                            .monospacedDigit()
                             .foregroundColor(Palette.goldLight)
-                            .environment(\.layoutDirection, .leftToRight)
                     }
                     .stripStyle()
                 }
@@ -101,11 +99,6 @@ struct TodayView: View {
                 .stripStyle()
             }
         }
-    }
-
-    private func countdown(to: Date, from: Date) -> String {
-        let s = max(0, Int(to.timeIntervalSince(from)))
-        return String(format: "%02d:%02d:%02d", s / 3600, (s % 3600) / 60, s % 60)
     }
 
     // MARK: البطاقة الرئيسية

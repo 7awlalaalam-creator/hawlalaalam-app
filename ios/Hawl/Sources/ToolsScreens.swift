@@ -125,7 +125,7 @@ struct PrayerTimesView: View {
                 } header: {
                     Text(hijriToday() + (state.city.isEmpty ? "" : " · " + state.city)).font(AppFont.ui(13))
                 } footer: {
-                    Text("طريقة أم القرى · العشاء بعد المغرب بساعة ونصف (ساعتين في رمضان)").font(AppFont.ui(12))
+                    Text(Prayer.currentMethod().name).font(AppFont.ui(12))
                 }
             } else {
                 Text("حدّد موقعك لعرض مواقيت الصلاة في مدينتك").font(AppFont.ui(15)).foregroundColor(Palette.muted)
@@ -274,13 +274,19 @@ struct SettingsView: View {
     var body: some View {
         Form {
             Section {
-                toggle("تنبيه الأذان", "عند دخول كل صلاة · طريقة أم القرى", get: { state.adhanOn }, set: { state.adhanOn = $0 })
+                toggle("تنبيه الأذان", "عند دخول كل صلاة، بطريقة الحساب أدناه", get: { state.adhanOn }, set: { state.adhanOn = $0 })
                     .disabled(!state.hasLocation)
                 if !state.hasLocation {
                     Button { location.requestLocation() } label: {
                         Label("حدّد موقعك لتفعيل الأذان", systemImage: "location").font(AppFont.ui(14, 700))
                     }
                 }
+                Picker(selection: $state.calcMethod) {
+                    Text("تلقائي حسب دولتك (" + (Prayer.methods[Prayer.forCountry(Prayer.country())]?.name ?? "") + ")").tag(0)
+                    ForEach(1..<Prayer.methods.count, id: \.self) { i in
+                        Text(Prayer.methods[i]?.name ?? "").tag(i)
+                    }
+                } label: { Text("طريقة الحساب").font(AppFont.ui(15)) }
             } header: { Text("الصلاة").font(AppFont.ui(13, 700)) }
 
             Section {

@@ -35,6 +35,9 @@ final class AppState: ObservableObject {
     @Published var azkarOn: Bool { didSet { d.set(azkarOn, forKey: "azkar_on"); Notifications.reschedule() } }
     @Published var kahfOn: Bool { didSet { d.set(kahfOn, forKey: "kahf_on"); Notifications.reschedule() } }
 
+    /** طريقة حساب المواقيت: ٠ تلقائي حسب الدولة، وإلا فهرس في Prayer.methods */
+    @Published var calcMethod: Int { didSet { d.set(calcMethod, forKey: "calc_method"); Notifications.reschedule() } }
+
     /** المظهر: ٠ تلقائي، ١ نهاري، ٢ ليلي */
     @Published var themeMode: Int { didSet { d.set(themeMode, forKey: "theme_mode") } }
 
@@ -61,6 +64,7 @@ final class AppState: ObservableObject {
         azkarOn = d.bool(forKey: "azkar_on")
         kahfOn = d.bool(forKey: "kahf_on")
         themeMode = d.integer(forKey: "theme_mode")
+        calcMethod = d.integer(forKey: "calc_method")
         if let s = d.object(forKey: "v_s") as? Int, let a = d.object(forKey: "v_a") as? Int,
            let t = d.string(forKey: "v_text"), !t.isEmpty {
             verse = DailyVerse(surah: s, ayah: a, text: t)
@@ -171,7 +175,9 @@ final class AppState: ObservableObject {
         lng = loc.coordinate.longitude
         CLGeocoder().reverseGeocodeLocation(loc, preferredLocale: Locale(identifier: "ar")) { [weak self] marks, _ in
             let name = marks?.first?.locality ?? marks?.first?.administrativeArea ?? ""
+            let cc = marks?.first?.isoCountryCode ?? ""
             Task { @MainActor in
+                if cc.count == 2 { UserDefaults.standard.set(cc, forKey: "country"); self?.objectWillChange.send() }
                 if !name.isEmpty { self?.city = name }
                 Notifications.reschedule()
             }
