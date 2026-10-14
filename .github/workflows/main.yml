@@ -2,6 +2,9 @@ name: بناء تطبيق أندرويد
 on:
   push:
     branches: [main]
+    # نسخة أندرويد تُبنى فقط عند تحديث ملف المشروع المضغوط (تعديلات iOS وغيرها لا تُصدر نسخة)
+    paths:
+      - '*.zip'
   workflow_dispatch:
 permissions:
   contents: write
