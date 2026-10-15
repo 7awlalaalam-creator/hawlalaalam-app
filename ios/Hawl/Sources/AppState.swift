@@ -1,189 +1,237 @@
 import SwiftUI
 import CoreLocation
+import WidgetKit
 
-/** حالة التطبيق وإعداداته المحفوظة على الجهاز (UserDefaults) */
+/** الشاشات التي تُفتح داخل «اليوم» و«الأدوات» (تنقّل بالقيم: يعمل من الإشعارات والويدجت أيضًا) */
+enum Screen: Hashable {
+    case web(URL, String)
+    case khatma
+    case settings
+    case notifications
+    case qibla
+    case tasbeeh
+    case mood(Int?)
+    case downloads
+    case prayerTimes
+    case index
+    case prayerAzkar
+    case dedicate
+    case player(String)
+}
+
+/** حالة التطبيق: التنقّل، وآية اليوم، ومرآة للإعدادات المحفوظة في Store (المشتركة مع الويدجت) */
 @MainActor
 final class AppState: ObservableObject {
     static let shared = AppState()
 
-    static let home = URL(string: "https://7awlalaalam.com/quran/")!
-
     enum Tab: Hashable { case today, mushaf, listen, tools }
 
-    private let d = UserDefaults.standard
-
-    // التنقل
+    // التنقّل
     @Published var tab: Tab = .today
-    /** طلب فتح صفحة في المصحف (من الفهرس أو «أكمل القراءة») */
+    @Published var todayPath = NavigationPath()
+    @Published var toolsPath = NavigationPath()
+    /** طلب فتح صفحة في المصحف (من الفهرس أو «أكمل القراءة» أو الإشعار) */
     @Published var mushafRequest: Int?
     /** فتح «أذكار بعد الصلاة» من إشعار الأذان */
     @Published var showPrayerAzkar = false
+    @Published var showWelcome = false
+    @Published var showTour = false
+    /** صفحة الاستماع: طلب تحميل رابط معيّن */
+    @Published var listenRequest: URL?
 
-    // القراءة
-    @Published var lastPage: Int { didSet { d.set(lastPage, forKey: "last_page") } }
-    @Published private(set) var readDays: Set<String>
-
-    // الموقع
-    @Published var lat: Double? { didSet { d.set(lat, forKey: "lat") } }
-    @Published var lng: Double? { didSet { d.set(lng, forKey: "lng") } }
-    @Published var city: String { didSet { d.set(city, forKey: "city") } }
-
-    // التنبيهات
-    @Published var adhanOn: Bool { didSet { d.set(adhanOn, forKey: "adhan_on"); Notifications.reschedule() } }
-    @Published var verseOn: Bool { didSet { d.set(verseOn, forKey: "verse_on"); Notifications.reschedule() } }
-    @Published var verseHour: Int { didSet { d.set(verseHour, forKey: "verse_h"); Notifications.reschedule() } }
-    @Published var azkarOn: Bool { didSet { d.set(azkarOn, forKey: "azkar_on"); Notifications.reschedule() } }
-    @Published var kahfOn: Bool { didSet { d.set(kahfOn, forKey: "kahf_on"); Notifications.reschedule() } }
-
-    /** طريقة حساب المواقيت: ٠ تلقائي حسب الدولة، وإلا فهرس في Prayer.methods */
-    @Published var calcMethod: Int { didSet { d.set(calcMethod, forKey: "calc_method"); Notifications.reschedule() } }
-
-    /** المظهر: ٠ تلقائي، ١ نهاري، ٢ ليلي */
-    @Published var themeMode: Int { didSet { d.set(themeMode, forKey: "theme_mode") } }
+    /** يزيد مع كل تغيير في الإعدادات أو الختمة فتُعاد رسم الشاشات */
+    @Published private(set) var rev = 0
 
     // آية اليوم
     @Published private(set) var verse: DailyVerse?
 
-    struct DailyVerse: Equatable {
-        let surah: Int, ayah: Int, text: String
-        var ref: String { "سورة " + Quran.surahName(surah) + " · الآية " + ar(ayah) }
-        var tafsirURL: URL { URL(string: "https://7awlalaalam.com/quran/ayah-\(surah)-\(ayah).html")! }
-        var cardURL: URL { URL(string: "https://7awlalaalam.com/quran/verse-story-card.html?surah=\(surah)&from=\(ayah)&to=\(ayah)")! }
-    }
+    // الإعدادات التي تُربط بعناصر الواجهة مباشرة
+    @Published var themeMode: Int { didSet { Store.d.set(themeMode, forKey: "theme_mode"); WidgetCenter.shared.reloadAllTimelines() } }
+    @Published var calcMethod: Int { didSet { Store.d.set(calcMethod, forKey: "calc_method"); changed() } }
+    @Published var textZoom: Int { didSet { Store.d.set(textZoom, forKey: "text_zoom") } }
+    @Published var lastPage: Int { didSet { Store.d.set(lastPage, forKey: "last_page") } }
+
+    typealias DailyVerse = VerseSource.Verse
 
     private init() {
-        let d = UserDefaults.standard              // لا نقرأ self.d قبل اكتمال التهيئة
-        lastPage = d.integer(forKey: "last_page")
-        readDays = Set(d.stringArray(forKey: "read_days") ?? [])
-        lat = d.object(forKey: "lat") as? Double
-        lng = d.object(forKey: "lng") as? Double
-        city = d.string(forKey: "city") ?? ""
-        adhanOn = d.bool(forKey: "adhan_on")
-        verseOn = d.object(forKey: "verse_on") as? Bool ?? false
-        verseHour = d.object(forKey: "verse_h") as? Int ?? 7
-        azkarOn = d.bool(forKey: "azkar_on")
-        kahfOn = d.bool(forKey: "kahf_on")
+        let d = Store.d
+        Self.migrateIfNeeded()
         themeMode = d.integer(forKey: "theme_mode")
         calcMethod = d.integer(forKey: "calc_method")
-        if let s = d.object(forKey: "v_s") as? Int, let a = d.object(forKey: "v_a") as? Int,
-           let t = d.string(forKey: "v_text"), !t.isEmpty {
-            verse = DailyVerse(surah: s, ayah: a, text: t)
+        textZoom = d.object(forKey: "text_zoom") as? Int ?? 100
+        lastPage = d.integer(forKey: "last_page")
+        verse = Self.cachedVerse()
+        Khatma.didChange = {
+            Task { @MainActor in AppState.shared.changed() }
         }
+        if !d.bool(forKey: "welcomed") { showWelcome = true }
+        else if d.integer(forKey: "tour_v") < FeaturesView.tourVersion { showTour = true }
     }
 
-    var hasLocation: Bool { lat != nil && lng != nil }
+    /** النسخة الأولى من تطبيق iOS حفظت إعداداتها في التخزين العادي: ننقلها مرة */
+    private static func migrateIfNeeded() {
+        let d = Store.d, old = UserDefaults.standard
+        guard d !== old, !d.bool(forKey: "migrated_v2") else { return }
+        for k in ["lat", "lng", "city", "country", "adhan_on", "verse_on", "verse_h", "kahf_on", "theme_mode",
+                  "calc_method", "last_page", "read_days", "v_s", "v_a", "v_text", "v_date"] {
+            if let v = old.object(forKey: k), d.object(forKey: k) == nil { d.set(v, forKey: k) }
+        }
+        if old.bool(forKey: "azkar_on") {
+            d.set(true, forKey: "azkar_am_on")
+            d.set(true, forKey: "azkar_pm_on")
+        }
+        d.set(true, forKey: "migrated_v2")
+    }
 
     var colorScheme: ColorScheme? { themeMode == 1 ? .light : (themeMode == 2 ? .dark : nil) }
 
-    // MARK: القراءة والسلسلة
+    var hasLocation: Bool { _ = rev; return Geo.has }
+    var city: String { _ = rev; return Geo.city }
 
-    static func dayKey(_ date: Date) -> String {
-        let f = DateFormatter()
-        f.calendar = Calendar(identifier: .gregorian)
-        f.locale = Locale(identifier: "en_US_POSIX")
-        f.dateFormat = "yyyy-MM-dd"
-        return f.string(from: date)
+    /** بعد أي تغيير: نعيد الجدولة ونحدّث الويدجت والشاشات */
+    func changed() {
+        rev += 1
+        Notifications.reschedule()
+        WidgetCenter.shared.reloadAllTimelines()
     }
 
-    func recordRead(page: Int) {
-        guard page >= 1 && page <= Quran.pages else { return }
-        if page != lastPage { lastPage = page }
-        let key = Self.dayKey(Date())
-        if !readDays.contains(key) {
-            readDays.insert(key)
-            // نحتفظ بآخر ٤٠٠ يوم فقط
-            let kept = readDays.sorted().suffix(400)
-            readDays = Set(kept)
-            d.set(Array(kept), forKey: "read_days")
-        }
+    // MARK: الإعدادات كمفاتيح
+
+    func flag(_ key: String, _ def: Bool = false) -> Bool { _ = rev; return Store.bool(key, def) }
+
+    func setFlag(_ key: String, _ on: Bool) {
+        Store.d.set(on, forKey: key)
+        changed()
     }
 
-    func readOn(_ date: Date) -> Bool { readDays.contains(Self.dayKey(date)) }
+    func number(_ key: String, _ def: Int) -> Int { _ = rev; return Store.int(key, def) }
 
-    /** الأيام المتتالية حتى اليوم (أو أمس إن لم يقرأ اليوم بعد) */
-    var streak: Int {
-        let cal = Calendar.current
-        var day = Date()
-        if !readOn(day) { day = cal.date(byAdding: .day, value: -1, to: day) ?? day }
-        var n = 0
-        while readOn(day) && n < 400 {
-            n += 1
-            day = cal.date(byAdding: .day, value: -1, to: day) ?? day
-        }
-        return n
+    func setNumber(_ key: String, _ v: Int) {
+        Store.d.set(v, forKey: key)
+        changed()
     }
+
+    /** ربط مفتاح بمفتاح تبديل؛ التفعيل يطلب إذن التنبيهات أولًا إن احتاج */
+    func toggle(_ key: String, _ def: Bool = false, needsNotifications: Bool = true,
+                denied: (() -> Void)? = nil) -> Binding<Bool> {
+        Binding(get: { self.flag(key, def) }, set: { on in
+            if !on || !needsNotifications { self.setFlag(key, on); return }
+            Task {
+                if await Notifications.requestPermission() { self.setFlag(key, true) }
+                else { denied?() }
+            }
+        })
+    }
+
+    // MARK: التنقّل
 
     func openMushaf(page: Int?) {
-        mushafRequest = page ?? (lastPage > 0 ? lastPage : 1)
+        mushafRequest = page ?? Khatma.lastMushafPage()
         tab = .mushaf
+    }
+
+    /** فتح شاشة داخل «اليوم» (من إشعار أو ويدجت أو اختصار) */
+    func show(_ s: Screen) {
+        tab = .today
+        todayPath = NavigationPath()
+        todayPath.append(s)
+    }
+
+    /** يفتح أي رابط: صفحة المصحف ← تبويب المصحف، والاستماع ← تبويبه، وصفحات الموقع داخل التطبيق، وغيرها خارجه */
+    func open(_ url: URL, title: String = "") {
+        if (url.scheme ?? "").lowercased() == "hawlapp" { handleDeepLink(url); return }
+        let p = Khatma.pageOf(url)
+        if p > 0 { openMushaf(page: p); return }
+        if Links.isOurs(url) {
+            if url.absoluteString.contains("quran-reciters") { tab = .listen; listenRequest = url; return }
+            show(.web(url, title))
+            return
+        }
+        UIApplication.shared.open(url)
+    }
+
+    /** hawlapp://… من الويدجت والإشعارات والاختصارات وصفحات الموقع */
+    func handleDeepLink(_ url: URL) {
+        let host = (url.host ?? "").lowercased()
+        let q = URLComponents(url: url, resolvingAgainstBaseURL: false)?.queryItems ?? []
+        func item(_ n: String) -> String? { q.first(where: { $0.name == n })?.value }
+        switch host {
+        case "open":
+            if let s = item("u"), let u = URL(string: s) { open(u) }
+        case "mushaf":
+            openMushaf(page: item("page").flatMap(Int.init))
+        case "listen": tab = .listen
+        case "tools": tab = .tools
+        case "downloads": show(.downloads)
+        case "dedicate": show(.dedicate)
+        case "index": show(.index)
+        case "khatma": show(.khatma)
+        case "settings": show(.settings)
+        case "notifications": show(.notifications)
+        case "qibla": show(.qibla)
+        case "tasbeeh": show(.tasbeeh)
+        case "mood": show(.mood(item("m").flatMap(Int.init)))
+        case "prayer": show(.prayerTimes)
+        case "azkar": show(.web(Links.azkar, "الأذكار"))
+        case "prayer-azkar": tab = .today; showPrayerAzkar = true
+        case "share-verse":
+            tab = .today
+            if let v = verse { Share.present([v.shareText]) }
+        default: tab = .today
+        }
     }
 
     // MARK: آية اليوم (نفس منطق VerseRepo في أندرويد)
 
-    func refreshVerse() async {
-        let today = Self.dayKey(Date())
-        if d.string(forKey: "v_date") == today, verse != nil { return }
-        var s = 0, a = 0, fromSite = false
-        let lastTry = d.double(forKey: "v_try")
-        if Date().timeIntervalSince1970 - lastTry > 3600 {
-            if let html = await Self.fetchHome() {
-                if let r = Self.verseRef(in: html), Quran.valid(r.0, r.1) { s = r.0; a = r.1; fromSite = true }
-            }
-            if !fromSite { d.set(Date().timeIntervalSince1970, forKey: "v_try") }
+    nonisolated static func cachedVerse() -> DailyVerse? { VerseSource.cached() }
+
+    nonisolated static var verseFresh: Bool { VerseSource.fresh }
+
+    func refreshVerse(force: Bool = false) async {
+        if !force && Self.verseFresh { return }
+        if let v = await Self.fetchVerse() {
+            verse = v
+            WidgetCenter.shared.reloadAllTimelines()
+            Notifications.reschedule()
         }
-        if !fromSite {
-            // دون اتصال: آية بحسب التاريخ
-            let r = Quran.fromIndex(Int(Date().timeIntervalSince1970 / 86400))
-            s = r.0
-            a = r.1
-        }
-        let (vs, va) = (s, a)
-        let text: String? = await Task.detached { Quran.verse(vs, va) }.value
-        guard let t = text, !t.isEmpty else { return }
-        verse = DailyVerse(surah: s, ayah: a, text: t)
-        d.set(fromSite ? today : "", forKey: "v_date")
-        d.set(s, forKey: "v_s")
-        d.set(a, forKey: "v_a")
-        d.set(t, forKey: "v_text")
     }
 
-    private static func fetchHome() async -> String? {
-        var req = URLRequest(url: home, timeoutInterval: 12)
-        req.setValue("HawlalaalamApp iOS", forHTTPHeaderField: "User-Agent")
-        guard let result = try? await URLSession.shared.data(for: req) else { return nil }
-        return String(data: result.0, encoding: .utf8)
-    }
-
-    /** أول رابط ayah-س-آ.html بعد «آية اليوم» في الصفحة الرئيسية */
-    static func verseRef(in html: String) -> (Int, Int)? {
-        guard let re = try? NSRegularExpression(pattern: "ayah-(\\d{1,3})-(\\d{1,3})\\.html") else { return nil }
-        let ns = html as NSString
-        let start = ns.range(of: "آية اليوم").location
-        let from = start == NSNotFound ? 0 : start
-        let m = re.firstMatch(in: html, range: NSRange(location: from, length: ns.length - from))
-            ?? re.firstMatch(in: html, range: NSRange(location: 0, length: ns.length))
-        guard let match = m,
-              let s = Int(ns.substring(with: match.range(at: 1))),
-              let a = Int(ns.substring(with: match.range(at: 2))) else { return nil }
-        return (s, a)
+    /** يجلب آية اليوم من الموقع ويحفظها (يُستدعى من التطبيق ومن التحديث في الخلفية) */
+    nonisolated static func fetchVerse() async -> DailyVerse? {
+        await VerseSource.fetch(userAgent: WebConfig.userAgentMark)
     }
 
     // MARK: الموقع
 
     func setLocation(_ loc: CLLocation) {
-        lat = loc.coordinate.latitude
-        lng = loc.coordinate.longitude
-        CLGeocoder().reverseGeocodeLocation(loc, preferredLocale: Locale(identifier: "ar")) { [weak self] marks, _ in
+        Store.d.set(loc.coordinate.latitude, forKey: "lat")
+        Store.d.set(loc.coordinate.longitude, forKey: "lng")
+        Store.d.set(Date().timeIntervalSince1970, forKey: "loc_time")
+        changed()
+        CLGeocoder().reverseGeocodeLocation(loc, preferredLocale: Locale(identifier: "ar")) { marks, _ in
             let name = marks?.first?.locality ?? marks?.first?.administrativeArea ?? ""
             let cc = marks?.first?.isoCountryCode ?? ""
             Task { @MainActor in
-                if cc.count == 2 { UserDefaults.standard.set(cc, forKey: "country"); self?.objectWillChange.send() }
-                if !name.isEmpty { self?.city = name }
-                Notifications.reschedule()
+                if cc.count == 2 { Store.d.set(cc.uppercased(), forKey: "country") }
+                if !name.isEmpty { Store.d.set(name, forKey: "city") }
+                AppState.shared.changed()
             }
         }
-        Notifications.reschedule()
     }
 
-    static let shareText = "تطبيق «حول العالم | القرآن الكريم»: مصحف المدينة بخط المجمع، والتفسير، والختمة، والأذان.\n" + home.absoluteString
+    // MARK: القراءة
+
+    /** تُستدعى عند كل صفحة مصحف تُعرض (آخر صفحة + السلسلة) */
+    func recordMushaf(page: Int) {
+        guard (1...Quran.pages).contains(page) else { return }
+        if page != lastPage { lastPage = page }
+        Reading.record(Links.page(page), title: nil)
+        rev += 1
+    }
+
+    var shareAppText: String {
+        "📖 تطبيق «حول العالم | القرآن الكريم»\n"
+            + "قراءة واستماع وتفسير وأكثر من ٣٠ أداة إسلامية، مجانًا وبلا تسجيل.\n\n"
+            + Links.homeString
+    }
 }

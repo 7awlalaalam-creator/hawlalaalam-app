@@ -30,6 +30,7 @@ struct HawlApp: App {
         if let t = UIFont(name: "Tajawal-Bold", size: 30) { nav.largeTitleTextAttributes = [.font: t] }
         UINavigationBar.appearance().standardAppearance = nav
         UINavigationBar.appearance().scrollEdgeAppearance = nav
+        WebConfig.prepareRules()
     }
 
     var body: some Scene {
@@ -40,12 +41,22 @@ struct HawlApp: App {
                 .environment(\.locale, Locale(identifier: "ar"))
                 .preferredColorScheme(state.colorScheme)
                 .tint(Palette.goldDeep)
+                .onOpenURL { url in state.open(url) }
         }
         .onChange(of: phase) { p in
-            if p == .active {
-                Task { await state.refreshVerse() }
-                Notifications.reschedule()                 // نجدد أيام الأذان السبعة كلما فُتح التطبيق
-            }
+            if p == .active { becameActive() }
+            if p == .background { Background.schedule() }
+        }
+    }
+
+    private func becameActive() {
+        Task { await state.refreshVerse() }
+        state.changed()                              // نجدد التنبيهات القادمة ونحدّث الويدجت كلما فُتح التطبيق
+        Announce.checkSoon()
+        LocationService.shared.refreshIfStale()
+        if let s = AppDelegate.pendingShortcut, let u = URL(string: s) {
+            AppDelegate.pendingShortcut = nil
+            state.handleDeepLink(u)
         }
     }
 }
@@ -55,36 +66,75 @@ struct RootView: View {
 
     var body: some View {
         TabView(selection: $state.tab) {
-            NavigationStack { TodayView() }
-                .tabItem { Label("اليوم", systemImage: "house") }
-                .tag(AppState.Tab.today)
+            NavigationStack(path: $state.todayPath) {
+                TodayView().navigationDestination(for: Screen.self) { ScreenView(screen: $0) }
+            }
+            .tabItem { Label("اليوم", systemImage: "house") }
+            .tag(AppState.Tab.today)
+
             NavigationStack { MushafScreen() }
                 .tabItem { Label("المصحف", systemImage: "book") }
                 .tag(AppState.Tab.mushaf)
-            NavigationStack { WebScreen(title: "الاستماع", url: URL(string: "https://7awlalaalam.com/quran/quran-reciters-ar.html")!) }
+
+            NavigationStack { ListenScreen() }
                 .tabItem { Label("الاستماع", systemImage: "headphones") }
                 .tag(AppState.Tab.listen)
-            NavigationStack { ToolsView() }
-                .tabItem { Label("الأدوات", systemImage: "square.grid.2x2") }
-                .tag(AppState.Tab.tools)
+
+            NavigationStack(path: $state.toolsPath) {
+                ToolsView().navigationDestination(for: Screen.self) { ScreenView(screen: $0) }
+            }
+            .tabItem { Label("الأدوات", systemImage: "square.grid.2x2") }
+            .tag(AppState.Tab.tools)
         }
+        .overlay { ToastOverlay() }
         .sheet(isPresented: $state.showPrayerAzkar) {
             NavigationStack { PrayerAzkarView() }
+                .environment(\.layoutDirection, .rightToLeft)
+        }
+        .fullScreenCover(isPresented: $state.showWelcome) {
+            WelcomeView()
+                .environmentObject(state)
+                .environment(\.layoutDirection, .rightToLeft)
+        }
+        .sheet(isPresented: $state.showTour) {
+            FeaturesView()
                 .environment(\.layoutDirection, .rightToLeft)
         }
     }
 }
 
-/** تبويب المصحف: الصفحة المطلوبة أو آخر صفحة قُرئت */
+/** الشاشة المطلوبة بالقيمة (من الروابط والإشعارات والويدجت) */
+struct ScreenView: View {
+    let screen: Screen
+
+    var body: some View {
+        switch screen {
+        case .web(let url, let title): WebScreen(title: title, url: url)
+        case .khatma: KhatmaView()
+        case .settings: SettingsView(notificationsOnly: false)
+        case .notifications: SettingsView(notificationsOnly: true)
+        case .qibla: QiblaView()
+        case .tasbeeh: TasbeehView()
+        case .mood(let m): MoodView(initial: m)
+        case .downloads: DownloadsView()
+        case .prayerTimes: PrayerTimesView()
+        case .index: IndexView()
+        case .prayerAzkar: PrayerAzkarView()
+        case .dedicate: DedicateView()
+        case .player(let url): PlayerView(url: url)
+        }
+    }
+}
+
+/** تبويب المصحف: الصفحة المطلوبة أو حيث توقف القارئ */
 struct MushafScreen: View {
     @EnvironmentObject var state: AppState
     @Environment(\.colorScheme) private var scheme
     @State private var page: Int = 0
 
     var body: some View {
-        // الصفحة تُحدَّد مرة عند الفتح أو عند طلب صريح (الفهرس، «أكمل القراءة»)؛
-        // التنقل داخل المصحف لا يعيد تحميله
-        MushafWebView(page: page == 0 ? max(1, state.lastPage) : page, night: scheme == .dark)
+        // الصفحة تُحدَّد مرة عند الفتح أو عند طلب صريح (الفهرس، «أكمل القراءة»)؛ التنقل داخل المصحف لا يعيد تحميله
+        MushafWebView(page: page == 0 ? Khatma.lastMushafPage() : page, night: scheme == .dark, zoom: state.textZoom)
             .background(Palette.page.ignoresSafeArea())
             .navigationTitle("المصحف")
             .navigationBarTitleDisplayMode(.inline)
@@ -95,8 +145,9 @@ struct MushafScreen: View {
                     }
                 }
             }
+            .keepScreenOn()
             .onAppear {
-                if page == 0 { page = max(1, state.lastPage) }
+                if page == 0 { page = Khatma.lastMushafPage() }
                 consumeRequest()
             }
             .onChange(of: state.mushafRequest) { _ in consumeRequest() }
@@ -107,5 +158,21 @@ struct MushafScreen: View {
             page = p
             state.mushafRequest = nil
         }
+    }
+}
+
+/** تبويب الاستماع: صفحة القرّاء في الموقع */
+struct ListenScreen: View {
+    @EnvironmentObject var state: AppState
+
+    var body: some View {
+        WebScreen(title: "الاستماع", url: state.listenRequest ?? Links.reciters)
+            .toolbar {
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    NavigationLink { DownloadsView() } label: {
+                        Label("المحمّلة", systemImage: "arrow.down.circle").labelStyle(.titleAndIcon).font(AppFont.ui(14, 700))
+                    }
+                }
+            }
     }
 }

@@ -1,10 +1,9 @@
 import SwiftUI
 import CoreLocation
 
-private func site(_ path: String) -> URL { URL(string: "https://7awlalaalam.com/quran/" + path)! }
-
 // MARK: - الأدوات
 
+/** شاشة «الأدوات»: سلسلة الأيام، أدوات القرآن، الصلاة والذكر، لقلبك، والصدقة الجارية (نفس ToolsActivity) */
 struct ToolsView: View {
     @EnvironmentObject var state: AppState
 
@@ -16,25 +15,26 @@ struct ToolsView: View {
                 streakCard
                 section("القرآن")
                 LazyVGrid(columns: columns, spacing: 8) {
-                    NavigationLink { IndexView() } label: { ToolTile(title: "الفهرس", systemImage: "list.bullet") }
-                    NavigationLink { WebScreen(title: "الترجمات", url: site("languages.html")) } label: { ToolTile(title: "الترجمات", systemImage: "globe") }
-                    NavigationLink { WebScreen(title: "التفسير", url: site("tafsir-sources-ar.html")) } label: { ToolTile(title: "التفسير", systemImage: "book") }
-                    NavigationLink { WebScreen(title: "حول العالم", url: AppState.home) } label: { ToolTile(title: "الموقع", systemImage: "safari") }
+                    NavigationLink(value: Screen.index) { ToolTile(title: "الفهرس", systemImage: "list.bullet") }
+                    NavigationLink(value: Screen.khatma) { ToolTile(title: "ختمتي", systemImage: "book.closed") }
+                    NavigationLink(value: Screen.downloads) { ToolTile(title: "المحمّلة", systemImage: "headphones") }
+                    NavigationLink(value: Screen.web(Links.languages, "الترجمات")) { ToolTile(title: "الترجمات", systemImage: "globe") }
                 }
                 section("الصلاة والذكر")
                 LazyVGrid(columns: columns, spacing: 8) {
-                    NavigationLink { PrayerTimesView() } label: { ToolTile(title: "المواقيت", systemImage: "clock") }
-                    NavigationLink { QiblaView() } label: { ToolTile(title: "القبلة", systemImage: "location.north.circle") }
-                    NavigationLink { WebScreen(title: "الأذكار", url: site("azkar-morning-evening-ar.html")) } label: { ToolTile(title: "الأذكار", systemImage: "sun.and.horizon") }
-                    NavigationLink { TasbeehView() } label: { ToolTile(title: "المسبحة", systemImage: "circle.grid.cross") }
-                    NavigationLink { PrayerAzkarView() } label: { ToolTile(title: "أذكار الصلاة", systemImage: "moon.stars") }
-                    NavigationLink { WebScreen(title: "الأدعية", url: site("duas-library-ar.html")) } label: { ToolTile(title: "الأدعية", systemImage: "hands.sparkles") }
+                    NavigationLink(value: Screen.prayerTimes) { ToolTile(title: "المواقيت", systemImage: "clock") }
+                    NavigationLink(value: Screen.qibla) { ToolTile(title: "القبلة", systemImage: "location.north.circle") }
+                    NavigationLink(value: Screen.web(Links.azkar, "الأذكار")) { ToolTile(title: "الأذكار", systemImage: "sun.and.horizon") }
+                    NavigationLink(value: Screen.tasbeeh) { ToolTile(title: "المسبحة", systemImage: "circle.grid.cross") }
+                    NavigationLink(value: Screen.prayerAzkar) { ToolTile(title: "أذكار الصلاة", systemImage: "moon.stars") }
+                    NavigationLink(value: Screen.web(Links.home, "حول العالم")) { ToolTile(title: "الموقع", systemImage: "safari") }
                 }
                 section("لقلبك والتطبيق")
                 LazyVGrid(columns: columns, spacing: 8) {
-                    NavigationLink { MoodView() } label: { ToolTile(title: "آية لحالك", systemImage: "heart") }
-                    NavigationLink { SettingsView() } label: { ToolTile(title: "التنبيهات", systemImage: "bell") }
-                    NavigationLink { SettingsView() } label: { ToolTile(title: "الإعدادات", systemImage: "gearshape") }
+                    NavigationLink(value: Screen.mood(nil)) { ToolTile(title: "آية لحالك", systemImage: "heart") }
+                    NavigationLink(value: Screen.dedicate) { ToolTile(title: "الإهداء", systemImage: "heart.circle") }
+                    NavigationLink(value: Screen.notifications) { ToolTile(title: "التنبيهات", systemImage: "bell") }
+                    NavigationLink(value: Screen.settings) { ToolTile(title: "الإعدادات", systemImage: "gearshape") }
                 }
                 dedicateCard.padding(.top, 12)
             }
@@ -43,6 +43,12 @@ struct ToolsView: View {
         }
         .background(Palette.page.ignoresSafeArea())
         .navigationTitle("الأدوات")
+        .toolbar {
+            ToolbarItem(placement: .navigationBarTrailing) {
+                NavigationLink(value: Screen.settings) { Image(systemName: "gearshape") }
+                    .accessibilityLabel("الإعدادات")
+            }
+        }
     }
 
     private func section(_ t: String) -> some View {
@@ -50,20 +56,21 @@ struct ToolsView: View {
     }
 
     private var streakCard: some View {
-        let n = state.streak
+        _ = state.rev
+        let n = Reading.streak
         let title = n == 0 ? "ابدأ سلسلتك اليوم مع القرآن"
             : n == 1 ? "يوم واحد مع القرآن" : n == 2 ? "يومان متتاليان مع القرآن"
             : ar(n) + (n <= 10 ? " أيام متتالية مع القرآن" : " يومًا متتاليًا مع القرآن")
         let cal = Calendar.current
         let days: [Date] = (0..<7).reversed().compactMap { cal.date(byAdding: .day, value: -$0, to: Date()) }
-        let letters = ["ح", "ن", "ث", "ر", "خ", "ج", "س"]
+        let letters = ["ح", "ن", "ث", "ر", "خ", "ج", "س"]          // الأحد..السبت
         return VStack(alignment: .leading, spacing: 4) {
             Text(title).font(AppFont.ui(16, 700)).foregroundColor(Palette.ink)
-            Text(state.readOn(Date()) ? "أحسنت، قرأت اليوم ✓" : "اقرأ ولو آية اليوم لتكملها")
+            Text(Reading.readOn(Date()) ? "أحسنت، قرأت اليوم ✓" : "اقرأ ولو آية اليوم لتكملها")
                 .font(AppFont.ui(12)).foregroundColor(Palette.muted).padding(.bottom, 8)
             HStack {
                 ForEach(Array(days.enumerated()), id: \.offset) { i, d in
-                    let on = state.readOn(d)
+                    let on = Reading.readOn(d)
                     VStack(spacing: 4) {
                         ZStack {
                             Circle().fill(on ? Palette.goldDeep : Palette.chip)
@@ -83,9 +90,9 @@ struct ToolsView: View {
     }
 
     private var dedicateCard: some View {
-        Button { Share.present([AppState.shareText]) } label: {
+        NavigationLink(value: Screen.dedicate) {
             HStack(spacing: 12) {
-                Image(systemName: "gift").foregroundColor(Palette.goldLight)
+                Image(systemName: "heart.fill").foregroundColor(Palette.goldLight)
                     .frame(width: 40, height: 40)
                     .background(RoundedRectangle(cornerRadius: 12).fill(Palette.gold.opacity(0.18)))
                 VStack(alignment: .leading, spacing: 2) {
@@ -98,6 +105,7 @@ struct ToolsView: View {
             .padding(16)
             .background(PatternBackground().clipShape(RoundedRectangle(cornerRadius: 18)))
         }
+        .accessibilityLabel("اجعلها صدقة جارية: شارك التطبيق باسم من تحب")
     }
 }
 
@@ -106,26 +114,35 @@ struct ToolsView: View {
 struct PrayerTimesView: View {
     @EnvironmentObject var state: AppState
     @ObservedObject private var location = LocationService.shared
+    @State private var now = Date()
 
     var body: some View {
         List {
-            if let lat = state.lat, let lng = state.lng {
-                let now = Date()
-                let t = Prayer.times(for: now, lat: lat, lng: lng)
-                let next = Prayer.next(lat: lat, lng: lng, now: now).0
+            if state.hasLocation {
+                let t = Prayer.times(for: now)
+                let next = Prayer.next(now: now)
                 Section {
                     ForEach(0..<6, id: \.self) { i in
+                        let isNext = i == next.0 && Calendar.current.isDate(next.1, inSameDayAs: now)
                         HStack {
-                            Text(Prayer.displayName(i, on: now)).font(AppFont.ui(16, i == next ? 700 : 500))
+                            Text(Prayer.displayName(i, on: now)).font(AppFont.ui(16, isNext ? 700 : 500))
+                            if isNext {
+                                Text(Prayer.remaining(next.1.timeIntervalSince(now), after: true))
+                                    .font(AppFont.ui(12, 700)).foregroundColor(Palette.goldDeep)
+                                    .padding(.horizontal, 8).padding(.vertical, 3)
+                                    .background(Capsule().fill(Palette.chip))
+                            }
                             Spacer()
-                            Text(formatTime(t[i])).font(AppFont.ui(16, i == next ? 700 : 400))
+                            Text(formatTime(t[i])).font(AppFont.ui(16, isNext ? 700 : 400))
                         }
-                        .foregroundColor(i == next ? Palette.goldDeep : Palette.ink)
+                        .foregroundColor(isNext ? Palette.goldDeep : Palette.ink)
+                        .frame(minHeight: 40)
                     }
                 } header: {
                     Text(hijriToday() + (state.city.isEmpty ? "" : " · " + state.city)).font(AppFont.ui(13))
                 } footer: {
-                    Text(Prayer.currentMethod().name).font(AppFont.ui(12))
+                    Text((Store.int("calc_method", 0) == 0 ? "تلقائي حسب دولتك · " : "")
+                         + Prayer.currentMethod().name + "\n" + Prayer.currentMethod().detail).font(AppFont.ui(12))
                 }
             } else {
                 Text("حدّد موقعك لعرض مواقيت الصلاة في مدينتك").font(AppFont.ui(15)).foregroundColor(Palette.muted)
@@ -143,21 +160,22 @@ struct PrayerTimesView: View {
                         if let u = URL(string: UIApplication.openSettingsURLString) { UIApplication.shared.open(u) }
                     }.font(AppFont.ui(14))
                 }
-                Toggle(isOn: Binding(get: { state.adhanOn }, set: { on in setAdhan(on) })) {
+                if location.failed {
+                    Text("تعذّر تحديد الموقع، فعّل خدمة الموقع ثم حاول مرة أخرى").font(AppFont.ui(13)).foregroundColor(Palette.muted)
+                }
+                Toggle(isOn: state.toggle("adhan_on")) {
                     Text("تنبيه الأذان").font(AppFont.ui(15, 500))
                 }
+                .tint(Palette.goldDeep)
                 .disabled(!state.hasLocation)
+                NavigationLink(value: Screen.web(Links.prayerTimes, "مواقيت الصلاة")) {
+                    Label("مواقيت الشهر في الموقع", systemImage: "calendar").font(AppFont.ui(15))
+                }
             }
         }
         .navigationTitle("مواقيت الصلاة")
         .navigationBarTitleDisplayMode(.inline)
-    }
-
-    private func setAdhan(_ on: Bool) {
-        if !on { state.adhanOn = false; return }
-        Task {
-            if await Notifications.requestPermission() { state.adhanOn = true }
-        }
+        .onReceive(Timer.publish(every: 30, on: .main, in: .common).autoconnect()) { now = $0 }
     }
 }
 
@@ -166,11 +184,13 @@ struct PrayerTimesView: View {
 struct QiblaView: View {
     @EnvironmentObject var state: AppState
     @ObservedObject private var location = LocationService.shared
+    @State private var aligned = false
 
     private static let kaaba = (lat: 21.422487, lng: 39.826206)
 
     private var bearing: Double? {
-        guard let lat = state.lat, let lng = state.lng else { return nil }
+        guard state.hasLocation else { return nil }
+        let lat = Geo.lat, lng = Geo.lng
         let p1 = lat * .pi / 180, p2 = Self.kaaba.lat * .pi / 180
         let dl = (Self.kaaba.lng - lng) * .pi / 180
         let y = sin(dl) * cos(p2)
@@ -179,181 +199,209 @@ struct QiblaView: View {
         return (b + 360).truncatingRemainder(dividingBy: 360)
     }
 
+    /** المسافة إلى مكة المكرمة بالكيلومتر */
+    private var distanceKm: Double {
+        let a = CLLocation(latitude: Geo.lat, longitude: Geo.lng)
+        let b = CLLocation(latitude: Self.kaaba.lat, longitude: Self.kaaba.lng)
+        return a.distance(from: b) / 1000
+    }
+
     var body: some View {
-        VStack(spacing: 24) {
-            if let b = bearing {
-                let rotation = b - (location.heading ?? 0)
-                ZStack {
-                    Circle().stroke(Palette.line, lineWidth: 2)
-                    Circle().stroke(Palette.gold.opacity(0.5), lineWidth: 1).padding(16)
-                    Image(systemName: "location.north.fill")
-                        .resizable().scaledToFit().frame(width: 70)
-                        .foregroundColor(Palette.goldDeep)
-                        .offset(y: -80)
-                        .rotationEffect(.degrees(rotation))
-                    Image(systemName: "building.columns.fill").font(.system(size: 34)).foregroundColor(Palette.ink)
+        ScrollView {
+            VStack(spacing: 18) {
+                if let b = bearing {
+                    // فاصل «—» بدل «·» لأن النقطة تُقرأ صفرًا عربيًا بجوار الأرقام
+                    Text((state.city.isEmpty ? "موقعك الحالي" : state.city) + " — تبعد " + ar(Int(distanceKm.rounded())) + " كم عن مكة المكرمة")
+                        .font(AppFont.ui(14)).foregroundColor(Palette.muted).multilineTextAlignment(.center)
+                    dial(qibla: b)
+                    statusText(qibla: b)
+                    Text("اتجاه القبلة " + ar(Int(b.rounded())) + "° من الشمال").font(AppFont.ui(14)).foregroundColor(Palette.muted)
+                } else {
+                    Text(location.denied ? "نحتاج إذن الموقع لتحديد اتجاه القبلة" : "حدّد موقعك لمعرفة اتجاه القبلة")
+                        .font(AppFont.ui(16, 500)).foregroundColor(Palette.muted)
+                    Button { location.requestLocation() } label: {
+                        HStack { if location.busy { ProgressView() }; Pill(title: "تحديد الموقع", systemImage: "location", primary: true) }
+                    }
+                    .frame(width: 240)
                 }
-                .frame(width: 260, height: 260)
-                .animation(.easeOut(duration: 0.25), value: rotation)
-                Text("اتجاه القبلة " + ar(Int(b.rounded())) + "° من الشمال").font(AppFont.ui(17, 700)).foregroundColor(Palette.ink)
-                Text(location.heading == nil ? "البوصلة غير متاحة؛ استخدم الزاوية من الشمال" : "وجّه أعلى الجوال نحو السهم الذهبي، وأبعده عن المعادن")
+                Text("ضع الجوال مسطحًا بعيدًا عن المعادن والمغناطيس. إذا كانت القراءة غير مستقرة، حرّك الجوال في الهواء على شكل الرقم 8 لمعايرة البوصلة.")
                     .font(AppFont.ui(13)).foregroundColor(Palette.muted).multilineTextAlignment(.center)
-            } else {
-                Text("حدّد موقعك لمعرفة اتجاه القبلة").font(AppFont.ui(16, 500)).foregroundColor(Palette.muted)
-                Button { location.requestLocation() } label: { Pill(title: "تحديد الموقع", systemImage: "location", primary: true) }
-                    .frame(width: 220)
+                    .padding(.top, 8)
+            }
+            .padding(24)
+            .frame(maxWidth: .infinity)
+        }
+        .background(Palette.page.ignoresSafeArea())
+        .navigationTitle("اتجاه القبلة")
+        .navigationBarTitleDisplayMode(.inline)
+        .onAppear {
+            location.startHeading()
+            if !state.hasLocation && location.authorized { location.requestLocation() }
+        }
+        .onDisappear { location.stopHeading() }
+    }
+
+    private func offset(_ qibla: Double) -> Double? {
+        guard let h = location.heading else { return nil }
+        return (qibla - h + 540).truncatingRemainder(dividingBy: 360) - 180
+    }
+
+    /** البوصلة: قرص يدور مع الجوال (ش ق ج غ) وسهم القبلة الذهبي */
+    private func dial(qibla: Double) -> some View {
+        let heading = location.heading ?? 0
+        let lowAccuracy = location.heading != nil && (location.headingAccuracy < 0 || location.headingAccuracy > 25)
+        let isAligned = (offset(qibla).map { abs($0) <= 4 }) ?? false
+        return ZStack {
+            Circle().fill(Palette.card)
+            Circle().stroke(isAligned ? Palette.gold : Palette.line, lineWidth: isAligned ? 4 : 2)
+            ZStack {
+                ForEach(0..<72, id: \.self) { i in
+                    Rectangle().fill(i % 18 == 0 ? Palette.goldDeep : Palette.line)
+                        .frame(width: i % 6 == 0 ? 2 : 1, height: i % 6 == 0 ? 12 : 6)
+                        .offset(y: -122)
+                        .rotationEffect(.degrees(Double(i) * 5))
+                }
+                ForEach(Array(["ش", "ق", "ج", "غ"].enumerated()), id: \.offset) { i, l in
+                    Text(l).font(AppFont.ui(15, 700)).foregroundColor(i == 0 ? Palette.goldDeep : Palette.muted)
+                        .rotationEffect(.degrees(-Double(i) * 90 + heading))
+                        .offset(y: -100)
+                        .rotationEffect(.degrees(Double(i) * 90))
+                }
+                // سهم القبلة
+                VStack(spacing: 0) {
+                    Image(systemName: "location.north.fill").font(.system(size: 34)).foregroundColor(Palette.gold)
+                    Rectangle().fill(Palette.gold).frame(width: 3, height: 52)
+                    Spacer()
+                }
+                .frame(height: 220)
+                .rotationEffect(.degrees(qibla))
+            }
+            .rotationEffect(.degrees(-heading))
+            Image(systemName: "building.columns.fill").font(.system(size: 30)).foregroundColor(Palette.ink)
+            if lowAccuracy {
+                Text("البوصلة تحتاج معايرة").font(AppFont.ui(12, 700)).foregroundColor(Palette.goldDeep).offset(y: 52)
             }
         }
-        .padding(24)
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .background(Palette.page.ignoresSafeArea())
-        .navigationTitle("القبلة")
-        .navigationBarTitleDisplayMode(.inline)
-        .onAppear { location.startHeading() }
-        .onDisappear { location.stopHeading() }
+        .frame(width: 270, height: 270)
+        .animation(.easeOut(duration: 0.25), value: heading)
+        .accessibilityLabel("بوصلة القبلة")
+        .onChange(of: isAligned) { now in
+            if now && !aligned { UINotificationFeedbackGenerator().notificationOccurred(.success) }
+            aligned = now
+        }
+    }
+
+    @ViewBuilder private func statusText(qibla: Double) -> some View {
+        if !location.headingAvailable {
+            Text("جوالك لا يحتوي على بوصلة").font(AppFont.ui(20, 700)).foregroundColor(Palette.ink)
+        } else if let off = offset(qibla) {
+            if abs(off) <= 4 {
+                Text("✓ أنت باتجاه القبلة").font(AppFont.ui(20, 700)).foregroundColor(Palette.goldDeep)
+            } else {
+                Text(off > 0 ? "استدر نحو اليمين ↻" : "استدر نحو اليسار ↺").font(AppFont.ui(20, 700)).foregroundColor(Palette.ink)
+            }
+        } else {
+            Text("جارٍ قراءة البوصلة…").font(AppFont.ui(17, 500)).foregroundColor(Palette.muted)
+        }
     }
 }
 
 // MARK: - المسبحة
 
+/** المسبحة الإلكترونية (نفس TasbeehActivity) */
 struct TasbeehView: View {
-    @AppStorage("tasbeeh_count") private var count = 0
+    @AppStorage("tasbeeh_dhikr") private var dhikr = 0
     @AppStorage("tasbeeh_target") private var target = 33
-    @AppStorage("tasbeeh_phrase") private var phrase = 0
-    private let phrases = ["سبحان الله", "الحمد لله", "الله أكبر", "لا إله إلا الله", "أستغفر الله"]
+    @AppStorage("tasbeeh_count") private var count = 0
+    @AppStorage("tasbeeh_total") private var total = 0
+
+    private static let dhikrs = [
+        "سُبْحَانَ اللَّهِ", "الْحَمْدُ لِلَّهِ", "اللَّهُ أَكْبَرُ", "لَا إِلَهَ إِلَّا اللَّهُ",
+        "أَسْتَغْفِرُ اللَّهَ", "سُبْحَانَ اللَّهِ وَبِحَمْدِهِ", "لَا حَوْلَ وَلَا قُوَّةَ إِلَّا بِاللَّهِ",
+        "اللَّهُمَّ صَلِّ عَلَى مُحَمَّدٍ"]
+    private static let targets = [33, 99, 100, 0]
 
     var body: some View {
-        VStack(spacing: 22) {
-            Picker("", selection: $phrase) {
-                ForEach(0..<phrases.count, id: \.self) { Text(phrases[$0]).tag($0) }
-            }
-            .pickerStyle(.menu)
-            .font(AppFont.ui(18, 700))
-            Button {
-                count += 1
-                let gen = UIImpactFeedbackGenerator(style: target > 0 && count % target == 0 ? .heavy : .light)
-                gen.impactOccurred()
-            } label: {
-                ZStack {
-                    Ring(fraction: target > 0 ? Double(count % target) / Double(target) : 0, width: 10)
-                    VStack(spacing: 6) {
-                        Text(phrases[min(phrase, phrases.count - 1)]).font(AppFont.ui(20, 700)).foregroundColor(Palette.goldDeep)
-                        Text(ar(count)).font(AppFont.ui(56, 700)).foregroundColor(Palette.ink).monospacedDigit()
-                        if target > 0 { Text("الدورة " + ar(count / target + 1)).font(AppFont.ui(13)).foregroundColor(Palette.muted) }
+        VStack(spacing: 0) {
+            ScrollView(.horizontal, showsIndicators: false) {
+                HStack(spacing: 8) {
+                    ForEach(0..<Self.dhikrs.count, id: \.self) { i in
+                        Button { dhikr = i; count = 0 } label: {
+                            Text(Self.dhikrs[i]).font(AppFont.ui(14, 500))
+                                .foregroundColor(i == dhikr ? .white : Palette.ink)
+                                .padding(.horizontal, 14).padding(.vertical, 8)
+                                .background(Capsule().fill(i == dhikr ? Palette.primary : Palette.card))
+                                .overlay(Capsule().stroke(i == dhikr ? Color.clear : Palette.fieldBorder))
+                        }
                     }
                 }
-                .frame(width: 260, height: 260)
-                .contentShape(Circle())
+                .padding(.horizontal, 20).padding(.top, 14).padding(.bottom, 6)
             }
-            .buttonStyle(.plain)
-            .accessibilityLabel("سبّح، العدد " + ar(count))
-            Picker("الهدف", selection: $target) {
-                Text("٣٣").tag(33)
-                Text("١٠٠").tag(100)
-                Text("بلا حد").tag(0)
+            Text(Self.dhikrs[min(dhikr, Self.dhikrs.count - 1)])
+                .font(AppFont.amiri(30)).foregroundColor(Palette.ink)
+                .multilineTextAlignment(.center)
+                .padding(.top, 18).padding(.bottom, 6).padding(.horizontal, 20)
+
+            GeometryReader { geo in
+                let side = max(96, min(240, min(geo.size.width, geo.size.height) - 8))
+                Button(action: tap) {
+                    ZStack {
+                        Circle().fill(Palette.dark)
+                        Circle().stroke(Palette.gold, lineWidth: 2)
+                        if target > 0 {
+                            Ring(fraction: Double(count) / Double(target), track: .clear, tint: Palette.gold, width: 6)
+                                .padding(6)
+                        }
+                        VStack(spacing: 4) {
+                            Text(ar(count)).font(AppFont.ui(side * 0.25, 700)).foregroundColor(.white).monospacedDigit()
+                            if side >= 140 {
+                                Text(target > 0 ? "من " + ar(target) : "عدّ مفتوح").font(AppFont.ui(14, 500)).foregroundColor(Palette.gold)
+                            }
+                        }
+                    }
+                    .frame(width: side, height: side)
+                    .contentShape(Circle())
+                }
+                .buttonStyle(.plain)
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                .accessibilityLabel("اضغط للتسبيح، العدد " + ar(count))
             }
-            .pickerStyle(.segmented)
-            .frame(maxWidth: 280)
-            Button("تصفير العدّاد") { count = 0 }.font(AppFont.ui(15, 700)).foregroundColor(Palette.goldDeep)
+
+            HStack(spacing: 6) {
+                ForEach(Self.targets, id: \.self) { t in
+                    Button { target = t; count = 0 } label: {
+                        Text(t == 0 ? "بلا حد" : ar(t)).font(AppFont.ui(14, 700))
+                            .foregroundColor(t == target ? .white : Palette.ink)
+                            .frame(maxWidth: .infinity, minHeight: 42)
+                            .background(Capsule().fill(t == target ? Palette.goldDeep : Palette.card))
+                            .overlay(Capsule().stroke(t == target ? Color.clear : Palette.fieldBorder))
+                    }
+                }
+            }
+            .padding(.horizontal, 20)
+            Text("مجموع تسبيحاتك: " + ar(total)).font(AppFont.ui(13)).foregroundColor(Palette.muted)
+                .padding(.top, 12).padding(.bottom, 20)
         }
-        .padding(24)
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background(Palette.page.ignoresSafeArea())
         .navigationTitle("المسبحة")
         .navigationBarTitleDisplayMode(.inline)
-    }
-}
-
-// MARK: - الإعدادات والتنبيهات
-
-struct SettingsView: View {
-    @EnvironmentObject var state: AppState
-    @ObservedObject private var location = LocationService.shared
-    @State private var permissionDenied = false
-
-    var body: some View {
-        Form {
-            Section {
-                toggle("تنبيه الأذان", "عند دخول كل صلاة، بطريقة الحساب أدناه", get: { state.adhanOn }, set: { state.adhanOn = $0 })
-                    .disabled(!state.hasLocation)
-                if !state.hasLocation {
-                    Button { location.requestLocation() } label: {
-                        Label("حدّد موقعك لتفعيل الأذان", systemImage: "location").font(AppFont.ui(14, 700))
-                    }
-                }
-                Picker(selection: $state.calcMethod) {
-                    Text("تلقائي حسب دولتك (" + (Prayer.methods[Prayer.forCountry(Prayer.country())]?.name ?? "") + ")").tag(0)
-                    ForEach(1..<Prayer.methods.count, id: \.self) { i in
-                        Text(Prayer.methods[i]?.name ?? "").tag(i)
-                    }
-                } label: { Text("طريقة الحساب").font(AppFont.ui(15)) }
-            } header: { Text("الصلاة").font(AppFont.ui(13, 700)) }
-
-            Section {
-                toggle("آية اليوم", "تذكير يومي بآية اليوم", get: { state.verseOn }, set: { state.verseOn = $0 })
-                if state.verseOn {
-                    Picker(selection: $state.verseHour) {
-                        ForEach(4..<23, id: \.self) { h in
-                            Text(formatTime(Calendar.current.date(bySettingHour: h, minute: 0, second: 0, of: Date()) ?? Date())).tag(h)
-                        }
-                    } label: { Text("الوقت").font(AppFont.ui(15)) }
-                }
-                toggle("سورة الكهف", "كل جمعة، نورٌ لك ما بين الجمعتين", get: { state.kahfOn }, set: { state.kahfOn = $0 })
-            } header: { Text("القرآن").font(AppFont.ui(13, 700)) }
-
-            Section {
-                toggle("أذكار الصباح والمساء", "الصباح ٦:٣٠ ص، والمساء ٥:٠٠ م", get: { state.azkarOn }, set: { state.azkarOn = $0 })
-            } header: { Text("الذكر").font(AppFont.ui(13, 700)) }
-
-            if permissionDenied {
-                Section {
-                    Button("السماح بالتنبيهات من إعدادات الجوال") {
-                        if let u = URL(string: UIApplication.openSettingsURLString) { UIApplication.shared.open(u) }
-                    }.font(AppFont.ui(14, 700))
-                }
-            }
-
-            Section {
-                Picker(selection: $state.themeMode) {
-                    Text("تلقائي").tag(0)
-                    Text("نهاري").tag(1)
-                    Text("ليلي").tag(2)
-                } label: { Text("المظهر").font(AppFont.ui(15)) }
-                .pickerStyle(.segmented)
-            } header: { Text("المظهر").font(AppFont.ui(13, 700)) }
-
-            Section {
-                Button { Share.present([AppState.shareText]) } label: { Label("شارك التطبيق مع من تحب", systemImage: "square.and.arrow.up") }
-                NavigationLink { WebScreen(title: "أرسل ملاحظة", url: site("contact.html")) } label: { Label("أرسل ملاحظة", systemImage: "envelope") }
-                NavigationLink { WebScreen(title: "الخصوصية", url: site("privacy-app-section.html")) } label: { Label("سياسة الخصوصية", systemImage: "hand.raised") }
-                HStack {
-                    Text("الإصدار").font(AppFont.ui(15))
-                    Spacer()
-                    Text(ar(Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "1.0")).foregroundColor(Palette.muted)
-                }
-            } header: { Text("عام").font(AppFont.ui(13, 700)) } footer: {
-                Text("صدقة جارية لمحمد بن مفرح الشهري رحمه الله، ولموتى المسلمين").font(AppFont.ui(12)).frame(maxWidth: .infinity)
+        .toolbar {
+            ToolbarItem(placement: .navigationBarLeading) {
+                Button("تصفير") { count = 0 }.font(AppFont.ui(14, 700)).foregroundColor(Palette.goldDeep)
             }
         }
-        .font(AppFont.ui(15))
-        .navigationTitle("الإعدادات والتنبيهات")
-        .navigationBarTitleDisplayMode(.inline)
+        .onAppear { UIApplication.shared.isIdleTimerDisabled = true }
+        .onDisappear { UIApplication.shared.isIdleTimerDisabled = false }
     }
 
-    /** مفتاح: عند التفعيل نطلب إذن التنبيهات أولًا */
-    private func toggle(_ title: String, _ sub: String, get: @escaping () -> Bool, set: @escaping (Bool) -> Void) -> some View {
-        Toggle(isOn: Binding(get: get, set: { on in
-            if !on { set(false); return }
-            Task {
-                if await Notifications.requestPermission() { set(true); permissionDenied = false }
-                else { permissionDenied = true }
-            }
-        })) {
-            VStack(alignment: .leading, spacing: 2) {
-                Text(title).font(AppFont.ui(16, 700))
-                Text(sub).font(AppFont.ui(12)).foregroundColor(Palette.muted)
-            }
+    private func tap() {
+        count += 1
+        total += 1
+        if target > 0 && count == target {
+            UINotificationFeedbackGenerator().notificationOccurred(.success)
+        } else {
+            UIImpactFeedbackGenerator(style: .light).impactOccurred()
         }
-        .tint(Palette.goldDeep)
+        if target > 0 && count > target { count = 1 }
     }
 }

@@ -67,7 +67,9 @@ enum Quran {
     private static func load() -> [String] {
         lock.lock(); defer { lock.unlock() }
         if let l = lines { return l }
-        guard let url = Bundle.main.url(forResource: "hafs", withExtension: "txt", subdirectory: "quran"),
+        // في التطبيق داخل مجلد quran، وفي الويدجت في جذر الحزمة
+        guard let url = Bundle.main.url(forResource: "hafs", withExtension: "txt", subdirectory: "quran")
+                ?? Bundle.main.url(forResource: "hafs", withExtension: "txt"),
               let text = try? String(contentsOf: url, encoding: .utf8) else { return [] }
         let l = text.components(separatedBy: "\n").map { $0.replacingOccurrences(of: "\r", with: "") }
         lines = l

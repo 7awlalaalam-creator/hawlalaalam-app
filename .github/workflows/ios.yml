@@ -34,9 +34,54 @@ jobs:
         run: |
           set -o pipefail
           xcodebuild -project Hawl.xcodeproj -scheme Hawl -configuration Debug \
-            -sdk iphonesimulator -destination 'generic/platform=iOS Simulator' \
+            -sdk iphonesimulator -destination 'generic/platform=iOS Simulator' -derivedDataPath build/dd \
             CODE_SIGNING_ALLOWED=NO build 2>&1 | tee build.log | grep -E "error:|warning: |BUILD (SUCCEEDED|FAILED)" || true
           grep -q "BUILD SUCCEEDED" build.log
+
+      - name: لقطات شاشة حقيقية على محاكي آيفون
+        continue-on-error: true
+        timeout-minutes: 20
+        working-directory: ios
+        run: |
+          APP=build/dd/Build/Products/Debug-iphonesimulator/Hawl.app
+          MODEL=$(xcrun simctl list devicetypes | grep -oE "iPhone 1[5-7] Pro \(" | head -1 | sed 's/ ($//')
+          UDID=$(xcrun simctl create shots "${MODEL:-iPhone 15 Pro}")
+          xcrun simctl boot "$UDID"
+          xcrun simctl bootstatus "$UDID" -b
+          xcrun simctl status_bar "$UDID" override --time "9:41" --batteryLevel 100 --cellularBars 4 || true
+          xcrun simctl install "$UDID" "$APP"
+          mkdir -p shots
+          # بيانات تجريبية: جدة، تخطّي الترحيب والجولة
+          ARGS=(-welcomed '<true/>' -tour_v '<integer>99</integer>' -lat '<real>21.5433</real>' -lng '<real>39.1728</real>' -city 'جدة' -country 'SA')
+          shot() { sleep "${3:-4}"; xcrun simctl io "$UDID" screenshot "shots/$1.png"; }
+          go() { xcrun simctl openurl "$UDID" "$1" || true; shot "$2" "$3"; }
+          for mode in light dark; do
+            xcrun simctl ui "$UDID" appearance $mode
+            xcrun simctl terminate "$UDID" com.hawlalaalam.quran || true
+            xcrun simctl launch "$UDID" com.hawlalaalam.quran "${ARGS[@]}"
+            shot "$mode-01-today" 8
+            go "hawlapp://mushaf?page=2" "$mode-02-mushaf" 7
+            go "hawlapp://khatma" "$mode-03-khatma"
+            go "hawlapp://tools" "$mode-04-tools"
+            go "hawlapp://prayer" "$mode-05-prayer"
+            go "hawlapp://settings" "$mode-06-settings"
+            go "hawlapp://tasbeeh" "$mode-07-tasbeeh"
+            go "hawlapp://qibla" "$mode-08-qibla"
+            go "hawlapp://mood?m=1" "$mode-09-mood"
+            go "hawlapp://dedicate" "$mode-10-dedicate"
+            go "hawlapp://index" "$mode-11-index"
+            go "hawlapp://downloads" "$mode-12-downloads"
+            go "hawlapp://listen" "$mode-13-listen" 8
+            go "hawlapp://prayer-azkar" "$mode-14-prayer-azkar"
+          done
+          ls -la shots
+
+      - name: حفظ لقطات الشاشة
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ios-screenshots
+          path: ios/shots/
 
       - name: حفظ سجل البناء (عند الفشل أرسله لنصلحه)
         if: always()

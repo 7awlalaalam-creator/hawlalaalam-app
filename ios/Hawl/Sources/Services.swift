@@ -2,6 +2,10 @@ import SwiftUI
 import CoreLocation
 import UserNotifications
 import AVFoundation
+import BackgroundTasks
+import WidgetKit
+
+// MARK: - الموقع والبوصلة
 
 /** الموقع (للمواقيت) واتجاه الجوال (للقبلة) */
 @MainActor
@@ -10,8 +14,10 @@ final class LocationService: NSObject, ObservableObject, CLLocationManagerDelega
 
     private let manager = CLLocationManager()
     @Published var heading: Double?
+    @Published var headingAccuracy: Double = -1
     @Published var busy = false
     @Published var denied = false
+    @Published var failed = false
 
     private override init() {
         super.init()
@@ -20,9 +26,12 @@ final class LocationService: NSObject, ObservableObject, CLLocationManagerDelega
         denied = [.denied, .restricted].contains(manager.authorizationStatus)
     }
 
+    var authorized: Bool { [.authorizedWhenInUse, .authorizedAlways].contains(manager.authorizationStatus) }
+
     /** يطلب الإذن عند الحاجة ثم يحدّث الموقع مرة واحدة */
     func requestLocation() {
         busy = true
+        failed = false
         switch manager.authorizationStatus {
         case .notDetermined: manager.requestWhenInUseAuthorization()
         case .denied, .restricted: busy = false; denied = true
@@ -30,12 +39,26 @@ final class LocationService: NSObject, ObservableObject, CLLocationManagerDelega
         }
     }
 
+    /** تحديث هادئ للمسافرين: مرة كل ٦ ساعات إن كان الأذان مفعّلًا والإذن ممنوحًا (مثل أندرويد) */
+    func refreshIfStale() {
+        guard authorized, Store.bool("adhan_on", false) else { return }
+        if Date().timeIntervalSince1970 - Store.d.double(forKey: "loc_time") > 6 * 3600 {
+            Store.d.set(Date().timeIntervalSince1970, forKey: "loc_time")
+            manager.requestLocation()
+        }
+    }
+
     func startHeading() {
         if manager.authorizationStatus == .notDetermined { manager.requestWhenInUseAuthorization() }
-        if CLLocationManager.headingAvailable() { manager.startUpdatingHeading() }
+        if CLLocationManager.headingAvailable() {
+            manager.headingFilter = 1
+            manager.startUpdatingHeading()
+        }
     }
 
     func stopHeading() { manager.stopUpdatingHeading() }
+
+    var headingAvailable: Bool { CLLocationManager.headingAvailable() }
 
     nonisolated func locationManagerDidChangeAuthorization(_ m: CLLocationManager) {
         let status = m.authorizationStatus
@@ -55,113 +78,490 @@ final class LocationService: NSObject, ObservableObject, CLLocationManagerDelega
     }
 
     nonisolated func locationManager(_ m: CLLocationManager, didFailWithError error: Error) {
-        Task { @MainActor in self.busy = false }
+        Task { @MainActor in
+            if self.busy { self.failed = true }
+            self.busy = false
+        }
     }
 
     nonisolated func locationManager(_ m: CLLocationManager, didUpdateHeading h: CLHeading) {
         let v = h.trueHeading >= 0 ? h.trueHeading : h.magneticHeading
-        Task { @MainActor in self.heading = v }
+        let acc = h.headingAccuracy
+        Task { @MainActor in
+            self.heading = v
+            self.headingAccuracy = acc
+        }
+    }
+
+    nonisolated func locationManagerShouldDisplayHeadingCalibration(_ manager: CLLocationManager) -> Bool { true }
+}
+
+// MARK: - التذكيرات (مفاتيح الإعدادات، نفس Reminders.java)
+
+enum Reminders {
+    static let verse = "verse", wird = "wird", azkarAM = "azkar_am", azkarPM = "azkar_pm", kahf = "kahf"
+
+    static func enabled(_ kind: String) -> Bool { Store.bool(kind + "_on", false) }
+
+    static func hour(_ kind: String) -> Int {
+        let def: Int
+        switch kind {
+        case verse: def = 7
+        case azkarAM: def = 6
+        case azkarPM: def = 17
+        case kahf: def = 9
+        default: def = 21
+        }
+        return Store.int(kind + "_h", def)
+    }
+
+    static func minute(_ kind: String) -> Int { Store.int(kind + "_m", kind == azkarAM ? 30 : 0) }
+
+    static func set(_ kind: String, on: Bool, hour h: Int, minute m: Int) {
+        Store.d.set(on, forKey: kind + "_on")
+        Store.d.set(h, forKey: kind + "_h")
+        Store.d.set(m, forKey: kind + "_m")
+    }
+
+    /** الصلاة التي يأتي بعدها تذكير الورد، أو -١ لوقت ثابت */
+    static var wirdPrayer: Int { Store.int("wird_prayer", -1) }
+
+    static var followUp: Bool { Store.bool("wird_follow", true) }
+
+    /** أذكار الصباح والمساء مرتبطة بالصلاة (افتراضيًا عند توفر الموقع)، والورد إن اختار القارئ صلاة */
+    static func byPrayer(_ kind: String) -> Bool {
+        if kind == wird { return wirdPrayer >= 0 && Geo.has }
+        return (kind == azkarAM || kind == azkarPM) && Store.bool("azkar_by_prayer", true) && Geo.has
+    }
+
+    /** «بعد العشاء» أو «٩:٠٠ م» */
+    static var wirdLabel: String {
+        if byPrayer(wird) { return "بعد " + Prayer.names[wirdPrayer] }
+        return formatTime(hour: hour(wird), minute: minute(wird))
+    }
+
+    /** وصف وقت التذكير لشريحة الإعدادات */
+    static func timeLabel(_ kind: String) -> String {
+        if kind == wird { return wirdLabel }
+        if byPrayer(kind) { return kind == azkarAM ? "بعد الفجر بربع ساعة" : "بعد العصر بربع ساعة" }
+        let t = formatTime(hour: hour(kind), minute: minute(kind))
+        return kind == kahf ? "الجمعة " + t : t
     }
 }
 
+// MARK: - الإشعارات
+
 /**
- * التنبيهات المحلية. iOS يسمح بـ ٦٤ تنبيهًا مجدولًا فقط، فنجدول أذان ٧ أيام (٣٥)
- * والتذكيرات اليومية المتكررة، ونعيد الجدولة كلما فُتح التطبيق.
+ * التنبيهات المحلية بنفس محتوى إشعارات أندرويد (Notifier.java).
+ * iOS يسمح بـ ٦٤ تنبيهًا مجدولًا فقط: نجدول الأيام القادمة بالأقرب فالأقرب حتى ٦٠ تنبيهًا،
+ * ونعيد الجدولة عند فتح التطبيق وفي التحديث الدوري في الخلفية.
  */
 @MainActor
 enum Notifications {
-    static let adhanCategory = "ADHAN"
-    static let azkarAction = "AZKAR"
+    static let adhanCategory = "ADHAN", sunriseCategory = "SUNRISE", fastCategory = "FAST"
+    static let wirdCategory = "WIRD", verseCategory = "VERSE", remindCategory = "REMIND"
+
+    static let actAzkar = "AZKAR", actShare = "SHARE", actSnooze = "SNOOZE", actOpenPage = "OPEN_PAGE"
+    static let actCard = "CARD", actText = "TEXT", actTafsir = "TAFSIR", actStart = "START", actMorning = "MORNING"
 
     static func registerCategories() {
-        let azkar = UNNotificationAction(identifier: azkarAction, title: "أذكار بعد الصلاة", options: [.foreground])
-        let cat = UNNotificationCategory(identifier: adhanCategory, actions: [azkar], intentIdentifiers: [], options: [])
-        UNUserNotificationCenter.current().setNotificationCategories([cat])
+        func a(_ id: String, _ title: String, fg: Bool = true) -> UNNotificationAction {
+            UNNotificationAction(identifier: id, title: title, options: fg ? [.foreground] : [])
+        }
+        UNUserNotificationCenter.current().setNotificationCategories([
+            UNNotificationCategory(identifier: adhanCategory, actions: [a(actAzkar, "أذكار بعد الصلاة"), a(actShare, "شارك الأجر")],
+                                   intentIdentifiers: [], options: []),
+            UNNotificationCategory(identifier: sunriseCategory, actions: [a(actMorning, "أذكار الصباح"), a(actShare, "شارك الأجر")],
+                                   intentIdentifiers: [], options: []),
+            UNNotificationCategory(identifier: fastCategory, actions: [a(actShare, "ذكّر من تحب")], intentIdentifiers: [], options: []),
+            UNNotificationCategory(identifier: wirdCategory, actions: [a(actOpenPage, "أكمل القراءة"), a(actSnooze, "ذكّرني بعد ساعة", fg: false)],
+                                   intentIdentifiers: [], options: []),
+            UNNotificationCategory(identifier: verseCategory, actions: [a(actCard, "شارك كصورة"), a(actText, "شارك نصًّا"), a(actTafsir, "التفسير")],
+                                   intentIdentifiers: [], options: []),
+            UNNotificationCategory(identifier: remindCategory, actions: [a(actStart, "ابدأ الآن")], intentIdentifiers: [], options: []),
+        ])
     }
 
     /** يطلب الإذن (مرة) ويعيد true إن سُمح */
     static func requestPermission() async -> Bool {
-        (try? await UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound, .badge])) ?? false
+        let center = UNUserNotificationCenter.current()
+        let s = await center.notificationSettings()
+        if s.authorizationStatus == .authorized || s.authorizationStatus == .provisional { return true }
+        if s.authorizationStatus == .denied { return false }
+        return (try? await center.requestAuthorization(options: [.alert, .sound, .badge])) ?? false
     }
 
+    static func allowed() async -> Bool {
+        let s = await UNUserNotificationCenter.current().notificationSettings()
+        return s.authorizationStatus == .authorized || s.authorizationStatus == .provisional
+    }
+
+    private struct Item { let req: UNNotificationRequest; let at: Date? }
+
+    private static var pendingWork: Task<Void, Never>?
+
+    /** إعادة الجدولة (تُجمع الطلبات المتتالية في طلب واحد) */
     static func reschedule() {
-        let s = AppState.shared
+        pendingWork?.cancel()
+        pendingWork = Task { @MainActor in
+            try? await Task.sleep(nanoseconds: 300_000_000)
+            if Task.isCancelled { return }
+            build()
+        }
+    }
+
+    private static func build() {
         let center = UNUserNotificationCenter.current()
         center.removeAllPendingNotificationRequests()
-        var requests: [UNNotificationRequest] = []
+        let cal = Calendar.current
+        let now = Date()
+        var timed: [Item] = []
+        var repeating: [UNNotificationRequest] = []
+        let city = Geo.city
 
-        if s.adhanOn, let lat = s.lat, let lng = s.lng {
-            let cal = Calendar.current
-            let now = Date()
-            for offset in 0..<7 {
-                guard let day = cal.date(byAdding: .day, value: offset, to: now) else { continue }
-                let t = Prayer.times(for: day, lat: lat, lng: lng)
-                for (i, k) in Prayer.alerts.enumerated() where t[k] > now {
-                    let name = Prayer.displayName(k, on: t[k])
-                    let c = UNMutableNotificationContent()
-                    c.title = "صلاة " + name
-                    var body = "حان الآن موعد صلاة " + name
-                    if i + 1 < Prayer.alerts.count {
-                        let nk = Prayer.alerts[i + 1]
-                        body += " · التالية: " + Prayer.displayName(nk, on: t[nk]) + " " + formatTime(t[nk])
-                    }
-                    if !s.city.isEmpty { body += "\nحسب التوقيت المحلي لـ" + s.city }
-                    c.body = body
-                    c.subtitle = "الأذان"
-                    c.sound = .default
-                    c.categoryIdentifier = adhanCategory
-                    let comps = cal.dateComponents([.year, .month, .day, .hour, .minute], from: t[k])
-                    requests.append(UNNotificationRequest(identifier: "adhan-\(offset)-\(k)", content: c,
-                        trigger: UNCalendarNotificationTrigger(dateMatching: comps, repeats: false)))
+        for offset in 0..<7 {
+            guard let day = cal.date(byAdding: .day, value: offset, to: now) else { continue }
+            let t = Geo.has ? Prayer.times(for: day) : []
+
+            // الأذان والشروق
+            if Store.bool("adhan_on", false) && Geo.has {
+                for k in Prayer.alerts where t[k] > now {
+                    timed.append(Item(req: adhan(k, at: t[k], city: city), at: t[k]))
+                }
+                if Store.bool("sunrise_on", true) && t[Prayer.sunrise] > now {
+                    timed.append(Item(req: sunrise(at: t[Prayer.sunrise]), at: t[Prayer.sunrise]))
                 }
             }
+            // تذكير الصيام المسنون (عند العشاء)
+            if Store.bool("fasting_on", true) && Geo.has && t[Prayer.isha] > now, let fast = Fadl.fastAfter(day) {
+                timed.append(Item(req: fasting(fast, at: t[Prayer.isha]), at: t[Prayer.isha]))
+            }
+            // الإفطار في رمضان (عند المغرب)
+            if Store.bool("iftar_on", true) && Geo.has && Ramadan.active(t[Prayer.maghrib]) && t[Prayer.maghrib] > now {
+                timed.append(Item(req: iftar(at: t[Prayer.maghrib]), at: t[Prayer.maghrib]))
+            }
+            // آية اليوم
+            if Reminders.enabled(Reminders.verse),
+               let at = cal.date(bySettingHour: Reminders.hour(Reminders.verse), minute: Reminders.minute(Reminders.verse), second: 0, of: day),
+               at > now {
+                timed.append(Item(req: verse(at: at, today: offset == 0), at: at))
+            }
+            // الورد
+            if Reminders.enabled(Reminders.wird) {
+                for it in wird(day: day, offset: offset, prayerTimes: t, now: now) { timed.append(it) }
+            }
+            // أذكار الصباح والمساء المرتبطة بالصلاة
+            for kind in [Reminders.azkarAM, Reminders.azkarPM] where Reminders.enabled(kind) && Reminders.byPrayer(kind) {
+                let at = t[kind == Reminders.azkarAM ? Prayer.fajr : Prayer.asr].addingTimeInterval(15 * 60)
+                if at > now { timed.append(Item(req: remind(kind, trigger: once(at), id: "\(kind)-\(offset)"), at: at)) }
+            }
         }
-        if s.verseOn {
-            requests.append(daily(id: "verse", title: "آية اليوم", body: "آية اليوم بانتظارك، افتح وتدبّر",
-                                  hour: s.verseHour, minute: 0, route: "today"))
+
+        // تذكيرات بوقت ثابت تتكرر
+        for kind in [Reminders.azkarAM, Reminders.azkarPM] where Reminders.enabled(kind) && !Reminders.byPrayer(kind) {
+            var c = DateComponents()
+            c.hour = Reminders.hour(kind)
+            c.minute = Reminders.minute(kind)
+            repeating.append(remind(kind, trigger: UNCalendarNotificationTrigger(dateMatching: c, repeats: true), id: kind))
         }
-        if s.azkarOn {
-            requests.append(daily(id: "azkar-am", title: "أذكار الصباح", body: "حصّن يومك بذكر الله", hour: 6, minute: 30, route: "azkar"))
-            requests.append(daily(id: "azkar-pm", title: "أذكار المساء", body: "اختم نهارك بذكر الله", hour: 17, minute: 0, route: "azkar"))
+        if Reminders.enabled(Reminders.kahf) {
+            var c = DateComponents()
+            c.weekday = 6
+            c.hour = Reminders.hour(Reminders.kahf)
+            c.minute = Reminders.minute(Reminders.kahf)
+            repeating.append(remind(Reminders.kahf, trigger: UNCalendarNotificationTrigger(dateMatching: c, repeats: true), id: "kahf"))
         }
-        if s.kahfOn {
-            let c = UNMutableNotificationContent()
-            c.title = "سورة الكهف"
-            c.body = "يوم الجمعة: نورٌ لك ما بين الجمعتين"
-            c.sound = .default
-            c.userInfo = ["page": Quran.surahStart[17]]
-            var comps = DateComponents()
-            comps.weekday = 6
-            comps.hour = 9
-            requests.append(UNNotificationRequest(identifier: "kahf", content: c,
-                trigger: UNCalendarNotificationTrigger(dateMatching: comps, repeats: true)))
+
+        // «ذكّرني بعد ساعة»
+        let snooze = Store.d.double(forKey: "wird_snooze_at")
+        if snooze > now.timeIntervalSince1970 && Khatma.running && Khatma.todayRemaining > 0 {
+            let at = Date(timeIntervalSince1970: snooze)
+            timed.append(Item(req: wirdContent(followUp: true, trigger: once(at), id: "wird-snooze"), at: at))
         }
-        for r in requests { center.add(r) }
+
+        let budget = max(0, 60 - repeating.count)
+        let chosen = timed.sorted { ($0.at ?? now) < ($1.at ?? now) }.prefix(budget)
+        for r in repeating { center.add(r) }
+        for it in chosen { center.add(it.req) }
+        Store.d.set(chosen.last?.at?.timeIntervalSince1970 ?? 0, forKey: "notif_until")
     }
 
-    private static func daily(id: String, title: String, body: String, hour: Int, minute: Int, route: String) -> UNNotificationRequest {
+    private static func once(_ at: Date) -> UNCalendarNotificationTrigger {
+        let comps = Calendar.current.dateComponents([.year, .month, .day, .hour, .minute, .second], from: at)
+        return UNCalendarNotificationTrigger(dateMatching: comps, repeats: false)
+    }
+
+    private static func content(_ title: String, _ body: String, kind: String?) -> UNMutableNotificationContent {
         let c = UNMutableNotificationContent()
         c.title = title
         c.body = body
+        if let k = kind { c.subtitle = k }
         c.sound = .default
-        c.userInfo = ["route": route]
-        var comps = DateComponents()
-        comps.hour = hour
-        comps.minute = minute
-        return UNNotificationRequest(identifier: id, content: c,
-                                     trigger: UNCalendarNotificationTrigger(dateMatching: comps, repeats: true))
+        return c
+    }
+
+    // MARK: الأذان
+
+    private static func adhan(_ k: Int, at: Date, city: String) -> UNNotificationRequest {
+        let name = Prayer.displayName(k, on: at)
+        let f = Fadl.of(k, on: at)
+        let nx = Prayer.after(k, on: at)
+        let nextText = "التالية: " + nx.0 + " " + formatTime(nx.1)
+        var body: String = "حان الآن موعد صلاة " + name + " · " + nextText
+        body += "\n\n" + f.0 + "\n— " + f.1
+        if !city.isEmpty { body += "\n\nحسب التوقيت المحلي لـ" + city }
+        let c = content("صلاة " + name, body, kind: "الأذان")
+        c.categoryIdentifier = adhanCategory
+        c.threadIdentifier = "adhan"
+        c.userInfo = ["route": "prayer", "share": f.0 + "\n— " + f.1 + "\n\n" + Links.homeString]
+        return UNNotificationRequest(identifier: "adhan-\(Int(at.timeIntervalSince1970))-\(k)", content: c, trigger: once(at))
+    }
+
+    /** الشروق: انتهاء وقت الفجر، وفضل الجلوس للذكر وصلاة الضحى */
+    private static func sunrise(at: Date) -> UNNotificationRequest {
+        let f = Fadl.of(Prayer.sunrise, on: at)
+        let duha = formatTime(at.addingTimeInterval(15 * 60))
+        let nx = Prayer.after(Prayer.sunrise, on: at)
+        var body: String = "أذكار الصباح بانتظارك، ووقت الضحى بعد ارتفاع الشمس\n\n" + f.0 + "\n— " + f.1
+        body += "\n\nيبدأ وقت الضحى بعد ارتفاع الشمس، نحو " + duha
+        body += "\nالتالية: " + nx.0 + " " + formatTime(nx.1)
+        let c = content("الشروق · انتهى وقت الفجر", body, kind: "الأذان")
+        c.categoryIdentifier = sunriseCategory
+        c.threadIdentifier = "adhan"
+        c.userInfo = ["url": Links.azkar.absoluteString, "share": f.0 + "\n— " + f.1 + "\n\n" + Links.homeString]
+        return UNNotificationRequest(identifier: "sunrise-\(Int(at.timeIntervalSince1970))", content: c, trigger: once(at))
+    }
+
+    /** ليلة يوم الصيام المسنون (عند العشاء) */
+    private static func fasting(_ fast: Fadl.Fast, at: Date) -> UNNotificationRequest {
+        let body = "غدًا " + fast.title + "، ولا تنسَ نية الصيام والسحور فإن فيه بركة.\n\n"
+            + fast.text + "\n— " + fast.source + "\n\n(حسب تقويم أم القرى)"
+        let c = content("غدًا " + fast.title, body, kind: "الصيام")
+        c.categoryIdentifier = fastCategory
+        c.userInfo = ["url": Links.homeString,
+                      "share": "غدًا " + fast.title + "\n" + fast.text + "\n— " + fast.source + "\n\n" + Links.homeString]
+        return UNNotificationRequest(identifier: "fast-\(Int(at.timeIntervalSince1970))", content: c, trigger: once(at))
+    }
+
+    /** عند أذان المغرب في رمضان */
+    private static func iftar(at: Date) -> UNNotificationRequest {
+        let c = content("حان وقت الإفطار",
+                        "«ذَهَبَ الظَّمَأُ، وَابْتَلَّتِ الْعُرُوقُ، وَثَبَتَ الأَجْرُ إِنْ شَاءَ اللَّهُ»\nتقبّل الله صيامكم", kind: "رمضان")
+        c.userInfo = ["url": Ramadan.tadabburURL(at).absoluteString]
+        return UNNotificationRequest(identifier: "iftar-\(Int(at.timeIntervalSince1970))", content: c, trigger: once(at))
+    }
+
+    // MARK: آية اليوم
+
+    private static func verse(at: Date, today: Bool) -> UNNotificationRequest {
+        let c = content("آية اليوم", "آية اليوم بانتظارك، افتح وتدبّر", kind: "آية اليوم")
+        c.userInfo = ["route": "today"]
+        if today, AppState.verseFresh, let v = AppState.cachedVerse() {
+            c.body = v.text + " · " + v.ref
+            c.categoryIdentifier = verseCategory
+            c.userInfo = ["route": "today", "card": v.cardURL.absoluteString, "tafsir": v.tafsirURL.absoluteString, "share": v.shareText]
+            if let att = verseAttachment(v) { c.attachments = [att] }
+        }
+        return UNNotificationRequest(identifier: "verse-\(Int(at.timeIntervalSince1970))", content: c, trigger: once(at))
+    }
+
+    /** بطاقة الآية بخط المجمع على خلفية الهوية، تظهر عند فتح الإشعار */
+    private static func verseAttachment(_ v: AppState.DailyVerse) -> UNNotificationAttachment? {
+        let renderer = ImageRenderer(content: VerseShareCard(verse: v).environment(\.layoutDirection, .rightToLeft))
+        renderer.scale = 2
+        guard let img = renderer.uiImage, let data = img.pngData() else { return nil }
+        let url = FileManager.default.temporaryDirectory.appendingPathComponent("verse-\(UUID().uuidString).png")
+        do {
+            try data.write(to: url)
+            return try UNNotificationAttachment(identifier: "verse", url: url, options: nil)
+        } catch { return nil }
+    }
+
+    // MARK: الورد
+
+    private static func wirdTime(day: Date, prayerTimes t: [Date]) -> Date? {
+        if Reminders.byPrayer(Reminders.wird), t.count > Reminders.wirdPrayer {
+            return t[Reminders.wirdPrayer].addingTimeInterval(20 * 60)
+        }
+        return Calendar.current.date(bySettingHour: Reminders.hour(Reminders.wird), minute: Reminders.minute(Reminders.wird), second: 0, of: day)
+    }
+
+    private static func wird(day: Date, offset: Int, prayerTimes t: [Date], now: Date) -> [Item] {
+        guard let at = wirdTime(day: day, prayerTimes: t), at > now else { return [] }
+        let khatma = Khatma.running
+        if khatma {
+            let dayNum = Khatma.today(day)
+            if !Khatma.isReadingDay(dayNum) { return [] }                  // يوم راحة
+            if offset == 0 && Khatma.todayRemaining == 0 { return [] }      // أتمّ ورده
+        }
+        var out = [Item(req: wirdContent(followUp: false, trigger: once(at), id: "wird-\(offset)", today: offset == 0), at: at)]
+        // تذكير ثانٍ لطيف بعد ٣ ساعات إن لم يكتمل الورد، ولا يتجاوز ١١ مساءً
+        if offset == 0 && khatma && Reminders.followUp, Khatma.todayRemaining > 0 {
+            let f = at.addingTimeInterval(3 * 3600)
+            if let limit = Calendar.current.date(bySettingHour: 23, minute: 0, second: 0, of: day), f <= limit {
+                out.append(Item(req: wirdContent(followUp: true, trigger: once(f), id: "wird-follow"), at: f))
+            }
+        }
+        return out
+    }
+
+    private static func wirdContent(followUp: Bool, trigger: UNNotificationTrigger, id: String, today: Bool = true) -> UNNotificationRequest {
+        let c: UNMutableNotificationContent
+        if Khatma.running {
+            let left = Khatma.todayRemaining
+            let target = max(left, Khatma.dailyTarget)
+            let r = Khatma.todayRange
+            let open = max(r.0, Khatma.nextPage)
+            if today {
+                let surah = Khatma.surahName(open)
+                let title = followUp ? "تذكير لطيف بوردك" : "وردك اليوم" + (surah.isEmpty ? "" : ": سورة " + surah)
+                let text: String
+                if followUp { text = "بقي " + pagesText(left) + " من وردك، ولو قليلًا قبل النوم" }
+                else if left < target { text = "بقي لك " + pagesText(left) + " من " + pagesText(target) }
+                else { text = "صفحة " + ar(r.0) + " إلى " + ar(r.1) + " · " + pagesText(target) }
+                c = content(title, text + "\n" + Khatma.whereIs(open) + " · الختم المتوقع " + Khatma.endDateText, kind: "الختمة")
+            } else {
+                c = content("وردك اليوم", "نحو " + pagesText(Khatma.pace) + " · أكمل ختمتك من حيث توقفت", kind: "الختمة")
+            }
+            c.userInfo = ["page": open]
+        } else {
+            c = content("وردك اليومي", "قليلٌ دائم، وأثرٌ في القلب. أكمل من حيث توقفت", kind: "الختمة")
+            c.userInfo = ["page": Khatma.lastMushafPage()]
+        }
+        c.categoryIdentifier = wirdCategory
+        c.threadIdentifier = "wird"
+        return UNNotificationRequest(identifier: id, content: c, trigger: trigger)
+    }
+
+    // MARK: الأذكار والكهف
+
+    private static func remind(_ kind: String, trigger: UNNotificationTrigger, id: String) -> UNNotificationRequest {
+        let title: String, text: String, label: String, url: URL
+        switch kind {
+        case Reminders.azkarAM: title = "أذكار الصباح"; text = "حصّن يومك بذكر الله"; label = "الأذكار"; url = Links.azkar
+        case Reminders.azkarPM: title = "أذكار المساء"; text = "اختم نهارك بذكر الله"; label = "الأذكار"; url = Links.azkar
+        default: title = "سورة الكهف"; text = "يوم الجمعة: نورٌ لك ما بين الجمعتين"; label = "الجمعة"; url = Links.kahf
+        }
+        let c = content(title, text, kind: label)
+        c.categoryIdentifier = remindCategory
+        c.userInfo = ["url": url.absoluteString]
+        return UNNotificationRequest(identifier: id, content: c, trigger: trigger)
+    }
+
+    /** «جرّب إشعار آية اليوم الآن» */
+    static func testVerse() async {
+        _ = await AppState.fetchVerse()
+        let c = content("آية اليوم", "آية اليوم بانتظارك، افتح وتدبّر", kind: "آية اليوم")
+        c.userInfo = ["route": "today"]
+        if let v = AppState.cachedVerse() {
+            c.body = v.text + " · " + v.ref
+            c.categoryIdentifier = verseCategory
+            c.userInfo = ["route": "today", "card": v.cardURL.absoluteString, "tafsir": v.tafsirURL.absoluteString, "share": v.shareText]
+            if let att = verseAttachment(v) { c.attachments = [att] }
+        }
+        try? await UNUserNotificationCenter.current().add(
+            UNNotificationRequest(identifier: "verse-test", content: c, trigger: UNTimeIntervalNotificationTrigger(timeInterval: 2, repeats: false)))
     }
 }
 
-/** يستقبل الضغط على الإشعار ويعرضه والتطبيق مفتوح */
+// MARK: - أخبار صاحب التطبيق (نفس Announce.java: ملف app-notice.json في الموقع، دون أي بيانات عن المستخدم)
+
+enum Announce {
+    /** فحص عند فتح التطبيق، مرة كل ٣٠ دقيقة على الأكثر */
+    static func checkSoon() {
+        if Date().timeIntervalSince1970 - Store.d.double(forKey: "notice_checked") < 30 * 60 { return }
+        Task { await check() }
+    }
+
+    static func check() async {
+        Store.d.set(Date().timeIntervalSince1970, forKey: "notice_checked")
+        let stamp = Int(Date().timeIntervalSince1970 / 600)
+        guard let url = URL(string: Links.notice.absoluteString + "?t=\(stamp)") else { return }
+        var req = URLRequest(url: url, timeoutInterval: 20)
+        req.setValue(WebConfig.userAgentMark, forHTTPHeaderField: "User-Agent")
+        guard let result = try? await URLSession.shared.data(for: req),
+              let o = try? JSONSerialization.jsonObject(with: result.0) as? [String: Any] else { return }
+        let id = (o["id"] as? String ?? (o["id"].map { "\($0)" } ?? "")).trimmingCharacters(in: .whitespaces)
+        let title = (o["title"] as? String ?? "").trimmingCharacters(in: .whitespaces)
+        let body = (o["body"] as? String ?? "").trimmingCharacters(in: .whitespaces)
+        let link = (o["url"] as? String ?? "").trimmingCharacters(in: .whitespaces)
+        let expires = (o["expires"] as? NSNumber)?.doubleValue ?? 0
+        if id.isEmpty || (title.isEmpty && body.isEmpty) { return }
+        if id == Store.string("notice_seen") { return }
+        if expires > 0 && Date().timeIntervalSince1970 > expires { return }
+        Store.d.set(id, forKey: "notice_seen")
+        guard Store.bool("news_on", true) else { return }
+        let c = UNMutableNotificationContent()
+        c.title = title.isEmpty ? "حول العالم" : title
+        c.body = body
+        c.subtitle = "أخبار حول العالم"
+        c.sound = .default
+        // الرابط من نطاق الموقع فقط يُفتح داخل التطبيق؛ غير ذلك يفتح «اليوم»
+        if let u = URL(string: link), Links.isOurs(u) { c.userInfo = ["url": link] } else { c.userInfo = ["route": "today"] }
+        try? await UNUserNotificationCenter.current().add(UNNotificationRequest(identifier: "news-" + id, content: c, trigger: nil))
+    }
+}
+
+// MARK: - التحديث الدوري في الخلفية
+
+enum Background {
+    static let refreshID = "com.hawlalaalam.quran.refresh"
+
+    static func register() {
+        BGTaskScheduler.shared.register(forTaskWithIdentifier: refreshID, using: nil) { task in
+            guard let t = task as? BGAppRefreshTask else { task.setTaskCompleted(success: false); return }
+            schedule()
+            let work = Task {
+                _ = await AppState.fetchVerse()
+                await Announce.check()
+                await MainActor.run {
+                    Notifications.reschedule()
+                    WidgetCenter.shared.reloadAllTimelines()
+                }
+                try? await Task.sleep(nanoseconds: 600_000_000)
+                t.setTaskCompleted(success: true)
+            }
+            t.expirationHandler = { work.cancel() }
+        }
+    }
+
+    /** كل ٣ ساعات تقريبًا (النظام يختار الوقت المناسب) */
+    static func schedule() {
+        let r = BGAppRefreshTaskRequest(identifier: refreshID)
+        r.earliestBeginDate = Date(timeIntervalSinceNow: 3 * 3600)
+        try? BGTaskScheduler.shared.submit(r)
+    }
+}
+
+// MARK: - مندوب التطبيق: الإشعارات والاختصارات والخلفية
+
 final class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCenterDelegate {
+    /** اختصار من أيقونة التطبيق فُتح به التطبيق */
+    static var pendingShortcut: String?
+
     func application(_ application: UIApplication,
                      didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]? = nil) -> Bool {
         UNUserNotificationCenter.current().delegate = self
         // التلاوات تستمر عند قفل الشاشة أو الخروج من التطبيق
         try? AVAudioSession.sharedInstance().setCategory(.playback, mode: .spokenAudio)
+        Background.register()
         Task { @MainActor in Notifications.registerCategories() }
         return true
+    }
+
+    /** انتهت تحميلات التلاوات والتطبيق في الخلفية */
+    func application(_ application: UIApplication, handleEventsForBackgroundURLSession identifier: String,
+                     completionHandler: @escaping () -> Void) {
+        if identifier == AudioDownloads.sessionID { AudioDownloads.shared.backgroundCompletion = completionHandler }
+        else { completionHandler() }
+    }
+
+    func application(_ application: UIApplication, configurationForConnecting session: UISceneSession,
+                     options: UIScene.ConnectionOptions) -> UISceneConfiguration {
+        if let item = options.shortcutItem { AppDelegate.pendingShortcut = item.type }
+        let config = UISceneConfiguration(name: nil, sessionRole: session.role)
+        config.delegateClass = SceneDelegate.self
+        return config
     }
 
     func userNotificationCenter(_ center: UNUserNotificationCenter, willPresent notification: UNNotification,
@@ -171,24 +571,52 @@ final class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCent
 
     func userNotificationCenter(_ center: UNUserNotificationCenter, didReceive response: UNNotificationResponse,
                                 withCompletionHandler completionHandler: @escaping () -> Void) {
-        let info = response.notification.request.content.userInfo
+        let content = response.notification.request.content
+        let info = content.userInfo
         let action = response.actionIdentifier
-        let isAdhan = response.notification.request.content.categoryIdentifier == Notifications.adhanCategory
         let route = info["route"] as? String
         let page = info["page"] as? Int
+        let url = (info["url"] as? String).flatMap(URL.init(string:))
+        let share = info["share"] as? String
+        let card = (info["card"] as? String).flatMap(URL.init(string:))
+        let tafsir = (info["tafsir"] as? String).flatMap(URL.init(string:))
         Task { @MainActor in
             let s = AppState.shared
-            if action == Notifications.azkarAction || (isAdhan && action == UNNotificationDefaultActionIdentifier) {
+            switch action {
+            case Notifications.actAzkar:
                 s.tab = .today
                 s.showPrayerAzkar = true
-            } else if let p = page {
-                s.openMushaf(page: p)
-            } else if route == "azkar" {
-                s.tab = .tools
-            } else {
-                s.tab = .today
+            case Notifications.actShare, Notifications.actText:
+                if let t = share { Share.present([t]) }
+            case Notifications.actSnooze:
+                // «ذكّرني بعد ساعة»: يعود التذكير بعد ساعة
+                Store.d.set(Date().timeIntervalSince1970 + 3600, forKey: "wird_snooze_at")
+                Notifications.reschedule()
+            case Notifications.actCard:
+                if let u = card { s.open(u, title: "آية اليوم") }
+            case Notifications.actTafsir:
+                if let u = tafsir { s.open(u, title: "التفسير") }
+            case Notifications.actMorning:
+                s.open(Links.azkar, title: "الأذكار")
+            default:
+                if let p = page { s.openMushaf(page: p) }
+                else if let u = url { s.open(u) }
+                else if route == "prayer" { s.show(.prayerTimes) }
+                else { s.tab = .today }
             }
             completionHandler()
+        }
+    }
+}
+
+/** اختصارات أيقونة التطبيق (الضغط المطوّل) */
+final class SceneDelegate: NSObject, UIWindowSceneDelegate {
+    func windowScene(_ windowScene: UIWindowScene, performActionFor shortcutItem: UIApplicationShortcutItem,
+                     completionHandler: @escaping (Bool) -> Void) {
+        let type = shortcutItem.type
+        Task { @MainActor in
+            if let u = URL(string: type) { AppState.shared.handleDeepLink(u) }
+            completionHandler(true)
         }
     }
 }

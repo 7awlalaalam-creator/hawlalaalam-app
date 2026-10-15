@@ -1,6 +1,10 @@
 import SwiftUI
 
-/** «اليوم»: الترويسة والصلاة القادمة، «أكمل القراءة»، بطاقة في وقتها، آية اليوم، وأربع أدوات */
+/**
+ * شاشة «اليوم» — مرتّبة بلا تشتيت (نفس HomeActivity):
+ * ١) الترويسة والصلاة القادمة، ٢) بطاقة واحدة «أكمل القراءة» مع حلقة الختمة،
+ * ٣) بطاقة في وقتها فقط (رمضان أو الأذكار)، ٤) آية اليوم، ٥) أربع أدوات وباقيها في «الأدوات».
+ */
 struct TodayView: View {
     @EnvironmentObject var state: AppState
     @ObservedObject private var location = LocationService.shared
@@ -13,7 +17,7 @@ struct TodayView: View {
                 mainCard
                     .padding(.horizontal, 10)
                     .padding(.top, -46)
-                if let ctx = azkarPrompt { ctx.padding(.top, 14) }
+                if let ctx = ramadanCard ?? azkarPrompt { ctx.padding(.top, 14) }
                 verseCard.padding(.top, 14)
                 toolsHeader.padding(.top, 22)
                 toolsRow.padding(.top, 10)
@@ -48,8 +52,8 @@ struct TodayView: View {
                 Button {
                     state.themeMode = scheme == .dark ? 1 : 2
                 } label: { heroIcon(scheme == .dark ? "sun.max" : "moon") }
-                .accessibilityLabel("تبديل الوضع الليلي")
-                NavigationLink { SettingsView() } label: { heroIcon("gearshape") }
+                .accessibilityLabel(scheme == .dark ? "الوضع النهاري" : "الوضع الليلي")
+                NavigationLink(value: Screen.settings) { heroIcon("gearshape") }
                     .accessibilityLabel("الإعدادات")
             }
             prayerStrip
@@ -68,12 +72,13 @@ struct TodayView: View {
             .overlay(RoundedRectangle(cornerRadius: 14).stroke(Palette.gold.opacity(0.3)))
     }
 
+    /** سطر الصلاة القادمة مع العدّ التنازلي؛ وبدون موقع: دعوة لتفعيل المواقيت */
     @ViewBuilder private var prayerStrip: some View {
-        if let lat = state.lat, let lng = state.lng {
+        if state.hasLocation {
             TimelineView(.everyMinute) { ctx in
-                let nx = Prayer.next(lat: lat, lng: lng, now: ctx.date)
+                let nx = Prayer.next(now: ctx.date)
                 let idx = nx.0, at = nx.1
-                NavigationLink { PrayerTimesView() } label: {
+                NavigationLink(value: Screen.prayerTimes) {
                     HStack(spacing: 6) {
                         Image(systemName: "clock").foregroundColor(Palette.gold)
                         Text(Prayer.displayName(idx, on: at)).font(AppFont.ui(15, 700)).foregroundColor(.white)
@@ -86,9 +91,10 @@ struct TodayView: View {
                     }
                     .stripStyle()
                 }
+                .accessibilityLabel("الصلاة القادمة " + Prayer.displayName(idx, on: at) + " " + formatTime(at) + "، اضغط لعرض المواقيت")
             }
         } else {
-            Button { location.requestLocation() } label: {
+            NavigationLink(value: Screen.settings) {
                 HStack {
                     Image(systemName: "clock").foregroundColor(Palette.gold)
                     Text("فعّل مواقيت الصلاة وتنبيه الأذان").font(AppFont.ui(14, 700)).foregroundColor(.white)
@@ -103,38 +109,144 @@ struct TodayView: View {
 
     // MARK: البطاقة الرئيسية
 
+    /** «أكمل من حيث توقفت» + حلقة الختمة + ورد اليوم، بزر واحد واضح */
     private var mainCard: some View {
-        let page = state.lastPage
-        return VStack(spacing: 14) {
+        _ = state.rev
+        let last = Reading.lastURL
+        let khatma = Khatma.running
+        return VStack(spacing: 0) {
             HStack(spacing: 14) {
-                Image(systemName: "book.closed")
-                    .font(.system(size: 30))
-                    .foregroundColor(Palette.goldDeep)
-                    .frame(width: 72, height: 72)
-                    .background(Circle().fill(Palette.chip))
+                // الحلقة: نسبة الختمة، أو أيقونة المصحف إن لم تبدأ ختمة
+                NavigationLink(value: Screen.khatma) {
+                    ZStack {
+                        if khatma {
+                            Ring(fraction: Double(Khatma.percent) / 100, track: Palette.chip, tint: Palette.gold)
+                            VStack(spacing: 0) {
+                                Text(ar(Khatma.percent) + "٪").font(AppFont.ui(17, 700)).foregroundColor(Palette.ink)
+                                Text("الختمة").font(AppFont.ui(10)).foregroundColor(Palette.muted)
+                            }
+                        } else {
+                            Circle().fill(Palette.chip)
+                            Image(systemName: "book.closed").font(.system(size: 28)).foregroundColor(Palette.goldDeep)
+                        }
+                    }
+                    .frame(width: 80, height: 80)
+                }
+                .accessibilityLabel(khatma ? "ختمتي " + ar(Khatma.percent) + "٪" : "ختمتي")
                 VStack(alignment: .leading, spacing: 3) {
-                    Text(page > 0 ? "أكمل من حيث توقفت" : "ابدأ القراءة").font(AppFont.ui(12, 700)).foregroundColor(Palette.goldDeep)
-                    Text(page > 0 ? "المصحف · صفحة " + ar(page) : "المصحف الشريف").font(AppFont.ui(18, 700)).foregroundColor(Palette.ink)
-                    Text(page > 0 ? Quran.whereIs(page: page) : "بأسطر مصحف المدينة · دون إنترنت")
+                    Text(last == nil ? "ابدأ القراءة" : "أكمل من حيث توقفت").font(AppFont.ui(12, 700)).foregroundColor(Palette.goldDeep)
+                    Text(last == nil ? "المصحف الشريف" : Reading.lastTitle).font(AppFont.ui(18, 700)).foregroundColor(Palette.ink)
+                        .lineLimit(2)
+                    Text(khatma ? Khatma.todayLine : "ابدأ ختمة: نحسب وردك كل يوم ونذكّرك به")
                         .font(AppFont.ui(13)).foregroundColor(Palette.muted)
                 }
                 Spacer(minLength: 0)
             }
+            if khatma {
+                // تقدّم ورد اليوم
+                let target = max(1, Khatma.dailyTarget)
+                let doneToday = min(target, Khatma.todayCount)
+                ProgressView(value: Double(doneToday), total: Double(target))
+                    .tint(Palette.gold)
+                    .scaleEffect(x: 1, y: 2, anchor: .center)
+                    .padding(.top, 14)
+                    .accessibilityLabel("ورد اليوم " + ar(doneToday) + " من " + ar(target) + " صفحة")
+            }
             HStack(spacing: 8) {
-                Button { state.openMushaf(page: nil) } label: {
-                    Pill(title: page > 0 ? "أكمل القراءة" : "افتح المصحف", systemImage: "book", primary: true, height: 48)
+                Button {
+                    if let u = last { state.open(u) } else { state.openMushaf(page: nil) }
+                } label: {
+                    Pill(title: last == nil ? "افتح المصحف" : "أكمل القراءة", systemImage: "book", primary: true, height: 48)
                 }
-                NavigationLink { IndexView() } label: {
+                NavigationLink(value: Screen.index) {
                     Pill(title: "الفهرس", systemImage: "list.bullet", height: 48).frame(width: 120)
                 }
+                .accessibilityLabel("فهرس السور والأجزاء")
             }
+            .padding(.top, 14)
         }
         .padding(16)
         .card(radius: 22)
         .shadow(color: Color(hex: 0x123640, alpha: 0.14), radius: 12, y: 6)
     }
 
-    // MARK: الأذكار في وقتها
+    // MARK: بطاقات في وقتها
+
+    /** وضع رمضان: يظهر في رمضان، وقبله بعشرة أيام */
+    private var ramadanCard: AnyView? {
+        let active = Ramadan.active()
+        let until = active ? 0 : Ramadan.daysUntil()
+        if !active && (until < 1 || until > 10) { return nil }
+        if !active {
+            return AnyView(
+                VStack(alignment: .leading, spacing: 6) {
+                    Label("رمضان على الأبواب", systemImage: "moon").font(AppFont.ui(13, 700)).foregroundColor(Palette.gold)
+                    Text("بعد " + ar(until) + (until <= 2 ? " يوم" : " أيام")).font(AppFont.ui(26, 700)).foregroundColor(.white)
+                    Text("جهّز ختمة رمضان من الآن، ونذكّرك بوردك كل يوم.").font(AppFont.ui(14)).foregroundColor(Palette.onDarkMuted)
+                    NavigationLink(value: Screen.khatma) { goldPill("جهّز ختمتي") }.padding(.top, 6)
+                }
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .padding(.horizontal, 18).padding(.vertical, 16)
+                .background(RoundedRectangle(cornerRadius: 22).fill(Palette.dark))
+            )
+        }
+        return AnyView(
+            VStack(alignment: .leading, spacing: 0) {
+                Label("رمضان كريم · " + Ramadan.ordinal(Ramadan.day()), systemImage: "moon")
+                    .font(AppFont.ui(13, 700)).foregroundColor(Palette.gold)
+                if state.hasLocation {
+                    TimelineView(.periodic(from: Date(), by: 1)) { ctx in
+                        let ev = Ramadan.nextEvent(ctx.date)
+                        VStack(spacing: 4) {
+                            Text(ev.iftar ? "الإفطار بعد" : "الإمساك بعد").font(AppFont.ui(14)).foregroundColor(Palette.onDarkMuted)
+                            Text(countdown(ev.at.timeIntervalSince(ctx.date))).font(AppFont.ui(40, 700)).foregroundColor(.white)
+                                .monospacedDigit()
+                        }
+                        .frame(maxWidth: .infinity)
+                        .padding(.top, 10)
+                    }
+                    HStack(spacing: 8) {
+                        timeCell("الإمساك", formatTime(Ramadan.imsak(Date())), .white)
+                        timeCell("الإفطار", formatTime(Ramadan.iftar(Date())), Palette.gold)
+                    }
+                    .padding(.top, 10)
+                }
+                HStack(spacing: 8) {
+                    NavigationLink(value: Screen.web(Ramadan.tadabburURL(), "تدبّر اليوم")) {
+                        Text("تدبّر اليوم").font(AppFont.ui(14, 700)).foregroundColor(Palette.ink)
+                            .frame(maxWidth: .infinity, minHeight: 42)
+                            .background(Capsule().fill(Palette.card))
+                    }
+                    NavigationLink(value: Screen.khatma) { goldPill("ختمة رمضان").frame(maxWidth: .infinity) }
+                }
+                .padding(.top, 12)
+            }
+            .padding(.horizontal, 18).padding(.vertical, 16)
+            .background(RoundedRectangle(cornerRadius: 22).fill(Palette.dark))
+        )
+    }
+
+    private func goldPill(_ t: String) -> some View {
+        Text(t).font(AppFont.ui(14, 700)).foregroundColor(Palette.widgetDark)
+            .padding(.horizontal, 16).frame(minHeight: 42)
+            .background(Capsule().fill(Palette.gold))
+    }
+
+    private func timeCell(_ name: String, _ time: String, _ color: Color) -> some View {
+        VStack(spacing: 2) {
+            Text(name).font(AppFont.ui(15, 700))
+            Text(time).font(AppFont.ui(15, 700))
+        }
+        .foregroundColor(color)
+        .frame(maxWidth: .infinity)
+        .padding(.vertical, 8)
+        .background(RoundedRectangle(cornerRadius: 14).fill(Color.white.opacity(0.08)))
+    }
+
+    private func countdown(_ s: TimeInterval) -> String {
+        let t = max(0, Int(s))
+        return ar(String(format: "%d:%02d:%02d", t / 3600, (t % 3600) / 60, t % 60))
+    }
 
     private var azkarPrompt: AnyView? {
         let h = Calendar.current.component(.hour, from: Date())
@@ -143,9 +255,7 @@ struct TodayView: View {
         else if h >= 15 && h < 20 { title = "حان وقت أذكار المساء" }
         else { return nil }
         return AnyView(
-            NavigationLink {
-                WebScreen(title: "الأذكار", url: URL(string: "https://7awlalaalam.com/quran/azkar-morning-evening-ar.html")!)
-            } label: {
+            NavigationLink(value: Screen.web(Links.azkar, "الأذكار")) {
                 HStack(spacing: 12) {
                     Image(systemName: h < 12 ? "sunrise" : "sunset")
                         .foregroundColor(Palette.goldDeep)
@@ -176,6 +286,7 @@ struct TodayView: View {
                 if let v = state.verse { Text(v.ref).font(AppFont.ui(12)).foregroundColor(Palette.muted) }
             }
             if let v = state.verse {
+                // نص مجمع الملك فهد بخطه، مع علامة نهاية الآية برقمها كما في المصحف
                 Text(Quran.withNumber(v.text, v.ayah))
                     .font(AppFont.quran(v.text.count < 80 ? 25 : (v.text.count < 180 ? 22 : 19)))
                     .foregroundColor(Palette.ink)
@@ -183,14 +294,21 @@ struct TodayView: View {
                     .lineSpacing(8)
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, 6)
+                    .textSelection(.enabled)
+                // ثلاثة أزرار في صف واحد: الصورة، النص، التفسير
                 HStack(spacing: 6) {
-                    Button { shareImage(v) } label: { Pill(title: "صورة", systemImage: "photo", primary: true, height: 44) }
-                    Button { Share.present(["﴿ \(v.text) ﴾\n\(v.ref)\n\nالتفسير: \(v.tafsirURL.absoluteString)"]) } label: {
+                    NavigationLink(value: Screen.web(v.cardURL, "آية اليوم")) {
+                        Pill(title: "صورة", systemImage: "photo", primary: true, height: 44)
+                    }
+                    .accessibilityLabel("شارك آية اليوم كصورة")
+                    Button { Share.present([v.shareText]) } label: {
                         Pill(title: "نص", systemImage: "text.alignright", height: 44)
                     }
-                    NavigationLink { WebScreen(title: "التفسير", url: v.tafsirURL) } label: {
+                    .accessibilityLabel("شارك آية اليوم نصًّا")
+                    NavigationLink(value: Screen.web(v.tafsirURL, "التفسير")) {
                         Pill(title: "التفسير", systemImage: "book", height: 44)
                     }
+                    .accessibilityLabel("اقرأ تفسير آية اليوم")
                 }
             } else {
                 Text("جارٍ تحميل آية اليوم…").font(AppFont.ui(16, 500)).foregroundColor(Palette.muted).padding(.vertical, 12)
@@ -198,12 +316,6 @@ struct TodayView: View {
         }
         .padding(.horizontal, 18).padding(.vertical, 14)
         .card(Palette.ivory, border: Palette.ivoryBorder, radius: 22)
-    }
-
-    @MainActor private func shareImage(_ v: AppState.DailyVerse) {
-        let renderer = ImageRenderer(content: VerseShareCard(verse: v).environment(\.layoutDirection, .rightToLeft))
-        renderer.scale = 3
-        if let img = renderer.uiImage { Share.present([img, v.ref]) }
     }
 
     // MARK: الأدوات
@@ -219,12 +331,13 @@ struct TodayView: View {
         .padding(.horizontal, 4)
     }
 
+    /** أكثر أربع أدوات استخدامًا؛ الباقي في شاشة «الأدوات» */
     private var toolsRow: some View {
         HStack(spacing: 8) {
-            NavigationLink { MoodView() } label: { ToolTile(title: "آية لحالك", systemImage: "heart") }
-            NavigationLink { PrayerAzkarView() } label: { ToolTile(title: "أذكار الصلاة", systemImage: "moon.stars") }
-            NavigationLink { QiblaView() } label: { ToolTile(title: "القبلة", systemImage: "location.north.circle") }
-            NavigationLink { TasbeehView() } label: { ToolTile(title: "المسبحة", systemImage: "circle.grid.cross") }
+            NavigationLink(value: Screen.mood(nil)) { ToolTile(title: "آية لحالك", systemImage: "heart") }
+            NavigationLink(value: Screen.web(Links.azkar, "الأذكار")) { ToolTile(title: "الأذكار", systemImage: "sun.and.horizon") }
+            NavigationLink(value: Screen.qibla) { ToolTile(title: "القبلة", systemImage: "location.north.circle") }
+            NavigationLink(value: Screen.tasbeeh) { ToolTile(title: "المسبحة", systemImage: "circle.grid.cross") }
         }
         .buttonStyle(.plain)
     }
@@ -240,7 +353,7 @@ private extension View {
     }
 }
 
-/** بطاقة آية اليوم للمشاركة كصورة (بهوية التطبيق وخط المجمع) */
+/** بطاقة آية اليوم كصورة (بهوية التطبيق وخط المجمع) — للإشعار */
 struct VerseShareCard: View {
     var verse: AppState.DailyVerse
 

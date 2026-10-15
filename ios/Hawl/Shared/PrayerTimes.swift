@@ -16,6 +16,22 @@ enum Prayer {
         let name: String
         let fajr: Double, isha: Double
         var ishaMin = 0, ishaMinRamadan = 0
+
+        /** «الفجر ١٨٫٥° · العشاء بعد المغرب بـ٩٠ دقيقة» */
+        var detail: String {
+            let f = "الفجر " + Method.deg(fajr)
+            var i: String = "العشاء " + Method.deg(isha)
+            if ishaMin > 0 {
+                i = "العشاء بعد المغرب بـ" + ar(ishaMin) + " دقيقة"
+                if ishaMinRamadan > ishaMin { i += " (" + ar(ishaMinRamadan) + " في رمضان)" }
+            }
+            return f + " · " + i
+        }
+
+        private static func deg(_ d: Double) -> String {
+            let s = d == d.rounded() ? String(Int(d)) : String(format: "%.1f", d).replacingOccurrences(of: ".", with: "٫")
+            return ar(s) + "°"
+        }
     }
 
     /** الفهرس 0 محجوز لـ«تلقائي حسب الدولة» */
@@ -161,18 +177,36 @@ enum Prayer {
 
     /** الطريقة المختارة في الإعدادات، أو المعتمدة في الدولة (من الموقع، وإلا من منطقة التوقيت) */
     static func methodIndex() -> Int {
-        let d = UserDefaults.standard
-        let choice = d.integer(forKey: "calc_method")
+        let choice = Store.int("calc_method", 0)
         if choice > 0 && choice < methods.count { return choice }
         return forCountry(country())
     }
 
     static func country() -> String {
-        if let cc = UserDefaults.standard.string(forKey: "country"), cc.count == 2 { return cc }
+        let cc = Store.string("country")
+        if cc.count == 2 { return cc }
         return Locale.current.region?.identifier ?? ""
     }
 
     static func currentMethod() -> Method { methods[methodIndex()] ?? methods[1]! }
+
+    /** مواقيت يوم بالموقع المحفوظ */
+    static func times(for day: Date) -> [Date] { times(for: day, lat: Geo.lat, lng: Geo.lng) }
+
+    /** الصلاة القادمة بالموقع المحفوظ */
+    static func next(now: Date = Date()) -> (Int, Date) { next(lat: Geo.lat, lng: Geo.lng, now: now) }
+
+    /** الحدث التالي بعد صلاة معيّنة: (الاسم، الوقت) لسطر «التالية» في الإشعار */
+    static func after(_ index: Int, on day: Date) -> (String, Date) {
+        var d = day
+        var nextIndex = index + 1
+        if index >= isha {
+            d = Calendar.current.date(byAdding: .day, value: 1, to: day) ?? day
+            nextIndex = fajr
+        }
+        let at = times(for: d)[nextIndex]
+        return (displayName(nextIndex, on: at), at)
+    }
 
     /** الصلاة القادمة: (الفهرس، الوقت) */
     static func next(lat: Double, lng: Double, now: Date = Date()) -> (Int, Date) {
