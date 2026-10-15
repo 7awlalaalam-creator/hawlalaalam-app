@@ -90,6 +90,44 @@ jobs:
           name: ios-build-log
           path: ios/build.log
 
+  # ١ب) ملف IPA غير موقّع للتجربة على آيفونك قبل تفعيل الحساب (يُوقَّع ويُثبَّت ببرنامج Sideloadly من ويندوز)
+  ipa:
+    runs-on: macos-15
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: بيانات المصحف والخطوط من مشروع أندرويد
+        run: |
+          Z=$(ls *.zip | grep -vi keys | head -1)
+          unzip -o -q "$Z" -d /tmp/p
+          R=$(dirname "$(find /tmp/p -name settings.gradle.kts | head -1)")
+          cp -r "$R"/app .
+
+      - name: توليد المشروع
+        working-directory: ios
+        run: |
+          brew install xcodegen
+          xcodegen generate
+
+      - name: البناء للآيفون (دون توقيع)
+        working-directory: ios
+        run: |
+          set -o pipefail
+          xcodebuild -project Hawl.xcodeproj -scheme Hawl -configuration Release \
+            -sdk iphoneos -destination 'generic/platform=iOS' -derivedDataPath build/dev \
+            CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO CODE_SIGN_IDENTITY="" \
+            CURRENT_PROJECT_VERSION="${{ github.run_number }}" build 2>&1 | tee ipa.log | grep -E "error:|BUILD (SUCCEEDED|FAILED)" || true
+          grep -q "BUILD SUCCEEDED" ipa.log
+          mkdir -p out/Payload
+          cp -R build/dev/Build/Products/Release-iphoneos/Hawl.app out/Payload/
+          cd out && zip -qry ../Hawlalaalam-unsigned.ipa Payload
+
+      - name: حفظ ملف IPA
+        uses: actions/upload-artifact@v4
+        with:
+          name: hawlalaalam-ios-ipa
+          path: ios/Hawlalaalam-unsigned.ipa
+
   # ٢) الرفع إلى TestFlight: يعمل تلقائيًا بعد إضافة أسرار حساب Apple (انظر ios/README.md)
   testflight:
     needs: build
