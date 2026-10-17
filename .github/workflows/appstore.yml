@@ -102,7 +102,7 @@ jobs:
         run: |
           if [ ! -d shots ]; then
             git fetch -q --depth 1 origin store-shots || echo "::error title=shots::تعذّر جلب فرع store-shots"
-            git archive FETCH_HEAD shots | tar -x || echo "::error title=shots::تعذّر استخراج الصور"
+            mkdir -p shots && git archive FETCH_HEAD:shots | tar -x -C shots || echo "::error title=shots::تعذّر استخراج الصور"
           fi
           echo "::notice title=shots::$(ls shots/iphone shots/ipad 2>&1 | tr '\n' ' ')"
           mkdir -p fastlane/screenshots/ar-SA fastlane/screenshots/en-US
