@@ -19,12 +19,14 @@ struct HawlWidgets: WidgetBundle {
 // MARK: - مشترك
 
 extension View {
-    /** خلفية الويدجت (iOS 17 يطلب containerBackground) */
-    @ViewBuilder func widgetBackground(_ color: Color) -> some View {
+    /** خلفية الويدجت (iOS 17 يطلب containerBackground).
+     *  ويدجت شاشة القفل بلا خلفية: النظام يرسمها شفافة فوق الخلفية ويلوّن النص بنفسه */
+    @ViewBuilder func widgetBackground(_ color: Color, accessory: Bool = false) -> some View {
         if #available(iOS 17.0, *) {
-            containerBackground(color, for: .widget)
+            if accessory { containerBackground(for: .widget) { Color.clear } }
+            else { containerBackground(color, for: .widget) }
         } else {
-            background(color)
+            if accessory { self } else { background(color) }
         }
     }
 
@@ -36,10 +38,21 @@ extension View {
         else { self }
     }
 
-    func widgetBase() -> some View {
-        self.environment(\.layoutDirection, .rightToLeft)
+    /** ويدجت شاشة القفل لا يُفرض عليه مظهر التطبيق: فرض «نهاري» كان يجعل النص داكنًا باهتًا على خلفية القفل */
+    @ViewBuilder func widgetBase(accessory: Bool = false) -> some View {
+        let v = self.environment(\.layoutDirection, .rightToLeft)
             .environment(\.locale, Locale(identifier: "ar"))
-            .appTheme()
+        if accessory { v } else { v.appTheme() }
+    }
+}
+
+extension WidgetFamily {
+    /** ويدجت شاشة القفل (وساعة StandBy) */
+    var isAccessory: Bool {
+        switch self {
+        case .accessoryCircular, .accessoryRectangular, .accessoryInline: return true
+        default: return false
+        }
     }
 }
 
@@ -135,11 +148,15 @@ struct PrayerWidgetView: View {
                 case .accessoryInline:
                     Text(name + " " + formatTime(entry.nextAt))
                 case .accessoryRectangular:
-                    VStack(alignment: .leading, spacing: 2) {
-                        Text(name + " " + formatTime(entry.nextAt)).font(AppFont.ui(15, 700))
-                        Text(Prayer.remaining(entry.nextAt.timeIntervalSince(entry.date), after: true)).font(AppFont.ui(13))
-                        ProgressView(value: entry.progress)
+                    VStack(alignment: .leading, spacing: 0) {
+                        Label("الصلاة القادمة", systemImage: "clock")
+                            .font(AppFont.ui(12, 700)).lineLimit(1).widgetAccentable()
+                        Text(name + " " + formatTime(entry.nextAt))
+                            .font(AppFont.ui(19, 700)).lineLimit(1).minimumScaleFactor(0.7)
+                        Text(Prayer.remaining(entry.nextAt.timeIntervalSince(entry.date), after: true))
+                            .font(AppFont.ui(13, 500)).lineLimit(1).minimumScaleFactor(0.7)
                     }
+                    .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .leading)
                 case .accessoryCircular:
                     Gauge(value: entry.progress) { Text(name).font(AppFont.ui(10, 700)) }
                         .gaugeStyle(.accessoryCircularCapacity)
@@ -150,8 +167,8 @@ struct PrayerWidgetView: View {
                 }
             }
         }
-        .widgetBackground(WColor.bg)
-        .widgetBase()
+        .widgetBackground(WColor.bg, accessory: family.isAccessory)
+        .widgetBase(accessory: family.isAccessory)
     }
 
     private var name: String { Prayer.displayName(entry.nextIndex, on: entry.nextAt) }
@@ -259,10 +276,14 @@ struct VerseWidgetView: View {
             if let v = entry.verse {
                 switch family {
                 case .accessoryRectangular:
-                    VStack(alignment: .leading, spacing: 2) {
-                        Text("آية اليوم").font(AppFont.ui(11, 700))
-                        Text(v.text).font(AppFont.quran(13)).lineLimit(3)
+                    VStack(alignment: .leading, spacing: 0) {
+                        Text("آية اليوم · " + Quran.surahName(v.surah) + " " + ar(v.ayah))
+                            .font(AppFont.ui(11, 700)).lineLimit(1).minimumScaleFactor(0.8).widgetAccentable()
+                        Text(v.text)
+                            .font(AppFont.quran(16)).lineLimit(2).minimumScaleFactor(0.6)
+                            .frame(maxWidth: .infinity, alignment: .leading)
                     }
+                    .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .leading)
                 default:
                     VStack(spacing: 6) {
                         HStack {
@@ -292,8 +313,8 @@ struct VerseWidgetView: View {
             }
         }
         .widgetURL(URL(string: "hawlapp://today"))
-        .widgetBackground(WColor.bg)
-        .widgetBase()
+        .widgetBackground(WColor.bg, accessory: family.isAccessory)
+        .widgetBase(accessory: family.isAccessory)
     }
 
     private func size(_ t: String) -> CGFloat {
@@ -367,8 +388,8 @@ struct KhatmaWidgetView: View {
             }
         }
         .widgetURL(URL(string: entry.running ? "hawlapp://mushaf?page=\(entry.page)" : "hawlapp://khatma"))
-        .widgetBackground(WColor.bg)
-        .widgetBase()
+        .widgetBackground(WColor.bg, accessory: family.isAccessory)
+        .widgetBase(accessory: family.isAccessory)
     }
 }
 
