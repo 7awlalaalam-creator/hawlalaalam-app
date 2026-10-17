@@ -100,7 +100,11 @@ jobs:
         if: inputs.upload
         working-directory: ios
         run: |
-          if [ ! -d shots ]; then git fetch -q origin store-shots && git archive FETCH_HEAD shots | tar -x; fi
+          if [ ! -d shots ]; then
+            git fetch -q --depth 1 origin store-shots || echo "::error title=shots::تعذّر جلب فرع store-shots"
+            git archive FETCH_HEAD shots | tar -x || echo "::error title=shots::تعذّر استخراج الصور"
+          fi
+          echo "::notice title=shots::$(ls shots/iphone shots/ipad 2>&1 | tr '\n' ' ')"
           mkdir -p fastlane/screenshots/ar-SA fastlane/screenshots/en-US
           for L in ar-SA en-US; do
             for f in shots/iphone/*.png; do cp "$f" "fastlane/screenshots/$L/iphone-$(basename "$f")"; done
@@ -116,4 +120,6 @@ jobs:
             --app_version 1.0 --skip_binary_upload true --submit_for_review false --force true \
             --overwrite_screenshots true --run_precheck_before_submit false \
             --metadata_path fastlane/metadata --screenshots_path fastlane/screenshots 2>&1 | tee deliver.log
-          grep -qiE "Successfully uploaded|finished" deliver.log || { grep -iE "error|❌|\[!\]" deliver.log | head -20 | while IFS= read -r l; do echo "::error title=deliver::$l"; done; exit 1; }
+          tail -25 deliver.log | sed 's/\x1b\[[0-9;]*m//g' | while IFS= read -r l; do echo "::notice title=deliver-tail::$l"; done
+          grep -iE "error|❌|\[!\]" deliver.log | sed 's/\x1b\[[0-9;]*m//g' | head -15 | while IFS= read -r l; do echo "::error title=deliver::$l"; done
+          ! grep -qE "\[!\]|Error:" deliver.log
