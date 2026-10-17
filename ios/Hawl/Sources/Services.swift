@@ -546,7 +546,30 @@ final class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCent
         try? AVAudioSession.sharedInstance().setCategory(.playback, mode: .spokenAudio)
         Background.register()
         Task { @MainActor in Notifications.registerCategories() }
+        Push.start(application)
         return true
+    }
+
+    // الإشعارات الفورية (Firebase)
+    func application(_ application: UIApplication, didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data) {
+        Push.setAPNsToken(deviceToken)
+    }
+
+    func application(_ application: UIApplication, didFailToRegisterForRemoteNotificationsWithError error: Error) { }
+
+    func application(_ application: UIApplication, didReceiveRemoteNotification userInfo: [AnyHashable: Any],
+                     fetchCompletionHandler completionHandler: @escaping (UIBackgroundFetchResult) -> Void) {
+        guard Push.isPush(userInfo) else { completionHandler(.noData); return }
+        let aps = userInfo["aps"] as? [String: Any]
+        if aps?["alert"] != nil {
+            Push.markDelivered(userInfo)                 // النظام يعرضه؛ نسجّله فقط كي لا يتكرر من app-notice.json
+            completionHandler(.newData)
+        } else {
+            Task {
+                await Push.showDataOnly(userInfo)
+                completionHandler(.newData)
+            }
+        }
     }
 
     /** انتهت تحميلات التلاوات والتطبيق في الخلفية */
@@ -566,6 +589,8 @@ final class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCent
 
     func userNotificationCenter(_ center: UNUserNotificationCenter, willPresent notification: UNNotification,
                                 withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void) {
+        let info = notification.request.content.userInfo
+        if Push.isPush(info) && !Push.markDelivered(info) { completionHandler([]); return }
         completionHandler([.banner, .sound, .list])
     }
 
@@ -576,7 +601,7 @@ final class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCent
         let action = response.actionIdentifier
         let route = info["route"] as? String
         let page = info["page"] as? Int
-        let url = (info["url"] as? String).flatMap(URL.init(string:))
+        let url = Push.isPush(info) ? Push.link(info) : (info["url"] as? String).flatMap(URL.init(string:))
         let share = info["share"] as? String
         let card = (info["card"] as? String).flatMap(URL.init(string:))
         let tafsir = (info["tafsir"] as? String).flatMap(URL.init(string:))

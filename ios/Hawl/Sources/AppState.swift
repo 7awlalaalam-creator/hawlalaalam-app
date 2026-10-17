@@ -93,6 +93,7 @@ final class AppState: ObservableObject {
         rev += 1
         Notifications.reschedule()
         WidgetCenter.shared.reloadAllTimelines()
+        Push.sync()                                  // مفتاح الأخبار: الاشتراك أو إلغاؤه في الإشعارات الفورية
     }
 
     // MARK: الإعدادات كمفاتيح
