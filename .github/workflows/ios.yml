@@ -12,7 +12,7 @@ on:
 jobs:
   # ١) فحص البناء على محاكي آيفون: يعمل الآن دون حساب Apple Developer
   build:
-    runs-on: macos-15
+    runs-on: macos-26
     steps:
       - uses: actions/checkout@v4
       - name: بيانات المصحف والخطوط من مشروع أندرويد
@@ -92,7 +92,7 @@ jobs:
 
   # ١ب) ملف IPA غير موقّع للتجربة على آيفونك قبل تفعيل الحساب (يُوقَّع ويُثبَّت ببرنامج Sideloadly من ويندوز)
   ipa:
-    runs-on: macos-15
+    runs-on: macos-26
     steps:
       - uses: actions/checkout@v4
 
@@ -130,7 +130,7 @@ jobs:
 
   # ٢) الرفع إلى TestFlight: يعمل تلقائيًا بعد إضافة أسرار حساب Apple (انظر ios/README.md)
   testflight:
-    runs-on: macos-15
+    runs-on: macos-26
     env:
       HAWL_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
       ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
@@ -175,6 +175,7 @@ jobs:
         if: steps.check.outputs.ready == 'true'
         working-directory: ios
         run: |
+          xcodebuild -version | head -1 | sed 's/^/::notice title=xcode::/'
           set -o pipefail
           xcodebuild -project Hawl.xcodeproj -scheme Hawl -configuration Release \
             -destination 'generic/platform=iOS' -archivePath build/Hawl.xcarchive \
