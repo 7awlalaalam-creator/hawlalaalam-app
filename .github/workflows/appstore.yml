@@ -96,14 +96,18 @@ jobs:
           git -c user.name=github-actions -c user.email=actions@github.com commit -qm "صور المتجر ${{ github.run_number }}"
           git push -qf "https://x-access-token:${GH_TOKEN}@github.com/${{ github.repository }}.git" store-shots
 
+      - name: جلب الصور المحفوظة
+        if: ${{ inputs.reuse_shots }}
+        uses: actions/checkout@v4
+        with:
+          ref: store-shots
+          path: storeshots
+
       - name: رفع الصور والنصوص إلى App Store Connect
         if: inputs.upload
         working-directory: ios
         run: |
-          if [ ! -d shots ]; then
-            git fetch -q --depth 1 origin store-shots || echo "::error title=shots::تعذّر جلب فرع store-shots"
-            mkdir -p shots && git archive FETCH_HEAD:shots | tar -x -C shots || echo "::error title=shots::تعذّر استخراج الصور"
-          fi
+          [ -d shots ] || cp -r ../storeshots/shots shots
           echo "::notice title=shots::$(ls shots/iphone shots/ipad 2>&1 | tr '\n' ' ')"
           mkdir -p fastlane/screenshots/ar-SA fastlane/screenshots/en-US
           for L in ar-SA en-US; do
