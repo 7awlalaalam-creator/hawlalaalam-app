@@ -63,8 +63,8 @@ jobs:
             # ننتظر حتى تختفي إشعارات النظام الأولى (مثل Apple Intelligence) قبل التصوير
             sleep 40
             n=1
-            for pair in "today|today|10" "mushaf?page=2|mushaf|10" "khatma|khatma|7" "prayer|prayer|7" \
-                        "listen|listen|10" "tools|tools|7" "qibla|qibla|7" "tasbeeh|tasbeeh|7"; do
+            for pair in "today|today|18" "mushaf?page=2|mushaf|10" "khatma|khatma|7" "prayer|prayer|7" \
+                        "listen|listen|10" "tools|tools|7" "mood?m=1|mood|8" "tasbeeh|tasbeeh|7"; do
               IFS='|' read -r route name wait <<< "$pair"
               xcrun simctl terminate "$UDID" com.hawlalaalam.quran 2>/dev/null || true
               xcrun simctl launch "$UDID" com.hawlalaalam.quran "${ARGS[@]}" -open_route "$route"
