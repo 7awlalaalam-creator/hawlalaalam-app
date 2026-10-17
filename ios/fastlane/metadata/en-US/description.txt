@@ -1,30 +1,30 @@
 Around The World: Quran is your daily companion with the Book of Allah — a non-profit app, completely free and ad-free. The app interface is in Arabic.
 
-📖 The Mushaf
-• The complete Quran (Hafs ʿan ʿAsim, Uthmani script), fully offline.
+The Mushaf
+• The complete Quran (Hafs 'an 'Asim, Uthmani script), fully offline.
 • Tafsir al-Muyassar for every verse, verse search, bookmarks and notes.
 • Remembers where you stopped so you can continue reading.
 
-🎯 Smart khatma
+Smart khatma
 • Choose how long you want to take and which days you read; your daily portion is planned for you.
 • Tracks your progress and re-plans if you fall behind or get ahead.
 • A gentle daily reminder at the time you choose.
 
-🕌 Prayer
+Prayer
 • Prayer times for your city, with several calculation methods including Umm al-Qura.
 • Adhan notification for every prayer, plus sunrise.
 • Qibla compass.
 
-📿 Adhkar & tasbeeh
+Adhkar & tasbeeh
 • Morning, evening and after-prayer adhkar.
 • Digital tasbeeh with 33 / 99 / 100 targets.
 • Reminders for Surah Al-Kahf on Friday and Sunnah fasting days.
 
-🎧 Recitations
+Recitations
 • Listen to renowned reciters and download surahs for offline listening, with lock-screen playback.
 
-✨ And more
+And more
 • Verse of the day, sharing verses as beautiful cards, home-screen widgets (prayer times, verse of the day, khatma, Ramadan), dark mode and adjustable text size.
 
-🔒 Private by design
-No accounts, no sign-up — your data stays on your device.
+Private by design
+• No accounts, no sign-up — your data stays on your device.
