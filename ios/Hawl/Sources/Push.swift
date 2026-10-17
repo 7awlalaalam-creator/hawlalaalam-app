@@ -11,8 +11,8 @@ import FirebaseMessaging
 
 enum PushConfig {
     // من Firebase ← إعدادات المشروع ← تطبيق iOS (com.hawlalaalam.quran) ← GoogleService-Info.plist
-    static let googleAppID = ""          // GOOGLE_APP_ID   مثل 1:431488654981:ios:xxxxxxxx
-    static let apiKey = ""               // API_KEY
+    static let googleAppID = "1:431488654981:ios:f526e8e5d9d8d4cd4013ec"   // GOOGLE_APP_ID
+    static let apiKey = "AIzaSyBSzv9tz0UOafSdLu3BT1Pqz2sLQjAwml4"   // مفتاح Firebase (مقيّد بخدمات Firebase فقط، كما في أندرويد)
     static let gcmSenderID = "431488654981"
     static let projectID = "hawlalaalam-730cc"
 
