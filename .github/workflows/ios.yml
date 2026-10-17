@@ -130,7 +130,6 @@ jobs:
 
   # ٢) الرفع إلى TestFlight: يعمل تلقائيًا بعد إضافة أسرار حساب Apple (انظر ios/README.md)
   testflight:
-    needs: build
     runs-on: macos-15
     env:
       HAWL_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
@@ -183,7 +182,12 @@ jobs:
             -authenticationKeyPath "$ASC_KEY_PATH" -authenticationKeyID "$ASC_KEY_ID" -authenticationKeyIssuerID "$ASC_ISSUER_ID" \
             DEVELOPMENT_TEAM="$HAWL_TEAM_ID" CURRENT_PROJECT_VERSION="${{ github.run_number }}" \
             archive 2>&1 | tee archive.log | grep -E "error:|ARCHIVE (SUCCEEDED|FAILED)" || true
-          grep -q "ARCHIVE SUCCEEDED" archive.log
+          if ! grep -q "ARCHIVE SUCCEEDED" archive.log; then
+            # الأخطاء تظهر في صفحة التشغيل نفسها (Annotations) لتسهيل معرفة السبب
+            grep -E "error:|error -|Error Domain|No profiles|No signing|requires a provisioning|Provisioning profile" archive.log | sort -u | head -15 | while IFS= read -r l; do echo "::error title=archive::$l"; done
+            tail -25 archive.log | while IFS= read -r l; do echo "::notice title=archive-tail::$l"; done
+            exit 1
+          fi
 
       - name: الرفع إلى App Store Connect (TestFlight)
         if: steps.check.outputs.ready == 'true'
@@ -202,7 +206,13 @@ jobs:
           EOF
           xcodebuild -exportArchive -archivePath build/Hawl.xcarchive -exportOptionsPlist build/ExportOptions.plist \
             -exportPath build/export -allowProvisioningUpdates \
-            -authenticationKeyPath "$ASC_KEY_PATH" -authenticationKeyID "$ASC_KEY_ID" -authenticationKeyIssuerID "$ASC_ISSUER_ID"
+            -authenticationKeyPath "$ASC_KEY_PATH" -authenticationKeyID "$ASC_KEY_ID" -authenticationKeyIssuerID "$ASC_ISSUER_ID" \
+            2>&1 | tee export.log || true
+          if ! grep -qE "EXPORT SUCCEEDED|Upload succeeded|Uploaded" export.log; then
+            grep -iE "error|failed" export.log | sort -u | head -15 | while IFS= read -r l; do echo "::error title=export::$l"; done
+            tail -20 export.log | while IFS= read -r l; do echo "::notice title=export-tail::$l"; done
+            exit 1
+          fi
 
       - name: حفظ سجلات الرفع
         if: always() && steps.check.outputs.ready == 'true'
