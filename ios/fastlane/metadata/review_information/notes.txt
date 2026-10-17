@@ -1,0 +1,12 @@
+Thank you for reviewing Around The World: Quran (حول العالم | القرآن), a free, non-profit, ad-free Quran app. The interface is in Arabic. No account or sign-in is needed.
+
+Native features to try:
+- Mushaf tab: the full Quran works completely offline (bundled data), with tafsir, search and bookmarks.
+- Today tab: next prayer, smart khatma progress ring, verse of the day.
+- Tools > Khatma (ختمتي): create a reading plan; daily reminders are scheduled locally.
+- Settings: enable adhan notifications (local notifications per prayer time), dark mode, text size.
+- Tools > Qibla (القبلة): compass (needs a real device), Tasbeeh (المسبحة), Mood verses (آية لحالك).
+- Listen tab: download a surah for offline playback with lock-screen controls.
+- Home screen widgets: prayer times, verse of the day, khatma progress, Ramadan.
+
+Location is used only to calculate prayer times and qibla direction and never leaves the device.
