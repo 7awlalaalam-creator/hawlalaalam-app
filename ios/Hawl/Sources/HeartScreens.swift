@@ -97,7 +97,7 @@ struct MoodView: View {
         let r = ImageRenderer(content: card)
         r.scale = 3
         var msg: String = Self.moods[m].1 + " 🤍\n﴿ " + p.text + " ﴾ "
-        msg += "[" + Quran.surahName(p.s) + ": " + ar(p.a) + "]\n\n"
+        msg += "[\(Quran.surahName(p.s)): \(ar(p.a))]\n\n"
         msg += "اختر شعورك واقرأ آية تواسيك في تطبيق «حول العالم | القرآن الكريم»:\n"
         msg += "https://7awlalaalam.com/quran/?utm_source=app_share&utm_medium=mood"
         if let img = r.uiImage { Share.present([img, msg]) } else { Share.present([msg]) }

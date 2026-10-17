@@ -328,7 +328,7 @@ enum Khatma {
         if !readingToday { return "يوم راحة من الورد · اقرأ إن شئت" }
         if todayRemaining == 0 { return "أتممت ورد اليوم ✓" }
         let r = todayRange
-        return "ورد اليوم: صفحة " + ar(r.0) + " إلى " + ar(r.1) + " · " + surahName(r.0)
+        return "ورد اليوم: صفحة \(ar(r.0)) إلى \(ar(r.1)) · \(surahName(r.0))"
     }
 
     /** تاريخ يوم (رقم اليوم) كنص هجري قصير */

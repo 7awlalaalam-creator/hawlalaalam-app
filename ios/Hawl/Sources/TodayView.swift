@@ -91,7 +91,7 @@ struct TodayView: View {
                     }
                     .stripStyle()
                 }
-                .accessibilityLabel("الصلاة القادمة " + Prayer.displayName(idx, on: at) + " " + formatTime(at) + "، اضغط لعرض المواقيت")
+                .accessibilityLabel("الصلاة القادمة \(Prayer.displayName(idx, on: at)) \(formatTime(at))، اضغط لعرض المواقيت")
             }
         } else {
             NavigationLink(value: Screen.settings) {
@@ -150,7 +150,7 @@ struct TodayView: View {
                     .tint(Palette.gold)
                     .scaleEffect(x: 1, y: 2, anchor: .center)
                     .padding(.top, 14)
-                    .accessibilityLabel("ورد اليوم " + ar(doneToday) + " من " + ar(target) + " صفحة")
+                    .accessibilityLabel("ورد اليوم \(ar(doneToday)) من \(ar(target)) صفحة")
             }
             HStack(spacing: 8) {
                 Button {

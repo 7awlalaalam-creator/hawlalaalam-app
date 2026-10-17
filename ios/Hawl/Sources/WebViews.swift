@@ -183,8 +183,9 @@ struct MushafWebView: UIViewRepresentable {
     func makeCoordinator() -> Coordinator { Coordinator() }
 
     private static func script(night: Bool, zoom: Int) -> String {
-        "window.HawlApp={postMessage:function(m){window.webkit.messageHandlers.HawlApp.postMessage(m)}};"
-            + "window.__hawlTheme='" + (night ? "dark" : "light") + "';window.__hawlZoom=" + String(zoom) + ";"
+        let theme: String = night ? "dark" : "light"
+        return "window.HawlApp={postMessage:function(m){window.webkit.messageHandlers.HawlApp.postMessage(m)}};"
+            + "window.__hawlTheme='\(theme)';window.__hawlZoom=\(zoom);"
     }
 
     func makeUIView(context: Context) -> WKWebView {

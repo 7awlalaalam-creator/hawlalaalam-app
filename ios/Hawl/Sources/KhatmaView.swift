@@ -160,7 +160,7 @@ struct KhatmaView: View {
                 Text(left == 0 ? "أتممت ورد اليوم ✓" : "ورد اليوم").font(AppFont.ui(13, 700)).foregroundColor(Palette.gold)
                 Text("من صفحة " + ar(r.0) + " إلى " + ar(r.1)).font(AppFont.ui(22, 700)).foregroundColor(.white)
                     .padding(.top, 8).padding(.bottom, 2)
-                Text(fromName == toName ? "سورة " + fromName : "من سورة " + fromName + " إلى سورة " + toName)
+                Text(fromName == toName ? "سورة \(fromName)" : "من سورة \(fromName) إلى سورة \(toName)")
                     .font(AppFont.ui(14, 500)).foregroundColor(Palette.onDarkSoft)
                 Text(ar(Khatma.dailyTarget) + " صفحة · " + (left == 0 ? "بارك الله فيك" : "بقي " + ar(left)))
                     .font(AppFont.ui(14)).foregroundColor(Palette.onDarkMuted).padding(.top, 4)
@@ -246,7 +246,7 @@ struct KhatmaView: View {
     private var historyCard: some View {
         VStack(spacing: 0) {
             ForEach(Array(Khatma.history.prefix(5).enumerated()), id: \.offset) { _, e in
-                infoRow("ختمة " + Khatma.dateText(e.1), "خلال " + ar(max(1, e.1 - e.0 + 1)) + " يومًا")
+                infoRow("ختمة \(Khatma.dateText(e.1))", "خلال \(ar(max(1, e.1 - e.0 + 1))) يومًا")
             }
         }
         .padding(.horizontal, 18).padding(.vertical, 10)
@@ -371,7 +371,7 @@ struct KhatmaView: View {
                 }
 
                 // الملخّص
-                Text("وردك نحو " + ar(pace) + " صفحة يوميًا" + Self.juzHint(pace) + "\nتختم بإذن الله يوم " + Khatma.dateText(end))
+                Text("وردك نحو \(ar(pace)) صفحة يوميًا\(Self.juzHint(pace))\nتختم بإذن الله يوم \(Khatma.dateText(end))")
                     .font(AppFont.ui(15, 700)).foregroundColor(Palette.ink).lineSpacing(5)
                     .frame(maxWidth: .infinity, alignment: .leading)
                     .padding(.horizontal, 14).padding(.vertical, 12)

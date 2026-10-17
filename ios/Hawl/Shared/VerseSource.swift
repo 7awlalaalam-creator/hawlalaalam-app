@@ -7,7 +7,7 @@ enum VerseSource {
         var ref: String { "سورة " + Quran.surahName(surah) + " · الآية " + ar(ayah) }
         var tafsirURL: URL { Links.ayah(surah, ayah) }
         var cardURL: URL { Links.site("verse-story-card.html?surah=\(surah)&from=\(ayah)&to=\(ayah)") }
-        var shareText: String { "﴿ " + text + " ﴾\n" + ref + "\n\nالتفسير: " + tafsirURL.absoluteString }
+        var shareText: String { "﴿ \(text) ﴾\n\(ref)\n\nالتفسير: \(tafsirURL.absoluteString)" }
     }
 
     static func cached() -> Verse? {

@@ -313,7 +313,7 @@ enum Notifications {
         let c = content("صلاة " + name, body, kind: "الأذان")
         c.categoryIdentifier = adhanCategory
         c.threadIdentifier = "adhan"
-        c.userInfo = ["route": "prayer", "share": f.0 + "\n— " + f.1 + "\n\n" + Links.homeString]
+        c.userInfo = ["route": "prayer", "share": "\(f.0)\n— \(f.1)\n\n\(Links.homeString)"]
         return UNNotificationRequest(identifier: "adhan-\(Int(at.timeIntervalSince1970))-\(k)", content: c, trigger: once(at))
     }
 
@@ -328,18 +328,17 @@ enum Notifications {
         let c = content("الشروق · انتهى وقت الفجر", body, kind: "الأذان")
         c.categoryIdentifier = sunriseCategory
         c.threadIdentifier = "adhan"
-        c.userInfo = ["url": Links.azkar.absoluteString, "share": f.0 + "\n— " + f.1 + "\n\n" + Links.homeString]
+        c.userInfo = ["url": Links.azkar.absoluteString, "share": "\(f.0)\n— \(f.1)\n\n\(Links.homeString)"]
         return UNNotificationRequest(identifier: "sunrise-\(Int(at.timeIntervalSince1970))", content: c, trigger: once(at))
     }
 
     /** ليلة يوم الصيام المسنون (عند العشاء) */
     private static func fasting(_ fast: Fadl.Fast, at: Date) -> UNNotificationRequest {
-        let body = "غدًا " + fast.title + "، ولا تنسَ نية الصيام والسحور فإن فيه بركة.\n\n"
-            + fast.text + "\n— " + fast.source + "\n\n(حسب تقويم أم القرى)"
+        let body: String = "غدًا \(fast.title)، ولا تنسَ نية الصيام والسحور فإن فيه بركة.\n\n\(fast.text)\n— \(fast.source)\n\n(حسب تقويم أم القرى)"
         let c = content("غدًا " + fast.title, body, kind: "الصيام")
         c.categoryIdentifier = fastCategory
         c.userInfo = ["url": Links.homeString,
-                      "share": "غدًا " + fast.title + "\n" + fast.text + "\n— " + fast.source + "\n\n" + Links.homeString]
+                      "share": "غدًا \(fast.title)\n\(fast.text)\n— \(fast.source)\n\n\(Links.homeString)"]
         return UNNotificationRequest(identifier: "fast-\(Int(at.timeIntervalSince1970))", content: c, trigger: once(at))
     }
 
@@ -418,8 +417,8 @@ enum Notifications {
                 let text: String
                 if followUp { text = "بقي " + pagesText(left) + " من وردك، ولو قليلًا قبل النوم" }
                 else if left < target { text = "بقي لك " + pagesText(left) + " من " + pagesText(target) }
-                else { text = "صفحة " + ar(r.0) + " إلى " + ar(r.1) + " · " + pagesText(target) }
-                c = content(title, text + "\n" + Khatma.whereIs(open) + " · الختم المتوقع " + Khatma.endDateText, kind: "الختمة")
+                else { text = "صفحة \(ar(r.0)) إلى \(ar(r.1)) · \(pagesText(target))" }
+                c = content(title, "\(text)\n\(Khatma.whereIs(open)) · الختم المتوقع \(Khatma.endDateText)", kind: "الختمة")
             } else {
                 c = content("وردك اليوم", "نحو " + pagesText(Khatma.pace) + " · أكمل ختمتك من حيث توقفت", kind: "الختمة")
             }

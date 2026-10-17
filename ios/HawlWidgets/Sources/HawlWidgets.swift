@@ -425,6 +425,15 @@ struct RamadanProvider: TimelineProvider {
 struct RamadanWidgetView: View {
     let entry: RamadanEntry
 
+    private var timesLine: String {
+        var t: String = "الإمساك "
+        t += formatTime(entry.imsak)
+        t += " · الإفطار "
+        t += formatTime(entry.iftarAt)
+        if !entry.city.isEmpty { t += " · " + entry.city }
+        return t
+    }
+
     var body: some View {
         VStack(alignment: .leading, spacing: 6) {
             if !entry.active {
@@ -446,7 +455,7 @@ struct RamadanWidgetView: View {
                 Text(timerInterval: entry.date...max(entry.date, entry.at), countsDown: true)
                     .font(AppFont.ui(28, 700)).foregroundColor(WColor.text).monospacedDigit()
                 Spacer(minLength: 0)
-                Text("الإمساك " + formatTime(entry.imsak) + " · الإفطار " + formatTime(entry.iftarAt) + (entry.city.isEmpty ? "" : " · " + entry.city))
+                Text(timesLine)
                     .font(AppFont.ui(11)).foregroundColor(WColor.muted).lineLimit(2)
             }
         }
