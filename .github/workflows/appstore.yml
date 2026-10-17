@@ -1,0 +1,109 @@
+name: صفحة App Store (الصور والنصوص)
+
+# يُشغَّل يدويًا: يلتقط صور المتجر على محاكي آيفون ٦٫٩ وآيباد ١٣، ثم يرفعها مع النصوص
+# الموجودة في ios/fastlane/metadata إلى App Store Connect. لا يرفع بناءً ولا يرسل للمراجعة.
+on:
+  workflow_dispatch:
+    inputs:
+      upload:
+        description: 'رفع الصور والنصوص إلى App Store Connect'
+        type: boolean
+        default: true
+
+permissions:
+  contents: write
+
+jobs:
+  store:
+    runs-on: macos-26
+    timeout-minutes: 60
+    env:
+      ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
+      ASC_ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
+      ASC_KEY_P8: ${{ secrets.ASC_KEY_P8 }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: بيانات المصحف والخطوط من مشروع أندرويد
+        run: |
+          Z=$(ls *.zip | grep -vi keys | head -1)
+          unzip -o -q "$Z" -d /tmp/p
+          R=$(dirname "$(find /tmp/p -name settings.gradle.kts | head -1)")
+          cp -r "$R"/app .
+
+      - name: البناء للمحاكي
+        working-directory: ios
+        run: |
+          brew install xcodegen >/dev/null
+          xcodegen generate
+          set -o pipefail
+          xcodebuild -project Hawl.xcodeproj -scheme Hawl -configuration Debug \
+            -sdk iphonesimulator -destination 'generic/platform=iOS Simulator' -derivedDataPath build/dd \
+            CODE_SIGNING_ALLOWED=NO build 2>&1 | tee build.log | grep -E "error:|BUILD (SUCCEEDED|FAILED)" || true
+          grep -q "BUILD SUCCEEDED" build.log
+
+      - name: التقاط صور المتجر
+        working-directory: ios
+        run: |
+          APP=build/dd/Build/Products/Debug-iphonesimulator/Hawl.app
+          ARGS=(-welcomed '<true/>' -tour_v '<integer>99</integer>' -lat '<real>21.5433</real>' -lng '<real>39.1728</real>' -city 'جدة' -country 'SA')
+          capture() {   # $1 نمط اسم الجهاز، $2 مجلد الحفظ
+            local TYPE UDID
+            TYPE=$(xcrun simctl list devicetypes | grep -E "$1" | tail -1 | sed -E 's/ \(com\.apple.*//')
+            echo "::notice title=device::$TYPE"
+            UDID=$(xcrun simctl create store "$TYPE")
+            xcrun simctl boot "$UDID"; xcrun simctl bootstatus "$UDID" -b
+            xcrun simctl status_bar "$UDID" override --time "9:41" --batteryState charged --batteryLevel 100 --cellularBars 4 --wifiBars 3 || true
+            xcrun simctl ui "$UDID" appearance light
+            xcrun simctl install "$UDID" "$APP"
+            # إذن الإشعارات والموقع مسبقًا حتى لا تظهر نوافذ الأذونات في الصور
+            xcrun simctl privacy "$UDID" grant notifications com.hawlalaalam.quran || true
+            xcrun simctl privacy "$UDID" grant location com.hawlalaalam.quran || true
+            mkdir -p "$2"
+            xcrun simctl launch "$UDID" com.hawlalaalam.quran "${ARGS[@]}"; sleep 10
+            xcrun simctl io "$UDID" screenshot "$2/01-today.png"
+            n=2
+            for pair in "hawlapp://mushaf?page=2|mushaf|8" "hawlapp://khatma|khatma|4" "hawlapp://prayer|prayer|4" \
+                        "hawlapp://listen|listen|8" "hawlapp://tools|tools|4" "hawlapp://qibla|qibla|4" "hawlapp://tasbeeh|tasbeeh|4"; do
+              IFS='|' read -r url name wait <<< "$pair"
+              xcrun simctl openurl "$UDID" "$url" || true
+              sleep "$wait"
+              xcrun simctl io "$UDID" screenshot "$2/$(printf %02d $n)-$name.png"
+              n=$((n+1))
+            done
+            xcrun simctl shutdown "$UDID"; xcrun simctl delete "$UDID"
+          }
+          capture "iPhone 1[6-9] Pro Max" shots/iphone
+          capture "iPad Pro 13-inch" shots/ipad
+          for f in shots/*/*.png; do echo "$f $(sips -g pixelWidth -g pixelHeight "$f" | awk '/pixel/{printf $2" "}')"; done
+
+      - name: حفظ الصور في فرع store-shots للمراجعة
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          rm -rf /tmp/wt && mkdir -p /tmp/wt && cp -r ios/shots /tmp/wt/ && cd /tmp/wt
+          git init -q && git checkout -qb store-shots
+          git -c user.name=github-actions -c user.email=actions@github.com add . 
+          git -c user.name=github-actions -c user.email=actions@github.com commit -qm "صور المتجر ${{ github.run_number }}"
+          git push -qf "https://x-access-token:${GH_TOKEN}@github.com/${{ github.repository }}.git" store-shots
+
+      - name: رفع الصور والنصوص إلى App Store Connect
+        if: inputs.upload
+        working-directory: ios
+        run: |
+          mkdir -p fastlane/screenshots/ar-SA fastlane/screenshots/en-US
+          for L in ar-SA en-US; do
+            for f in shots/iphone/*.png; do cp "$f" "fastlane/screenshots/$L/iphone-$(basename "$f")"; done
+            for f in shots/ipad/*.png; do cp "$f" "fastlane/screenshots/$L/ipad-$(basename "$f")"; done
+          done
+          printf '%s' "$ASC_KEY_P8" > /tmp/key.p8
+          python3 - <<'PY'
+          import json, os
+          json.dump({"key_id": os.environ["ASC_KEY_ID"], "issuer_id": os.environ["ASC_ISSUER_ID"],
+                     "key": open("/tmp/key.p8").read(), "in_house": False}, open("/tmp/asc.json", "w"))
+          PY
+          fastlane deliver --api_key_path /tmp/asc.json --app_identifier com.hawlalaalam.quran --platform ios \
+            --app_version 1.0 --skip_binary_upload true --submit_for_review false --force true \
+            --overwrite_screenshots true --run_precheck_before_submit false \
+            --metadata_path fastlane/metadata --screenshots_path fastlane/screenshots 2>&1 | tee deliver.log
+          grep -qiE "Successfully uploaded|finished" deliver.log || { grep -iE "error|❌|\[!\]" deliver.log | head -20 | while IFS= read -r l; do echo "::error title=deliver::$l"; done; exit 1; }

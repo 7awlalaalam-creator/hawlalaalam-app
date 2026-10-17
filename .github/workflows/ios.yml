@@ -6,6 +6,7 @@ on:
     branches: [main]
     paths:
       - 'ios/**'
+      - '!ios/fastlane/**'
       - '.github/workflows/ios.yml'
   workflow_dispatch:
 
