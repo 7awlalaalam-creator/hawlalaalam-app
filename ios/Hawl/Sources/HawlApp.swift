@@ -5,6 +5,7 @@ struct HawlApp: App {
     @UIApplicationDelegateAdaptor(AppDelegate.self) private var delegate
     @StateObject private var state = AppState.shared
     @Environment(\.scenePhase) private var phase
+    static var routeOpened = false
 
     init() {
         // شريط التبويب بخط التطبيق وألوانه
@@ -57,6 +58,12 @@ struct HawlApp: App {
         if let s = AppDelegate.pendingShortcut, let u = URL(string: s) {
             AppDelegate.pendingShortcut = nil
             state.handleDeepLink(u)
+        }
+        // لقطات المتجر الآلية: تُفتح الشاشة مباشرة من وسيط التشغيل (-open_route khatma) دون نافذة «فتح في…؟»
+        if !HawlApp.routeOpened, let r = UserDefaults.standard.string(forKey: "open_route"), !r.isEmpty,
+           let u = URL(string: "hawlapp://" + r) {
+            HawlApp.routeOpened = true
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) { state.handleDeepLink(u) }
         }
     }
 }

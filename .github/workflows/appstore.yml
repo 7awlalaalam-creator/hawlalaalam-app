@@ -60,13 +60,14 @@ jobs:
             xcrun simctl privacy "$UDID" grant notifications com.hawlalaalam.quran || true
             xcrun simctl privacy "$UDID" grant location com.hawlalaalam.quran || true
             mkdir -p "$2"
-            xcrun simctl launch "$UDID" com.hawlalaalam.quran "${ARGS[@]}"; sleep 10
-            xcrun simctl io "$UDID" screenshot "$2/01-today.png"
-            n=2
-            for pair in "hawlapp://mushaf?page=2|mushaf|8" "hawlapp://khatma|khatma|4" "hawlapp://prayer|prayer|4" \
-                        "hawlapp://listen|listen|8" "hawlapp://tools|tools|4" "hawlapp://qibla|qibla|4" "hawlapp://tasbeeh|tasbeeh|4"; do
-              IFS='|' read -r url name wait <<< "$pair"
-              xcrun simctl openurl "$UDID" "$url" || true
+            # ننتظر حتى تختفي إشعارات النظام الأولى (مثل Apple Intelligence) قبل التصوير
+            sleep 40
+            n=1
+            for pair in "today|today|10" "mushaf?page=2|mushaf|10" "khatma|khatma|7" "prayer|prayer|7" \
+                        "listen|listen|10" "tools|tools|7" "qibla|qibla|7" "tasbeeh|tasbeeh|7"; do
+              IFS='|' read -r route name wait <<< "$pair"
+              xcrun simctl terminate "$UDID" com.hawlalaalam.quran 2>/dev/null || true
+              xcrun simctl launch "$UDID" com.hawlalaalam.quran "${ARGS[@]}" -open_route "$route"
               sleep "$wait"
               xcrun simctl io "$UDID" screenshot "$2/$(printf %02d $n)-$name.png"
               n=$((n+1))
