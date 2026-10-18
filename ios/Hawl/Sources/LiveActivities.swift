@@ -11,8 +11,11 @@ import ActivityKit
 enum LiveActivities {
     static let key = "live_prayer"
 
-    /** مفعّل افتراضيًا؛ ويُطفأ من «التنبيهات» */
-    static var enabled: Bool { Store.bool(key, true) }
+    /** متوقف افتراضيًا (لا نزعج أحدًا)؛ يفعّله المستخدم من «التنبيهات» */
+    static var enabled: Bool { Store.bool(key, false) }
+
+    /** أخفاه المستخدم بالسحب: لا نعيده قبل دخول هذا الوقت */
+    private static let dismissedKey = "live_prayer_dismissed_until"
 
     /** هل يدعم الجهاز النشاط الحي ومسموح به في إعدادات الجوال؟ */
     static var supported: Bool {
@@ -26,21 +29,36 @@ enum LiveActivities {
     static func refresh(canStart: Bool = true) {
         #if canImport(ActivityKit)
         guard #available(iOS 16.2, *) else { return }
-        let all = Activity<PrayerLiveAttributes>.activities
+        let every = Activity<PrayerLiveAttributes>.activities
+        // النظام يُبقي النشاط المنتهي (بعد ٨ ساعات) في القائمة مدةً؛ لا نعدّه
+        let all = every.filter { $0.activityState == .active || $0.activityState == .stale }
+        for old in every where !all.contains(where: { $0.id == old.id }) {
+            Task { await old.end(nil, dismissalPolicy: .immediate) }
+        }
         guard enabled, Geo.has, ActivityAuthorizationInfo().areActivitiesEnabled else {
             for a in all { Task { await a.end(nil, dismissalPolicy: .immediate) } }
             return
         }
-        let (idx, at) = Prayer.next()
+        let now = Date()
+        let (idx, at) = Prayer.next(now: now)
+        let (idx2, at2) = Prayer.next(now: at.addingTimeInterval(60))
         let state = PrayerLiveAttributes.ContentState(
-            name: Prayer.displayName(idx, on: at), at: at, clock: formatTime(at), city: Geo.city)
-        // يبقى ظاهرًا ربع ساعة بعد دخول الوقت بعبارة «حان وقت الصلاة»، ثم يُعدّ قديمًا
-        let content = ActivityContent(state: state, staleDate: at.addingTimeInterval(15 * 60))
+            name: Prayer.displayName(idx, on: at), at: at, clock: formatTime(at), city: Geo.city,
+            nextName: Prayer.displayName(idx2, on: at2), nextAt: at2, nextClock: formatTime(at2))
+        // عند دخول الوقت يُعاد الرسم فيتحول العدّاد إلى الصلاة التالية
+        let content = ActivityContent(state: state, staleDate: at)
         if let current = all.first {
             for extra in all.dropFirst() { Task { await extra.end(nil, dismissalPolicy: .immediate) } }
             if current.content.state != state { Task { await current.update(content) } }
-        } else if canStart {
-            _ = try? Activity.request(attributes: PrayerLiveAttributes(), content: content, pushType: nil)
+        } else if canStart, Store.d.double(forKey: dismissedKey) < now.timeIntervalSince1970 {
+            guard let a = try? Activity.request(attributes: PrayerLiveAttributes(), content: content, pushType: nil) else { return }
+            // سحبه المستخدم من شاشة القفل: نحترم ذلك حتى تدخل الصلاة القادمة
+            Task {
+                for await st in a.activityStateUpdates where st == .dismissed {
+                    Store.d.set(at.timeIntervalSince1970, forKey: dismissedKey)
+                    break
+                }
+            }
         }
         #endif
     }

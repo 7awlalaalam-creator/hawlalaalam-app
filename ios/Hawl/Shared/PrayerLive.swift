@@ -18,6 +18,10 @@ struct PrayerLiveAttributes: ActivityAttributes {
         var clock: String
         /** المدينة إن وُجدت */
         var city: String
+        /** الصلاة التي بعدها: يتحول إليها العدّاد وحده عند دخول الوقت (دون انتظار التطبيق) */
+        var nextName: String
+        var nextAt: Date
+        var nextClock: String
     }
 }
 #endif

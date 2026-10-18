@@ -510,14 +510,23 @@ private struct LiveTimer: View {
     var color: Color
 
     var body: some View {
-        if at > Date() {
-            Text(timerInterval: Date()...at, countsDown: true)
+        let now = Date()
+        if at > now {
+            Text(timerInterval: now...at, countsDown: true)
                 .font(.system(size: size, weight: .bold).monospacedDigit())
                 .foregroundColor(color)
                 .multilineTextAlignment(.center)
         } else {
             Text("حان الآن").font(AppFont.ui(size * 0.8, 700)).foregroundColor(color)
         }
+    }
+}
+
+@available(iOS 16.1, *)
+extension PrayerLiveAttributes.ContentState {
+    /** الهدف الحالي: الصلاة القادمة، وبعد دخولها التي تليها (يرسمها الويدجت وحده) */
+    var current: (name: String, at: Date, clock: String) {
+        at > Date() ? (name, at, clock) : (nextName, nextAt, nextClock)
     }
 }
 
@@ -534,26 +543,26 @@ struct PrayerLiveActivity: Widget {
                 DynamicIslandExpandedRegion(.leading) {
                     VStack(alignment: .leading, spacing: 2) {
                         Text("الصلاة القادمة").font(AppFont.ui(11, 500)).foregroundColor(Color(hex: 0xA9BABF))
-                        Text(ctx.state.name).font(AppFont.ui(20, 700)).foregroundColor(.white)
+                        Text(ctx.state.current.name).font(AppFont.ui(20, 700)).foregroundColor(.white)
                     }
                     .environment(\.layoutDirection, .rightToLeft)
                 }
                 DynamicIslandExpandedRegion(.trailing) {
-                    LiveTimer(at: ctx.state.at, size: 24, color: Color(hex: 0xC9A876))
+                    LiveTimer(at: ctx.state.current.at, size: 24, color: Color(hex: 0xC9A876))
                         .frame(maxWidth: 110)
                 }
                 DynamicIslandExpandedRegion(.bottom) {
-                    Text("تدخل " + ctx.state.clock + (ctx.state.city.isEmpty ? "" : " · " + ctx.state.city))
+                    Text("تدخل " + ctx.state.current.clock + (ctx.state.city.isEmpty ? "" : " · " + ctx.state.city))
                         .font(AppFont.ui(13)).foregroundColor(Color(hex: 0xEFE4CF))
                         .environment(\.layoutDirection, .rightToLeft)
                 }
             } compactLeading: {
                 HStack(spacing: 4) {
                     Image(systemName: "clock").foregroundColor(Color(hex: 0xC9A876))
-                    Text(ctx.state.name).font(AppFont.ui(13, 700)).foregroundColor(.white)
+                    Text(ctx.state.current.name).font(AppFont.ui(13, 700)).foregroundColor(.white)
                 }
             } compactTrailing: {
-                LiveTimer(at: ctx.state.at, size: 14, color: Color(hex: 0xC9A876))
+                LiveTimer(at: ctx.state.current.at, size: 14, color: Color(hex: 0xC9A876))
                     .frame(maxWidth: 64)
             } minimal: {
                 Image(systemName: "clock").foregroundColor(Color(hex: 0xC9A876))
@@ -568,15 +577,16 @@ struct PrayerLiveLockView: View {
     var state: PrayerLiveAttributes.ContentState
 
     var body: some View {
+        let cur = state.current
         HStack(spacing: 14) {
             VStack(alignment: .leading, spacing: 3) {
                 Text("الصلاة القادمة").font(AppFont.ui(12, 500)).foregroundColor(Color(hex: 0xC9A876))
-                Text(state.name).font(AppFont.ui(26, 700)).foregroundColor(.white)
-                Text(state.clock + (state.city.isEmpty ? "" : " · " + state.city))
+                Text(cur.name).font(AppFont.ui(26, 700)).foregroundColor(.white)
+                Text(cur.clock + (state.city.isEmpty ? "" : " · " + state.city))
                     .font(AppFont.ui(13)).foregroundColor(Color(hex: 0xA9BABF)).lineLimit(1)
             }
             Spacer(minLength: 8)
-            LiveTimer(at: state.at, size: 30, color: Color(hex: 0xE9D9B8))
+            LiveTimer(at: cur.at, size: 30, color: Color(hex: 0xE9D9B8))
                 .frame(maxWidth: 140)
         }
         .padding(.horizontal, 18)
