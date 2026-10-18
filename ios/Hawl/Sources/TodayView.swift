@@ -112,8 +112,10 @@ struct TodayView: View {
     /** سلسلة الأيام المتتالية مع القرآن (تظهر من اليوم الثاني) */
     private var streakChip: some View {
         let n = Reading.streak
+        let r = n % 100
         let t = n == 2 ? "يومان متتاليان مع القرآن"
-            : (n <= 10 ? ar(n) + " أيام متتالية مع القرآن" : ar(n) + " يومًا متتاليًا مع القرآن")
+            : (r >= 3 && r <= 10) ? ar(n) + " أيام متتالية مع القرآن"
+            : (r >= 11 ? ar(n) + " يومًا متتاليًا مع القرآن" : ar(n) + " يوم متتالٍ مع القرآن")
         return NavigationLink(value: Screen.khatma) {
             HStack(spacing: 6) {
                 Image(systemName: "flame").font(.system(size: 13, weight: .semibold))
