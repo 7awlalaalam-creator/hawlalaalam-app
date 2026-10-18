@@ -416,7 +416,7 @@ struct VerseShareCard: View {
                 .foregroundColor(Color(hex: 0xF5EBD3))
                 .multilineTextAlignment(.center)
                 .lineSpacing(10)
-            Text(verse.ref + " · حول العالم").font(AppFont.ui(14, 500)).foregroundColor(Palette.goldLight)
+            Text(verse.ref + " · القرآن حول العالم").font(AppFont.ui(14, 500)).foregroundColor(Palette.goldLight)
         }
         .padding(36)
         .frame(width: 360)
