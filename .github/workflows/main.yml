@@ -5,7 +5,13 @@ on:
     # نسخة أندرويد تُبنى فقط عند تحديث ملف المشروع المضغوط (تعديلات iOS وغيرها لا تُصدر نسخة)
     paths:
       - '*.zip'
+  # النشر للمستخدمين (إصدار يراه زر «البحث عن تحديث») لا يكون إلا بطلب صريح: Run workflow ← نشر = نعم
   workflow_dispatch:
+    inputs:
+      publish:
+        description: 'نشر الإصدار للمستخدمين'
+        type: boolean
+        default: false
 permissions:
   contents: write
 jobs:
@@ -55,9 +61,9 @@ jobs:
           name: hawlalaalam-app
           path: out/
       - name: نشر إصدار للتحميل
-        if: env.KEYSTORE_FILE != ''
+        if: env.KEYSTORE_FILE != '' && inputs.publish == true
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: v1.0.${{ github.run_number }}
-          name: حول العالم | القرآن 1.0.${{ github.run_number }}
+          tag_name: v2.0.${{ github.run_number }}
+          name: القرآن حول العالم 2.0.${{ github.run_number }}
           files: out/*

@@ -3,7 +3,7 @@ name: بناء تطبيق iOS
 # يعمل عند أي تعديل في مجلد ios. بيانات المصحف والخطوط تؤخذ من مشروع أندرويد داخل HawlalaalamApp.zip
 on:
   push:
-    branches: [main, v2]
+    branches: [main]
     paths:
       - 'ios/**'
       - '!ios/fastlane/**'
@@ -156,8 +156,8 @@ jobs:
 
   # ٢) الرفع إلى TestFlight: يعمل تلقائيًا بعد إضافة أسرار حساب Apple (انظر ios/README.md)
   testflight:
-    # الفرع الرئيسي يُرفع تلقائيًا؛ فرع التطوير لا يُرفع إلا بطلب صريح
-    if: github.ref == 'refs/heads/main' || inputs.upload == true
+    # الرفع إلى TestFlight بطلب صريح فقط: Run workflow ← رفع = نعم
+    if: inputs.upload == true
     runs-on: macos-26
     env:
       HAWL_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
