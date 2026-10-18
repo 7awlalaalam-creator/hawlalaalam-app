@@ -83,6 +83,13 @@ jobs:
             go "hawlapp://listen" "$mode-13-listen" 8
             go "hawlapp://prayer-azkar" "$mode-14-prayer-azkar"
           done
+          # النشاط الحي «الصلاة القادمة»: نفتح التطبيق ثم الإعدادات فتظهر الجزيرة الديناميكية
+          xcrun simctl ui "$UDID" appearance light
+          xcrun simctl terminate "$UDID" com.hawlalaalam.quran || true
+          xcrun simctl launch "$UDID" com.hawlalaalam.quran "${ARGS[@]}"
+          sleep 8
+          xcrun simctl launch "$UDID" com.apple.Preferences || true
+          shot "live-island" 5
           ls -la shots
 
       - name: نشر اللقطات في فرع ci-shots (للمراجعة دون تنزيل)
