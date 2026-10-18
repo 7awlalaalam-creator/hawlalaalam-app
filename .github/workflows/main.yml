@@ -12,6 +12,10 @@ on:
         description: 'نشر الإصدار للمستخدمين'
         type: boolean
         default: false
+      beta:
+        description: 'نسخة تجريبية لك فقط (رابط تحميل لا يظهر للمستخدمين في البحث عن تحديث)'
+        type: boolean
+        default: false
 permissions:
   contents: write
 jobs:
@@ -66,4 +70,16 @@ jobs:
         with:
           tag_name: v2.0.${{ github.run_number }}
           name: القرآن حول العالم 2.0.${{ github.run_number }}
+          files: out/*
+
+      # نسخة تجريبية: «إصدار تجريبي» على GitHub؛ زر «البحث عن تحديث» يقرأ آخر إصدار رسمي فقط فلا يراها أحد
+      - name: نسخة تجريبية للتحميل
+        if: env.KEYSTORE_FILE != '' && inputs.beta == true && inputs.publish != true
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: beta-2.0.${{ github.run_number }}
+          name: تجريبي — القرآن حول العالم 2.0.${{ github.run_number }}
+          prerelease: true
+          make_latest: false
+          body: نسخة تجريبية للاختبار فقط، ليست للنشر.
           files: out/*
