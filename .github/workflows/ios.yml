@@ -3,12 +3,20 @@ name: بناء تطبيق iOS
 # يعمل عند أي تعديل في مجلد ios. بيانات المصحف والخطوط تؤخذ من مشروع أندرويد داخل HawlalaalamApp.zip
 on:
   push:
-    branches: [main]
+    branches: [main, v2]
     paths:
       - 'ios/**'
       - '!ios/fastlane/**'
       - '.github/workflows/ios.yml'
   workflow_dispatch:
+    inputs:
+      upload:
+        description: 'رفع النسخة إلى TestFlight'
+        type: boolean
+        default: false
+
+permissions:
+  contents: write
 
 jobs:
   # ١) فحص البناء على محاكي آيفون: يعمل الآن دون حساب Apple Developer
@@ -77,6 +85,16 @@ jobs:
           done
           ls -la shots
 
+      - name: نشر اللقطات في فرع ci-shots (للمراجعة دون تنزيل)
+        if: always()
+        working-directory: ios
+        run: |
+          [ -d shots ] || exit 0
+          git config user.name "ci"; git config user.email "ci@users.noreply.github.com"
+          rm -rf /tmp/cs && mkdir -p /tmp/cs && cp shots/*.png /tmp/cs/ 2>/dev/null || exit 0
+          cd /tmp/cs && git init -q && git checkout -q -b ci-shots && git add . && git commit -qm "shots ${{ github.sha }}"
+          git push -qf "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git" ci-shots
+
       - name: حفظ لقطات الشاشة
         if: always()
         uses: actions/upload-artifact@v4
@@ -131,6 +149,8 @@ jobs:
 
   # ٢) الرفع إلى TestFlight: يعمل تلقائيًا بعد إضافة أسرار حساب Apple (انظر ios/README.md)
   testflight:
+    # الفرع الرئيسي يُرفع تلقائيًا؛ فرع التطوير لا يُرفع إلا بطلب صريح
+    if: github.ref == 'refs/heads/main' || inputs.upload == true
     runs-on: macos-26
     env:
       HAWL_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}

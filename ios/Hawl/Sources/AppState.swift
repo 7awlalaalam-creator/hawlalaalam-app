@@ -94,6 +94,7 @@ final class AppState: ObservableObject {
         Notifications.reschedule()
         WidgetCenter.shared.reloadAllTimelines()
         Push.sync()                                  // مفتاح الأخبار: الاشتراك أو إلغاؤه في الإشعارات الفورية
+        LiveActivities.refresh()                     // الموقع أو طريقة الحساب أو مفتاح النشاط الحي تغيّرت
     }
 
     // MARK: الإعدادات كمفاتيح

@@ -516,6 +516,7 @@ enum Background {
                 await MainActor.run {
                     Notifications.reschedule()
                     WidgetCenter.shared.reloadAllTimelines()
+                    LiveActivities.refresh(canStart: false)   // من الخلفية: تحديث فقط، لا بدء
                 }
                 try? await Task.sleep(nanoseconds: 600_000_000)
                 t.setTaskCompleted(success: true)

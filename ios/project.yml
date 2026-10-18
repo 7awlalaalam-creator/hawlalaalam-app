@@ -5,7 +5,7 @@ name: Hawl
 options:
   bundleIdPrefix: com.hawlalaalam
   deploymentTarget:
-    iOS: "16.0"
+    iOS: "16.1"
   developmentLanguage: ar
   createIntermediateGroups: true
 # الإشعارات الفورية (نفس مشروع Firebase المستخدم في أندرويد)
@@ -16,7 +16,7 @@ packages:
 settings:
   base:
     SWIFT_VERSION: "5.0"
-    MARKETING_VERSION: "1.0"
+    MARKETING_VERSION: "2.0"
     CURRENT_PROJECT_VERSION: "1"
 targets:
   Hawl:
@@ -114,6 +114,8 @@ targets:
         NSLocationWhenInUseUsageDescription: "نستخدم موقعك لحساب مواقيت الصلاة واتجاه القبلة في مدينتك، ولا يُرسل إلى أي جهة."
         NSPhotoLibraryAddUsageDescription: "لحفظ بطاقات الآيات التي تختار حفظها في الصور."
         ITSAppUsesNonExemptEncryption: false
+        # الصلاة القادمة في الجزيرة الديناميكية وشاشة القفل (نشاط حيّ)
+        NSSupportsLiveActivities: true
         LSApplicationQueriesSchemes:
           - whatsapp
     settings:

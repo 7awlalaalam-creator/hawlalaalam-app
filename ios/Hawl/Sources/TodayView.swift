@@ -56,7 +56,9 @@ struct TodayView: View {
                 NavigationLink(value: Screen.settings) { heroIcon("gearshape") }
                     .accessibilityLabel("الإعدادات")
             }
+            if Reading.streak >= 2 { streakChip }
             prayerStrip
+            if state.hasLocation { prayersRow }
         }
         .padding(16)
         .padding(.bottom, 46)
@@ -103,6 +105,49 @@ struct TodayView: View {
                     else { Text("تفعيل ←").font(AppFont.ui(13, 700)).foregroundColor(Palette.gold) }
                 }
                 .stripStyle()
+            }
+        }
+    }
+
+    /** سلسلة الأيام المتتالية مع القرآن (تظهر من اليوم الثاني) */
+    private var streakChip: some View {
+        let n = Reading.streak
+        let t = n == 2 ? "يومان متتاليان مع القرآن"
+            : (n <= 10 ? ar(n) + " أيام متتالية مع القرآن" : ar(n) + " يومًا متتاليًا مع القرآن")
+        return NavigationLink(value: Screen.khatma) {
+            HStack(spacing: 6) {
+                Image(systemName: "flame").font(.system(size: 13, weight: .semibold))
+                Text(t).font(AppFont.ui(13, 700))
+            }
+            .foregroundColor(Palette.goldLight)
+            .padding(.horizontal, 12).frame(minHeight: 32)
+            .background(Capsule().fill(Color.white.opacity(0.08)))
+            .overlay(Capsule().stroke(Palette.gold.opacity(0.3)))
+            .frame(maxWidth: .infinity, alignment: .leading)
+        }
+        .accessibilityLabel(t)
+    }
+
+    /** مواقيت اليوم الخمس، والقادمة منها مميّزة بالذهبي */
+    private var prayersRow: some View {
+        TimelineView(.everyMinute) { ctx in
+            let t = Prayer.times(for: ctx.date)
+            let list = Prayer.alerts
+            let next = list.firstIndex { t[$0] > ctx.date }
+            HStack(spacing: 5) {
+                ForEach(Array(list.enumerated()), id: \.offset) { k, p in
+                    let isNext = k == next
+                    VStack(spacing: 3) {
+                        Text(Prayer.displayName(p, on: t[p])).font(AppFont.ui(12, isNext ? 700 : 500))
+                        Text(formatClockShort(t[p])).font(AppFont.ui(14, 700))
+                    }
+                    .foregroundColor(isNext ? Palette.widgetDark : Palette.onDarkSoft)
+                    .lineLimit(1).minimumScaleFactor(0.75)
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 8)
+                    .background(RoundedRectangle(cornerRadius: 12).fill(isNext ? Palette.gold : Color.white.opacity(0.07)))
+                    .accessibilityElement(children: .combine)
+                }
             }
         }
     }
@@ -297,7 +342,7 @@ struct TodayView: View {
                     .textSelection(.enabled)
                 // ثلاثة أزرار في صف واحد: الصورة، النص، التفسير
                 HStack(spacing: 6) {
-                    NavigationLink(value: Screen.web(v.cardURL, "آية اليوم")) {
+                    Button { shareImage(v) } label: {
                         Pill(title: "صورة", systemImage: "photo", primary: true, height: 44)
                     }
                     .accessibilityLabel("شارك آية اليوم كصورة")
@@ -316,6 +361,13 @@ struct TodayView: View {
         }
         .padding(.horizontal, 18).padding(.vertical, 14)
         .card(Palette.ivory, border: Palette.ivoryBorder, radius: 22)
+    }
+
+    /** بطاقة الآية صورةً جاهزة للمشاركة (تُرسم على الجهاز دون إنترنت)؛ وإن تعذّر الرسم فصفحة البطاقة في الموقع */
+    @MainActor private func shareImage(_ v: AppState.DailyVerse) {
+        let r = ImageRenderer(content: VerseShareCard(verse: v).environment(\.layoutDirection, .rightToLeft))
+        r.scale = 3
+        if let img = r.uiImage { Share.present([img, v.shareText]) } else { state.open(v.cardURL) }
     }
 
     // MARK: الأدوات
