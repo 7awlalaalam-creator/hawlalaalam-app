@@ -54,7 +54,7 @@ struct HawlApp: App {
         Task { await state.refreshVerse() }
         state.changed()                              // نجدد التنبيهات القادمة ونحدّث الويدجت كلما فُتح التطبيق
         Announce.checkSoon()
-        LocationService.shared.refreshIfStale()
+        LocationService.shared.refreshIfStale()      // state.changed() أعلاه يحدّث نشاط الصلاة الحيّ أيضًا
         if let s = AppDelegate.pendingShortcut, let u = URL(string: s) {
             AppDelegate.pendingShortcut = nil
             state.handleDeepLink(u)

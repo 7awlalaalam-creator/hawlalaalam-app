@@ -129,6 +129,9 @@ struct SettingsView: View {
                 row("تنبيه الأذان", "عند دخول كل صلاة مع فضلها، حسب طريقة الحساب أدناه", isOn: adhanBinding)
                 if state.flag("adhan_on") { adhanHealth }
                 divider
+                row("الصلاة القادمة على شاشة القفل", "عدّاد هادئ في الجزيرة الديناميكية وشاشة القفل حتى دخول الوقت",
+                    isOn: state.toggle(LiveActivities.key, true, needsNotifications: false))
+                divider
                 row("تنبيه الشروق", "انتهاء وقت الفجر، وفضل الجلوس للذكر وصلاة الضحى",
                     isOn: state.toggle("sunrise_on", true, denied: { permissionDenied = true }))
                 divider
