@@ -21,6 +21,7 @@ struct ToolsView: View {
                     NavigationLink(value: Screen.web(Links.languages, "الترجمات")) { ToolTile(title: "الترجمات", systemImage: "globe") }
                     Button { state.openMushaf(page: nil, extra: "hifz=1") } label: { ToolTile(title: "الحفظ", systemImage: "puzzlepiece") }
                     Button { state.openMushaf(page: nil, extra: "find=1") } label: { ToolTile(title: "بحث بالمعنى", systemImage: "text.magnifyingglass") }
+                    NavigationLink(value: Screen.web(Links.site("family-khatma.html"), "ختمة العائلة")) { ToolTile(title: "ختمة العائلة", systemImage: "person.3") }
                 }
                 section("الصلاة والذكر")
                 LazyVGrid(columns: columns, spacing: 8) {

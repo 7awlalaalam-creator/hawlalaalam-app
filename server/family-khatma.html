@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>ختمة العائلة · القرآن حول العالم</title>
+<meta name="description" content="ختمة جماعية للقرآن الكريم: أنشئ ختمة لعائلتك، وكل فرد يحجز جزءًا يقرؤه، وتتابعون التقدّم معًا.">
+<meta property="og:title" content="ختمة العائلة · القرآن حول العالم">
+<meta property="og:description" content="احجز جزءًا واقرأه، ونختم القرآن معًا.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#F6F8F9;--card:#FFFFFF;--ink:#16353D;--muted:#5D747C;--line:#E6E9EC;--chip:#F5F1E6;--gold:#9A7332;--goldL:#C9A876;
+ --dark:#123640;--pri:#16353D;--onpri:#fff;--taken:#2E6370;--warn:#A1460A}
+@media (prefers-color-scheme:dark){:root:not([data-theme=light]){--bg:#0B1A1E;--card:#12262B;--ink:#E9EEF0;--muted:#8FA6AC;--line:#1F3A41;
+ --chip:#1A3439;--gold:#C9A876;--dark:#0F2A30;--pri:#2E6370;--taken:#2E6370;--warn:#E08A4F}}
+:root[data-theme=dark]{--bg:#0B1A1E;--card:#12262B;--ink:#E9EEF0;--muted:#8FA6AC;--line:#1F3A41;--chip:#1A3439;--gold:#C9A876;
+ --dark:#0F2A30;--pri:#2E6370;--taken:#2E6370;--warn:#E08A4F}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:Tajawal,system-ui,sans-serif;
+ padding:calc(env(safe-area-inset-top,0px) + 16px) 16px calc(env(safe-area-inset-bottom,0px) + 32px)}
+main{max-width:620px;margin:0 auto;display:flex;flex-direction:column;gap:14px}
+h1{margin:0;font-size:28px;font-weight:800}
+h2{margin:0;font-size:18px;font-weight:800}
+p{margin:0}
+.dim{color:var(--muted);font-size:14px;line-height:1.7}
+.card{background:var(--card);border:1px solid var(--line);border-radius:22px;padding:18px;display:flex;flex-direction:column;gap:12px}
+.hero{background:var(--dark);color:#FFFDF8;border-radius:24px;padding:20px;display:flex;flex-direction:column;gap:10px}
+.hero .k{color:var(--goldL);font-size:13px;font-weight:700}
+.hero .s{color:#A9BABF;font-size:14px}
+.hero h1{color:#FFFDF8}
+.bar{height:10px;border-radius:5px;background:rgba(255,255,255,.12);overflow:hidden}
+.bar span{display:block;height:100%;background:var(--goldL);border-radius:5px;transition:width .4s}
+.big{font-size:30px;font-weight:800;color:#E9D9B8}
+label{font-size:14px;font-weight:700;display:flex;flex-direction:column;gap:6px}
+input{height:48px;border-radius:14px;border:1px solid var(--line);background:var(--bg);color:var(--ink);font:500 16px Tajawal,system-ui,sans-serif;padding:0 14px}
+input:focus{outline:2px solid var(--goldL);outline-offset:1px}
+button{font-family:inherit;cursor:pointer}
+.btn{min-height:48px;border-radius:24px;border:1px solid var(--line);background:var(--card);color:var(--ink);font:700 15px Tajawal,system-ui,sans-serif;padding:0 20px}
+.btn.pri{background:var(--pri);color:var(--onpri);border:0}
+.btn.gold{background:var(--goldL);color:#0F2A30;border:0}
+.btn.warn{color:var(--warn)}
+.row{display:flex;gap:10px;flex-wrap:wrap}
+.row>.btn{flex:1}
+.grid{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:6px}
+.cell{aspect-ratio:1;border-radius:12px;border:1.5px solid var(--line);background:var(--card);color:var(--ink);font:800 15px Tajawal,system-ui,sans-serif;
+ display:flex;align-items:center;justify-content:center;padding:0;position:relative}
+.cell.taken{background:var(--taken);color:#EFE4CF;border-color:transparent}
+.cell.done{background:var(--goldL);color:#0F2A30;border-color:transparent}
+.cell.mine{box-shadow:0 0 0 3px var(--bg),0 0 0 5px var(--gold)}
+.legend{display:flex;gap:14px;flex-wrap:wrap;font-size:13px;color:var(--muted)}
+.legend i{display:inline-block;width:12px;height:12px;border-radius:4px;vertical-align:-2px;margin-inline-end:5px;border:1.5px solid var(--line)}
+.legend .t{background:var(--taken);border-color:transparent}.legend .d{background:var(--goldL);border-color:transparent}
+.list{display:flex;flex-direction:column}
+.li{display:flex;align-items:center;gap:12px;padding:10px 2px;border-bottom:1px solid var(--line)}
+.li:last-child{border-bottom:0}
+.av{width:36px;height:36px;border-radius:50%;background:var(--chip);color:var(--gold);font-weight:800;display:flex;align-items:center;justify-content:center;flex:none}
+.li .n{flex:1;display:flex;flex-direction:column}
+.li .n b{font-size:15px}.li .n span{font-size:12px;color:var(--muted)}
+.li .c{font-weight:800;color:var(--gold);font-size:14px}
+.grp{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:14px;border-radius:16px;border:1px solid var(--line);background:var(--card);color:var(--ink);text-align:start;width:100%}
+.grp b{font-size:16px}.grp span{font-size:13px;color:var(--muted)}
+.sheet{position:fixed;inset:0;background:rgba(10,26,30,.45);display:none;align-items:flex-end;justify-content:center;z-index:5}
+.sheet.on{display:flex}
+.sheet .in{background:var(--card);width:100%;max-width:620px;border-radius:26px 26px 0 0;padding:20px 18px calc(env(safe-area-inset-bottom,0px) + 20px);display:flex;flex-direction:column;gap:12px}
+.toast{position:fixed;left:50%;bottom:calc(env(safe-area-inset-bottom,0px) + 24px);transform:translateX(-50%);background:var(--dark);color:#fff;
+ padding:10px 18px;border-radius:20px;font-size:14px;opacity:0;transition:opacity .2s;pointer-events:none;z-index:9;max-width:90%;text-align:center}
+.toast.on{opacity:1}
+.empty{text-align:center;padding:10px}
+.muted-link{color:var(--gold);font-weight:700;text-decoration:none}
+</style>
+</head>
+<body>
+<main id="app" aria-live="polite"><p class="dim" style="text-align:center;padding:40px">جارٍ التحميل…</p></main>
+<div class="sheet" id="sheet" role="dialog" aria-modal="true"><div class="in" id="sheetIn"></div></div>
+<div class="toast" id="toast" role="status"></div>
+<script>
+(function () {
+  'use strict';
+  var API = 'khatma-api.php';
+  var JUZ = [1, 22, 42, 62, 82, 102, 121, 142, 162, 182, 201, 222, 242, 262, 282, 302, 322, 342, 362, 382, 402, 422, 442, 462, 482, 502, 522, 542, 562, 582];
+  var inApp = /HawlalaalamApp\//.test(navigator.userAgent);
+  if (window.__hawlTheme) document.documentElement.setAttribute('data-theme', window.__hawlTheme);
+  var $ = function (id) { return document.getElementById(id); };
+  var ar = function (n) { return String(n).replace(/[0-9]/g, function (d) { return String.fromCharCode(0x0660 + (+d)); }); };
+  var esc = function (t) { return String(t == null ? '' : t).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); };
+  var ls = { get: function (k, d) { try { var v = localStorage.getItem(k); return v === null ? d : JSON.parse(v); } catch (e) { return d; } },
+             set: function (k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} } };
+
+  // رمز عشوائي لهذا الجهاز: يعرّف حجوزاتك دون أي بيانات شخصية
+  var member = ls.get('hawl_member', '');
+  if (!/^[A-Za-z0-9_-]{16,64}$/.test(member)) {
+    var a = new Uint8Array(18); (window.crypto || {}).getRandomValues ? crypto.getRandomValues(a) : a.forEach(function (_, i) { a[i] = Math.random() * 256; });
+    member = Array.prototype.map.call(a, function (b) { return ('0' + b.toString(16)).slice(-2); }).join('');
+    ls.set('hawl_member', member);
+  }
+  var myName = ls.get('hawl_name', '');
+  function myGroups() { return ls.get('hawl_family', []); }
+  function remember(g, adminKey) {
+    var all = myGroups().filter(function (x) { return x.id !== g.id; });
+    var old = myGroups().filter(function (x) { return x.id === g.id; })[0];
+    all.unshift({ id: g.id, name: g.name, adminKey: adminKey || (old && old.adminKey) || '' });
+    ls.set('hawl_family', all.slice(0, 20));
+  }
+  function forget(id) { ls.set('hawl_family', myGroups().filter(function (x) { return x.id !== id; })); }
+  function keyOf(id) { var g = myGroups().filter(function (x) { return x.id === id; })[0]; return g ? g.adminKey : ''; }
+
+  function toast(t) { var el = $('toast'); el.textContent = t; el.classList.add('on'); clearTimeout(toast.t); toast.t = setTimeout(function () { el.classList.remove('on'); }, 2400); }
+  function api(body) {
+    body.member = member;
+    var get = body.action === 'get';
+    var url = get ? API + '?' + Object.keys(body).map(function (k) { return k + '=' + encodeURIComponent(body[k]); }).join('&') : API;
+    return fetch(url, get ? { cache: 'no-store' } : { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) })
+      .then(function (r) { return r.json().catch(function () { throw new Error('تعذّر الاتصال بالخادم'); }); })
+      .then(function (d) { if (!d.ok) throw new Error(d.error || 'حدث خطأ'); return d; });
+  }
+  function sheet(html) { $('sheetIn').innerHTML = html; $('sheet').classList.add('on'); }
+  function closeSheet() { $('sheet').classList.remove('on'); }
+  $('sheet').addEventListener('click', function (e) { if (e.target === $('sheet')) closeSheet(); });
+
+  function inviteUrl(id) { return location.origin + location.pathname + '?id=' + id; }
+  function share(g) {
+    var text = 'انضم إلى ختمة «' + g.name + '» واحجز جزءًا تقرؤه، ونختم القرآن معًا 🤍\n' + inviteUrl(g.id);
+    try { if (window.HawlApp && window.HawlApp.postMessage) { window.HawlApp.postMessage(JSON.stringify({ cmd: 'share', title: g.name, text: text })); return; } } catch (e) {}
+    if (navigator.share) { navigator.share({ title: g.name, text: text }).catch(function () {}); return; }
+    var done = function () { toast('نُسخ رابط الدعوة، أرسله لأهلك'); };
+    if (navigator.clipboard) navigator.clipboard.writeText(text).then(done, function () { prompt('انسخ رابط الدعوة', inviteUrl(g.id)); });
+    else prompt('انسخ رابط الدعوة', inviteUrl(g.id));
+  }
+  function readUrl(n) {
+    var p = JUZ[n - 1];
+    return inApp ? 'https://7awlalaalam.com/__hawl/mushaf-pages-offline.html?page=' + p : 'mushaf-pages-ar.html?page=' + p;
+  }
+
+  // ------------------------------------------------------------ الصفحة الأولى: ختماتي + إنشاء ختمة
+  function home() {
+    var mine = myGroups();
+    var h = '<div class="hero"><span class="k">ختمة العائلة</span><h1>نختم القرآن معًا</h1>' +
+      '<p class="s">أنشئ ختمة وأرسل رابطها لأهلك، وكل فرد يحجز جزءًا يقرؤه، وتتابعون التقدّم معًا حتى الختم.</p></div>';
+    if (mine.length) {
+      h += '<div class="card"><h2>ختماتي</h2><div class="list">' + mine.map(function (g) {
+        return '<button class="grp" data-id="' + esc(g.id) + '"><span><b>' + esc(g.name) + '</b><br><span>' + (g.adminKey ? 'أنشأتها أنت' : 'مشارك') + '</span></span><span aria-hidden="true">←</span></button>';
+      }).join('<div style="height:8px"></div>') + '</div></div>';
+    }
+    h += '<form class="card" id="cf" autocomplete="off"><h2>ختمة جديدة</h2>' +
+      '<label>اسم الختمة<input id="cName" maxlength="40" required placeholder="مثل: ختمة آل فلان"></label>' +
+      '<label>اسمك كما يراه أهلك<input id="cOwner" maxlength="30" required value="' + esc(myName) + '"></label>' +
+      '<label>إهداء (اختياري)<input id="cNote" maxlength="80" placeholder="مثل: لروح الوالدة رحمها الله"></label>' +
+      '<label>نختم قبل (اختياري)<input id="cDate" type="date"></label>' +
+      '<button class="btn pri" type="submit">أنشئ الختمة</button>' +
+      '<p class="dim">لا نطلب بريدًا ولا رقمًا. الختمة يراها من معه رابطها فقط.</p></form>';
+    $('app').innerHTML = h;
+    document.querySelectorAll('[data-id]').forEach(function (b) { b.onclick = function () { open(b.getAttribute('data-id')); }; });
+    $('cf').onsubmit = function (e) {
+      e.preventDefault();
+      var name = $('cName').value.trim(), owner = $('cOwner').value.trim();
+      if (!name || !owner) { toast('اكتب اسم الختمة واسمك'); return; }
+      myName = owner; ls.set('hawl_name', owner);
+      var btn = this.querySelector('button[type=submit]'); btn.disabled = true; btn.textContent = 'جارٍ الإنشاء…';
+      api({ action: 'create', name: name, owner: owner, note: $('cNote').value.trim(), deadline: $('cDate').value || '' })
+        .then(function (d) { remember(d.group, d.adminKey); go(d.group.id); show(d.group); setTimeout(function () { share(d.group); }, 400); })
+        .catch(function (err) { toast(err.message); btn.disabled = false; btn.textContent = 'أنشئ الختمة'; });
+    };
+  }
+
+  // ------------------------------------------------------------ صفحة الختمة
+  var cur = null, timer = 0;
+  function go(id) { try { history.replaceState(null, '', location.pathname + '?id=' + id); } catch (e) {} }
+  function open(id) {
+    $('app').innerHTML = '<p class="dim" style="text-align:center;padding:40px">جارٍ فتح الختمة…</p>';
+    go(id);
+    load(id, true);
+  }
+  function load(id, first) {
+    return api({ action: 'get', id: id, adminKey: keyOf(id) }).then(function (d) {
+      if (first) remember(d.group);
+      show(d.group);
+    }).catch(function (err) {
+      if (first) {
+        $('app').innerHTML = '<div class="card empty"><h2>' + esc(err.message) + '</h2><p class="dim">تأكد من الرابط، أو اطلب من صاحب الختمة رابطًا جديدًا.</p>' +
+          '<button class="btn pri" id="toHome">ختماتي وختمة جديدة</button></div>';
+        if (/حُذفت/.test(err.message)) forget(id);
+        $('toHome').onclick = function () { try { history.replaceState(null, '', location.pathname); } catch (e) {} home(); };
+      }
+    });
+  }
+  function show(g) {
+    cur = g;
+    var done = g.parts.filter(function (p) { return p.done; }).length;
+    var taken = g.parts.filter(function (p) { return p.by && !p.done; }).length;
+    var mineParts = g.parts.filter(function (p) { return p.mine; });
+    var people = {};
+    g.parts.forEach(function (p) { if (p.by) { var x = people[p.by] = people[p.by] || { t: 0, d: 0, list: [] }; x.t++; if (p.done) x.d++; x.list.push(p.n); } });
+    var names = Object.keys(people).sort(function (a, b) { return people[b].t - people[a].t; });
+    var finished = done === g.parts.length;
+    var dl = g.deadline ? new Date(g.deadline + 'T12:00:00') : null;
+    var h = '<div class="hero"><span class="k">ختمة جماعية' + (g.round > 1 ? ' · الختمة ' + ar(g.round) : '') + '</span>' +
+      '<h1>' + esc(g.name) + '</h1>' +
+      '<p class="s">أنشأها ' + esc(g.owner) + (g.note ? ' · ' + esc(g.note) : '') + (dl ? ' · نختم قبل ' + dl.toLocaleDateString('ar-SA-u-ca-gregory', { day: 'numeric', month: 'long' }) : '') + '</p>' +
+      '<div style="display:flex;justify-content:space-between;align-items:baseline"><span class="s">أُنجز</span><span class="big">' + ar(done) + ' <span class="s">من ٣٠ جزءًا</span></span></div>' +
+      '<div class="bar" role="progressbar" aria-valuemin="0" aria-valuemax="30" aria-valuenow="' + done + '"><span style="width:' + Math.round(done * 100 / 30) + '%"></span></div></div>';
+    if (finished) {
+      h += '<div class="card empty"><h2>تمّت الختمة بفضل الله</h2><p class="dim">تقبّل الله منكم جميعًا' + (g.note ? '، و' + esc(g.note) : '') + '.</p>' +
+        (g.admin ? '<button class="btn gold" id="again">ابدأ ختمة جديدة بنفس الرابط</button>' : '') + '</div>';
+    }
+    if (mineParts.length) {
+      h += '<div class="card"><h2>أجزائي</h2><div class="list">' + mineParts.map(function (p) {
+        return '<div class="li"><span class="av">' + ar(p.n) + '</span><span class="n"><b>الجزء ' + ar(p.n) + '</b><span>' + (p.done ? 'أتممته، تقبّل الله' : 'من صفحة ' + ar(JUZ[p.n - 1])) + '</span></span>' +
+          (p.done ? '<button class="btn" data-undo="' + p.n + '">تراجع</button>' : '<a class="btn" style="display:flex;align-items:center;text-decoration:none" href="' + readUrl(p.n) + '">اقرأ</a><button class="btn pri" data-done="' + p.n + '">أتممته</button>') + '</div>';
+      }).join('') + '</div></div>';
+    }
+    h += '<div class="card"><div style="display:flex;justify-content:space-between;align-items:center"><h2>الأجزاء</h2><span class="dim">' +
+      (30 - done - taken ? 'متاح ' + ar(30 - done - taken) : 'كل الأجزاء محجوزة') + '</span></div>' +
+      '<div class="grid">' + g.parts.map(function (p) {
+        var c = 'cell' + (p.done ? ' done' : p.by ? ' taken' : '') + (p.mine ? ' mine' : '');
+        var lab = 'الجزء ' + ar(p.n) + (p.done ? '، أتمّه ' + p.by : p.by ? '، محجوز لـ' + p.by : '، متاح');
+        return '<button class="' + c + '" data-n="' + p.n + '" aria-label="' + esc(lab) + '">' + ar(p.n) + '</button>';
+      }).join('') + '</div>' +
+      '<div class="legend"><span><i></i>متاح</span><span><i class="t"></i>محجوز</span><span><i class="d"></i>مقروء</span></div>' +
+      '<p class="dim">اضغط على جزء متاح لتحجزه.</p></div>';
+    if (names.length) {
+      h += '<div class="card"><h2>المشاركون (' + ar(names.length) + ')</h2><div class="list">' + names.map(function (n) {
+        var x = people[n];
+        return '<div class="li"><span class="av">' + esc(n.charAt(0)) + '</span><span class="n"><b>' + esc(n) + '</b><span>الأجزاء ' +
+          x.list.map(ar).join('، ') + '</span></span><span class="c">' + ar(x.d) + '/' + ar(x.t) + '</span></div>';
+      }).join('') + '</div></div>';
+    }
+    h += '<div class="row"><button class="btn pri" id="inv">ادعُ أهلك برابط</button><button class="btn" id="home">ختماتي</button></div>';
+    if (g.admin) h += '<button class="btn warn" id="del">حذف الختمة</button>';
+    $('app').innerHTML = h;
+
+    document.querySelectorAll('[data-n]').forEach(function (b) { b.onclick = function () { tapPart(+b.getAttribute('data-n')); }; });
+    document.querySelectorAll('[data-done]').forEach(function (b) { b.onclick = function () { act('done', +b.getAttribute('data-done'), 'تقبّل الله منك'); }; });
+    document.querySelectorAll('[data-undo]').forEach(function (b) { b.onclick = function () { act('undo', +b.getAttribute('data-undo')); }; });
+    $('inv').onclick = function () { share(g); };
+    $('home').onclick = function () { stopPoll(); try { history.replaceState(null, '', location.pathname); } catch (e) {} home(); };
+    if ($('again')) $('again').onclick = function () {
+      api({ action: 'newround', id: g.id, adminKey: keyOf(g.id) }).then(function (d) { show(d.group); toast('بدأت ختمة جديدة'); }).catch(function (e) { toast(e.message); });
+    };
+    if ($('del')) $('del').onclick = function () {
+      sheet('<h2>حذف الختمة؟</h2><p class="dim">تُحذف الختمة وحجوزات الجميع، ولا يمكن التراجع.</p>' +
+        '<div class="row"><button class="btn warn" id="yes">احذفها</button><button class="btn" id="no">إلغاء</button></div>');
+      $('no').onclick = closeSheet;
+      $('yes').onclick = function () {
+        api({ action: 'delete', id: g.id, adminKey: keyOf(g.id) }).then(function () { closeSheet(); forget(g.id); stopPoll(); toast('حُذفت الختمة'); try { history.replaceState(null, '', location.pathname); } catch (e) {} home(); })
+          .catch(function (e) { toast(e.message); });
+      };
+    };
+    startPoll();
+  }
+  function act(action, n, msg, who) {
+    return api({ action: action, id: cur.id, part: n, who: who || myName }).then(function (d) { closeSheet(); show(d.group); if (msg) toast(msg); })
+      .catch(function (e) { toast(e.message); load(cur.id); });
+  }
+  function tapPart(n) {
+    var p = cur.parts[n - 1];
+    if (p.mine) {
+      sheet('<h2>الجزء ' + ar(n) + '</h2><p class="dim">' + (p.done ? 'أتممته، تقبّل الله منك.' : 'محجوز باسمك · يبدأ من صفحة ' + ar(JUZ[n - 1])) + '</p>' +
+        '<div class="row">' + (p.done ? '<button class="btn" id="u">لم أتمّه بعد</button>' :
+          '<a class="btn pri" style="display:flex;align-items:center;justify-content:center;text-decoration:none" href="' + readUrl(n) + '">اقرأ الجزء</a><button class="btn gold" id="d">أتممته</button>') + '</div>' +
+        (p.done ? '' : '<button class="btn warn" id="r">ألغِ حجزي</button>') + '<button class="btn" id="c">إغلاق</button>');
+      if ($('u')) $('u').onclick = function () { act('undo', n); };
+      if ($('d')) $('d').onclick = function () { act('done', n, 'تقبّل الله منك'); };
+      if ($('r')) $('r').onclick = function () { act('release', n, 'أُلغي الحجز'); };
+      $('c').onclick = closeSheet;
+      return;
+    }
+    if (p.by) { toast((p.done ? 'أتمّه ' : 'محجوز لـ') + p.by); return; }
+    sheet('<h2>احجز الجزء ' + ar(n) + '</h2><p class="dim">يبدأ من صفحة ' + ar(JUZ[n - 1]) + '. اكتب اسمك ليعرف أهلك من يقرؤه.</p>' +
+      '<label>اسمك<input id="who" maxlength="30" value="' + esc(myName) + '"></label>' +
+      '<div class="row"><button class="btn pri" id="ok">احجزه</button><button class="btn" id="c">إلغاء</button></div>');
+    $('c').onclick = closeSheet;
+    $('ok').onclick = function () {
+      var w = $('who').value.trim();
+      if (!w) { toast('اكتب اسمك'); return; }
+      myName = w; ls.set('hawl_name', w);
+      act('take', n, 'حُجز الجزء ' + ar(n) + ' باسمك', w);
+    };
+  }
+  function startPoll() {
+    stopPoll();
+    timer = setInterval(function () { if (!document.hidden && cur && !$('sheet').classList.contains('on')) load(cur.id); }, 20000);
+  }
+  function stopPoll() { clearInterval(timer); timer = 0; }
+  document.addEventListener('visibilitychange', function () { if (!document.hidden && cur) load(cur.id); });
+
+  var m = /[?&]id=([A-Za-z2-9]{6})\b/.exec(location.search);
+  if (m) open(m[1].toUpperCase()); else home();
+})();
+</script>
+</body>
+</html>
