@@ -242,7 +242,7 @@ final class AppState: ObservableObject {
     }
 
     var shareAppText: String {
-        "📖 تطبيق «حول العالم | القرآن الكريم»\n"
+        "📖 تطبيق «القرآن حول العالم»\n"
             + "قراءة واستماع وتفسير وأكثر من ٣٠ أداة إسلامية، مجانًا وبلا تسجيل.\n\n"
             + Links.homeString
     }

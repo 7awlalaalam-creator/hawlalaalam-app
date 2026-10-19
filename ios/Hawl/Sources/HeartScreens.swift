@@ -98,7 +98,7 @@ struct MoodView: View {
         r.scale = 3
         var msg: String = Self.moods[m].1 + " 🤍\n﴿ " + p.text + " ﴾ "
         msg += "[\(Quran.surahName(p.s)): \(ar(p.a))]\n\n"
-        msg += "اختر شعورك واقرأ آية تواسيك في تطبيق «حول العالم | القرآن الكريم»:\n"
+        msg += "اختر شعورك واقرأ آية تواسيك في تطبيق «القرآن حول العالم»:\n"
         msg += "https://7awlalaalam.com/quran/?utm_source=app_share&utm_medium=mood"
         if let img = r.uiImage { Share.present([img, msg]) } else { Share.present([msg]) }
     }
@@ -120,7 +120,7 @@ struct MoodCard: View {
                 .foregroundColor(Color(hex: 0xE9DFC9)).padding(.top, 10)
             Spacer(minLength: 8)
             Rectangle().fill(Palette.gold.opacity(0.33)).frame(width: 60, height: 1)
-            Text("آية لحالك · تطبيق «حول العالم | القرآن الكريم»").font(AppFont.ui(11, 500)).foregroundColor(.white).padding(.top, 10)
+            Text("آية لحالك · تطبيق «القرآن حول العالم»").font(AppFont.ui(11, 500)).foregroundColor(.white).padding(.top, 10)
             Text("7awlalaalam.com/quran").font(AppFont.ui(13, 700)).foregroundColor(Palette.gold).padding(.top, 6).padding(.bottom, 34)
         }
         .frame(width: 360, height: 450)
@@ -189,7 +189,7 @@ struct DedicateView: View {
         let n = name.trimmingCharacters(in: .whitespaces)
         let who: String = n.isEmpty ? "من أحب" : n
         var msg: String = "صدقة جارية عن " + who + " " + Self.titles[honor]
-        msg += "\nحمّل تطبيق «حول العالم | القرآن الكريم» واقرأ وادعُ " + (feminine ? "لها" : "له") + " 🤍\n"
+        msg += "\nحمّل تطبيق «القرآن حول العالم» واقرأ وادعُ " + (feminine ? "لها" : "له") + " 🤍\n"
         msg += "https://" + Self.link + "/"
         if let img = r.uiImage { Share.present([img, msg]) } else { Share.present([msg]) }
     }
@@ -208,7 +208,7 @@ struct DedicateCard: View {
                 .lineLimit(2).minimumScaleFactor(0.5).padding(.horizontal, 24).padding(.top, 6)
             Text(honor).font(AppFont.ui(17, 500)).foregroundColor(Color(hex: 0xE9DFC9)).padding(.top, 2)
             Rectangle().fill(Palette.gold.opacity(0.33)).frame(width: 60, height: 1).padding(.top, 20)
-            Text("حمّل تطبيق «حول العالم | القرآن الكريم»\nواقرأ وادعُ " + (feminine ? "لها" : "له"))
+            Text("حمّل تطبيق «القرآن حول العالم»\nواقرأ وادعُ " + (feminine ? "لها" : "له"))
                 .font(AppFont.ui(15, 500)).foregroundColor(.white).multilineTextAlignment(.center).lineSpacing(3).padding(.top, 16)
             Text("مجاني · بلا تسجيل · بلا إعلانات").font(AppFont.ui(12)).foregroundColor(Palette.onDarkMuted).padding(.top, 20)
             Spacer(minLength: 0)

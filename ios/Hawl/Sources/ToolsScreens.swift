@@ -36,7 +36,7 @@ struct ToolsView: View {
                 section("لقلبك والتطبيق")
                 LazyVGrid(columns: columns, spacing: 8) {
                     NavigationLink(value: Screen.mood(nil)) { ToolTile(title: "آية لحالك", systemImage: "heart") }
-                    NavigationLink(value: Screen.dedicate) { ToolTile(title: "الإهداء", systemImage: "heart.circle") }
+                    NavigationLink(value: Screen.dedicate) { ToolTile(title: "صدقة جارية", systemImage: "heart.circle") }
                     NavigationLink(value: Screen.notifications) { ToolTile(title: "التنبيهات", systemImage: "bell") }
                     NavigationLink(value: Screen.settings) { ToolTile(title: "الإعدادات", systemImage: "gearshape") }
                 }
