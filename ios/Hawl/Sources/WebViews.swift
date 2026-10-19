@@ -148,6 +148,10 @@ final class HawlBridge: NSObject, WKScriptMessageHandler {
             AppState.shared.show(.settings)
         case "diag":
             Store.d.set(o["msg"] as? String ?? "", forKey: "bridge_diag")
+        case "speech":
+            // التسميع: بدء التعرّف على التلاوة أو إيقافه
+            if (o["op"] as? String) == "start" { SpeechService.shared.start(web: web, lang: o["lang"] as? String ?? "ar-SA") }
+            else { SpeechService.shared.stop() }
         case "hifz":
             // حالة الحفظ من صفحة المصحف: لبطاقة «مراجعة الحفظ» في «اليوم»
             Store.d.set(o["total"] as? Int ?? 0, forKey: "hifz_total")
@@ -244,6 +248,7 @@ struct MushafWebView: UIViewRepresentable {
 
     static func dismantleUIView(_ web: WKWebView, coordinator: Coordinator) {
         web.configuration.userContentController.removeScriptMessageHandler(forName: "HawlApp")
+        SpeechService.shared.stopIfActive()
         coordinator.urlObservation = nil
         coordinator.dwellTask?.cancel()
     }

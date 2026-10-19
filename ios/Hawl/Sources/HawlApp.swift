@@ -46,7 +46,7 @@ struct HawlApp: App {
         }
         .onChange(of: phase) { p in
             if p == .active { becameActive() }
-            if p == .background { Background.schedule() }
+            if p == .background { Background.schedule(); SpeechService.shared.stopIfActive() }
         }
     }
 
