@@ -17,6 +17,7 @@ enum Screen: Hashable {
     case prayerAzkar
     case dedicate
     case player(String)
+    case journey
 }
 
 /** حالة التطبيق: التنقّل، وآية اليوم، ومرآة للإعدادات المحفوظة في Store (المشتركة مع الويدجت) */
@@ -169,6 +170,7 @@ final class AppState: ObservableObject {
         case "mushaf":
             openMushaf(page: item("page").flatMap(Int.init))
         case "hifz": openMushaf(page: nil, extra: "hifz=1")
+        case "journey": show(.journey)
         case "find": openMushaf(page: nil, extra: "find=1")
         case "listen": tab = .listen
         case "tools": tab = .tools

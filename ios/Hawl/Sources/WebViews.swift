@@ -156,6 +156,8 @@ final class HawlBridge: NSObject, WKScriptMessageHandler {
             // حالة الحفظ من صفحة المصحف: لبطاقة «مراجعة الحفظ» في «اليوم»
             Store.d.set(o["total"] as? Int ?? 0, forKey: "hifz_total")
             Store.d.set(o["next"] as? Int ?? -1, forKey: "hifz_next")
+            Store.d.set(o["held"] as? Int ?? 0, forKey: "hifz_held")
+            Store.d.set(o["pct"] as? Int ?? 0, forKey: "hifz_pct")
             AppState.shared.touch()
         default: break                                    // media: التحكم من شاشة القفل يتولاه النظام في iOS
         }

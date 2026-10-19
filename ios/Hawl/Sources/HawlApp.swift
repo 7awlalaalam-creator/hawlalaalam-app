@@ -129,6 +129,7 @@ struct ScreenView: View {
         case .prayerAzkar: PrayerAzkarView()
         case .dedicate: DedicateView()
         case .player(let url): PlayerView(url: url)
+        case .journey: JourneyView()
         }
     }
 }

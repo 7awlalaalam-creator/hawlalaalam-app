@@ -12,7 +12,8 @@ struct ToolsView: View {
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 8) {
-                streakCard
+                NavigationLink(value: Screen.journey) { streakCard }
+                    .accessibilityHint("افتح «رحلتي»")
                 section("القرآن")
                 LazyVGrid(columns: columns, spacing: 8) {
                     NavigationLink(value: Screen.index) { ToolTile(title: "الفهرس", systemImage: "list.bullet") }
