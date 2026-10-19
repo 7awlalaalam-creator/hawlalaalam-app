@@ -17,6 +17,7 @@ struct TodayView: View {
                 mainCard
                     .padding(.horizontal, 10)
                     .padding(.top, -46)
+                if let h = hifzCard { h.padding(.top, 14) }
                 if let ctx = ramadanCard ?? azkarPrompt { ctx.padding(.top, 14) }
                 verseCard.padding(.top, 14)
                 toolsHeader.padding(.top, 22)
@@ -218,6 +219,35 @@ struct TodayView: View {
     }
 
     // MARK: بطاقات في وقتها
+
+    /** «مراجعة الحفظ»: تظهر يوم تحين مراجعة آيات من الحفظ (الحالة ترسلها صفحة المصحف) */
+    private var hifzCard: AnyView? {
+        _ = state.rev
+        let total = Store.int("hifz_total", 0), next = Store.int("hifz_next", -1)
+        let today = Int(floor((Date().timeIntervalSince1970 + Double(TimeZone.current.secondsFromGMT())) / 86400))
+        guard total > 0, next >= 0, today >= next else { return nil }
+        return AnyView(
+            Button { state.openMushaf(page: nil, extra: "hifz=1") } label: {
+                HStack(spacing: 12) {
+                    Image(systemName: "puzzlepiece")
+                        .foregroundColor(Palette.goldDeep)
+                        .frame(width: 40, height: 40)
+                        .background(RoundedRectangle(cornerRadius: 12).fill(Palette.chip))
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text("مراجعة الحفظ").font(AppFont.ui(15, 700)).foregroundColor(Palette.ink)
+                        Text("آيات من حفظك تنتظر المراجعة اليوم").font(AppFont.ui(12)).foregroundColor(Palette.muted)
+                    }
+                    Spacer()
+                    Text("راجع").font(AppFont.ui(14, 700)).foregroundColor(.white)
+                        .padding(.horizontal, 16).frame(minHeight: 38)
+                        .background(Capsule().fill(Palette.primary))
+                }
+                .padding(.horizontal, 14).padding(.vertical, 12)
+                .card()
+            }
+            .buttonStyle(.plain)
+        )
+    }
 
     /** وضع رمضان: يظهر في رمضان، وقبله بعشرة أيام */
     private var ramadanCard: AnyView? {

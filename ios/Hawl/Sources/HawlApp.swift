@@ -138,10 +138,13 @@ struct MushafScreen: View {
     @EnvironmentObject var state: AppState
     @Environment(\.colorScheme) private var scheme
     @State private var page: Int = 0
+    @State private var extra = ""                  // «hifz=1» أو «find=1» مع رقم طلب ليُعاد التحميل كل مرة
+    @State private var extraID = 0
 
     var body: some View {
         // الصفحة تُحدَّد مرة عند الفتح أو عند طلب صريح (الفهرس، «أكمل القراءة»)؛ التنقل داخل المصحف لا يعيد تحميله
-        MushafWebView(page: page == 0 ? Khatma.lastMushafPage() : page, night: scheme == .dark, zoom: state.textZoom)
+        MushafWebView(page: page == 0 ? Khatma.lastMushafPage() : page, night: scheme == .dark, zoom: state.textZoom,
+                      extra: extra, extraID: extraID)
             .background(Palette.page.ignoresSafeArea())
             .navigationTitle("المصحف")
             .navigationBarTitleDisplayMode(.inline)
@@ -164,6 +167,11 @@ struct MushafScreen: View {
         if let p = state.mushafRequest {
             page = p
             state.mushafRequest = nil
+        }
+        if let e = state.mushafExtra {
+            extra = e
+            extraID += 1
+            state.mushafExtra = nil
         }
     }
 }

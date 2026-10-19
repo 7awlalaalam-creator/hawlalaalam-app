@@ -32,6 +32,8 @@ final class AppState: ObservableObject {
     @Published var toolsPath = NavigationPath()
     /** طلب فتح صفحة في المصحف (من الفهرس أو «أكمل القراءة» أو الإشعار) */
     @Published var mushafRequest: Int?
+    /** طلب فتح أداة في صفحة المصحف: «hifz=1» مراجعة الحفظ، «find=1» البحث بالمعنى */
+    @Published var mushafExtra: String?
     /** فتح «أذكار بعد الصلاة» من إشعار الأذان */
     @Published var showPrayerAzkar = false
     @Published var showWelcome = false
@@ -97,6 +99,9 @@ final class AppState: ObservableObject {
         LiveActivities.refresh()                     // الموقع أو طريقة الحساب أو مفتاح النشاط الحي تغيّرت
     }
 
+    /** إعادة رسم الشاشات بعد تغيّر بيانات خارجية (حالة الحفظ من صفحة المصحف) */
+    func touch() { rev += 1 }
+
     // MARK: الإعدادات كمفاتيح
 
     func flag(_ key: String, _ def: Bool = false) -> Bool { _ = rev; return Store.bool(key, def) }
@@ -127,8 +132,9 @@ final class AppState: ObservableObject {
 
     // MARK: التنقّل
 
-    func openMushaf(page: Int?) {
+    func openMushaf(page: Int?, extra: String? = nil) {
         mushafRequest = page ?? Khatma.lastMushafPage()
+        mushafExtra = extra
         tab = .mushaf
     }
 
@@ -162,6 +168,8 @@ final class AppState: ObservableObject {
             if let s = item("u"), let u = URL(string: s) { open(u) }
         case "mushaf":
             openMushaf(page: item("page").flatMap(Int.init))
+        case "hifz": openMushaf(page: nil, extra: "hifz=1")
+        case "find": openMushaf(page: nil, extra: "find=1")
         case "listen": tab = .listen
         case "tools": tab = .tools
         case "downloads": show(.downloads)

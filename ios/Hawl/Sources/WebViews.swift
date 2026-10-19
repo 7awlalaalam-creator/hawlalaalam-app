@@ -148,6 +148,11 @@ final class HawlBridge: NSObject, WKScriptMessageHandler {
             AppState.shared.show(.settings)
         case "diag":
             Store.d.set(o["msg"] as? String ?? "", forKey: "bridge_diag")
+        case "hifz":
+            // حالة الحفظ من صفحة المصحف: لبطاقة «مراجعة الحفظ» في «اليوم»
+            Store.d.set(o["total"] as? Int ?? 0, forKey: "hifz_total")
+            Store.d.set(o["next"] as? Int ?? -1, forKey: "hifz_next")
+            AppState.shared.touch()
         default: break                                    // media: التحكم من شاشة القفل يتولاه النظام في iOS
         }
     }
@@ -179,6 +184,9 @@ struct MushafWebView: UIViewRepresentable {
     var page: Int
     var night: Bool
     var zoom: Int
+    /** أداة تُفتح مع الصفحة (مراجعة الحفظ أو البحث بالمعنى)، ورقم الطلب حتى تُفتح كل مرة تُطلب */
+    var extra: String = ""
+    var extraID: Int = 0
 
     func makeCoordinator() -> Coordinator { Coordinator() }
 
@@ -207,12 +215,18 @@ struct MushafWebView: UIViewRepresentable {
         context.coordinator.observe(web)
         context.coordinator.night = night
         context.coordinator.zoom = zoom
-        context.coordinator.load(web, page: page)
+        context.coordinator.extraID = extraID
+        context.coordinator.load(web, page: page, extra: extra)
         return web
     }
 
     func updateUIView(_ web: WKWebView, context: Context) {
         let c = context.coordinator
+        if extraID != c.extraID {
+            c.extraID = extraID
+            c.load(web, page: page != c.requestedPage ? page : (c.currentPage ?? page), extra: extra)
+            return
+        }
         if c.night != night || c.zoom != zoom {
             // تغيّر المظهر أو حجم الخط: نعيد تحميل الصفحة نفسها
             c.night = night
@@ -242,11 +256,13 @@ struct MushafWebView: UIViewRepresentable {
         var night = false
         var zoom = 100
         var dwellTask: Task<Void, Never>?
+        var extraID = 0
 
-        func load(_ web: WKWebView, page: Int) {
+        func load(_ web: WKWebView, page: Int, extra: String = "") {
             requestedPage = page
             let p = max(1, min(Quran.pages, page))
-            if let url = URL(string: "hawl://app/__hawl/mushaf-pages-offline.html?page=\(p)") {
+            let more = extra.isEmpty ? "" : "&" + extra
+            if let url = URL(string: "hawl://app/__hawl/mushaf-pages-offline.html?page=\(p)\(more)") {
                 web.load(URLRequest(url: url))
             }
         }
