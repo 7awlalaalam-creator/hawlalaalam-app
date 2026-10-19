@@ -162,6 +162,8 @@ struct MushafScreen: View {
                 consumeRequest()
             }
             .onChange(of: state.mushafRequest) { _ in consumeRequest() }
+            // الانتقال إلى تبويب آخر لا يزيل صفحة المصحف: نوقف الميكروفون صراحة
+            .onDisappear { SpeechService.shared.stopIfActive() }
     }
 
     private func consumeRequest() {

@@ -108,9 +108,8 @@ button{font-family:inherit;cursor:pointer}
   function toast(t) { var el = $('toast'); el.textContent = t; el.classList.add('on'); clearTimeout(toast.t); toast.t = setTimeout(function () { el.classList.remove('on'); }, 2400); }
   function api(body) {
     body.member = member;
-    var get = body.action === 'get';
-    var url = get ? API + '?' + Object.keys(body).map(function (k) { return k + '=' + encodeURIComponent(body[k]); }).join('&') : API;
-    return fetch(url, get ? { cache: 'no-store' } : { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) })
+    // كل الطلبات POST: رمز الجهاز ومفتاح المنشئ لا يظهران في سجلات الخادم
+    return fetch(API, { method: 'POST', cache: 'no-store', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) })
       .then(function (r) { return r.json().catch(function () { throw new Error('تعذّر الاتصال بالخادم'); }); })
       .then(function (d) { if (!d.ok) throw new Error(d.error || 'حدث خطأ'); return d; });
   }
@@ -134,6 +133,7 @@ button{font-family:inherit;cursor:pointer}
 
   // ------------------------------------------------------------ الصفحة الأولى: ختماتي + إنشاء ختمة
   function home() {
+    cur = null; stopPoll();
     var mine = myGroups();
     var h = '<div class="hero"><span class="k">ختمة العائلة</span><h1>نختم القرآن معًا</h1>' +
       '<p class="s">أنشئ ختمة وأرسل رابطها لأهلك، وكل فرد يحجز جزءًا يقرؤه، وتتابعون التقدّم معًا حتى الختم.</p></div>';
@@ -173,6 +173,7 @@ button{font-family:inherit;cursor:pointer}
   }
   function load(id, first) {
     return api({ action: 'get', id: id, adminKey: keyOf(id) }).then(function (d) {
+      if (!first && (!cur || cur.id !== id)) return;            // غادر الختمة قبل وصول الرد
       if (first) remember(d.group);
       show(d.group);
     }).catch(function (err) {
@@ -189,7 +190,7 @@ button{font-family:inherit;cursor:pointer}
     var done = g.parts.filter(function (p) { return p.done; }).length;
     var taken = g.parts.filter(function (p) { return p.by && !p.done; }).length;
     var mineParts = g.parts.filter(function (p) { return p.mine; });
-    var people = {};
+    var people = Object.create(null);           // أسماء مثل «constructor» لا تكسر الصفحة
     g.parts.forEach(function (p) { if (p.by) { var x = people[p.by] = people[p.by] || { t: 0, d: 0, list: [] }; x.t++; if (p.done) x.d++; x.list.push(p.n); } });
     var names = Object.keys(people).sort(function (a, b) { return people[b].t - people[a].t; });
     var finished = done === g.parts.length;
@@ -249,8 +250,9 @@ button{font-family:inherit;cursor:pointer}
     startPoll();
   }
   function act(action, n, msg, who) {
-    return api({ action: action, id: cur.id, part: n, who: who || myName }).then(function (d) { closeSheet(); show(d.group); if (msg) toast(msg); })
-      .catch(function (e) { toast(e.message); load(cur.id); });
+    var id = cur.id;
+    return api({ action: action, id: id, part: n, who: who || myName }).then(function (d) { closeSheet(); if (cur && cur.id === id) show(d.group); if (msg) toast(msg); })
+      .catch(function (e) { toast(e.message); if (cur && cur.id === id) load(id); });
   }
   function tapPart(n) {
     var p = cur.parts[n - 1];

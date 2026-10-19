@@ -17,7 +17,8 @@ function data_dir() {
     if ((@is_dir($out) || @mkdir($out, 0750, true)) && @is_writable($out)) return $out;
     $in = __DIR__ . '/khatma-data';                             // بديل: بجانب الملف مع منع القراءة المباشرة
     if (!@is_dir($in)) @mkdir($in, 0750, true);
-    if (!@is_file($in . '/.htaccess')) @file_put_contents($in . '/.htaccess', "Require all denied\nDeny from all\n");
+    if (!@is_file($in . '/.htaccess')) @file_put_contents($in . '/.htaccess',
+        "<IfModule mod_authz_core.c>\nRequire all denied\n</IfModule>\n<IfModule !mod_authz_core.c>\nDeny from all\n</IfModule>\n");
     if (!@is_file($in . '/index.html')) @file_put_contents($in . '/index.html', '');
     return $in;
 }
@@ -30,23 +31,25 @@ function clean($s, $max) {
     $s = trim(preg_replace('/[\x00-\x1F\x7F\x{200B}-\x{200F}\x{202A}-\x{202E}\x{2066}-\x{2069}]/u', '', strip_tags((string)$s)));
     return mb_substr($s, 0, $max);
 }
-function token_ok($t) { return is_string($t) && preg_match('/^[A-Za-z0-9_-]{16,64}$/', $t); }
+function token_ok($t) { return is_string($t) && preg_match('/^[A-Za-z0-9_-]{16,64}\z/', $t); }
+/** رمز الجهاز لا يُحفظ كما هو: بصمته فقط (لو تسرّب الملف لا يمكن انتحال أحد) */
+function member_hash($t) { return $t === '' ? '' : hash('sha256', 'hawl-member:' . $t); }
 function new_id() {
     $abc = 'ABCDEFGHJKMNPQRSTUVWXYZ23456789';                   // دون حروف وأرقام متشابهة
     $s = ''; for ($i = 0; $i < 6; $i++) $s .= $abc[random_int(0, strlen($abc) - 1)];
     return $s;
 }
 function path_of($id) {
-    if (!preg_match('/^[A-Z2-9]{6}$/', (string)$id)) fail('رمز الختمة غير صحيح');
+    if (!preg_match('/^[A-Z2-9]{6}\z/', (string)$id)) fail('رمز الختمة غير صحيح');
     return data_dir() . '/' . $id . '.json';
 }
 
 /** يقرأ الختمة ويعدّلها تحت قفل (لا يتعارض مشاركان يحجزان في اللحظة نفسها) */
 function with_group($id, $fn) {
     $f = path_of($id);
-    if (!is_file($f)) fail('لم نجد هذه الختمة، ربما حُذفت', 404);
-    $h = fopen($f, 'c+');
-    if (!$h || !flock($h, LOCK_EX)) fail('حاول مرة أخرى', 503);
+    $h = @fopen($f, 'r+');                                      // لا يُنشئ ملفًا إن حُذفت الختمة للتو
+    if (!$h) fail('لم نجد هذه الختمة، ربما حُذفت', 404);
+    if (!flock($h, LOCK_EX)) { fclose($h); fail('حاول مرة أخرى', 503); }
     $g = json_decode(stream_get_contents($h), true);
     if (!is_array($g)) { flock($h, LOCK_UN); fclose($h); fail('ملف الختمة تالف', 500); }
     $res = $fn($g);                                             // تعيد [الختمة بعد التعديل أو null، الرد]
@@ -63,11 +66,24 @@ function with_group($id, $fn) {
 /** ما يراه الجميع: دون رموز الأجهزة */
 function public_view($g, $me) {
     $parts = [];
+    $mh = member_hash($me);
     foreach ($g['parts'] as $n => $p) {
-        $parts[] = ['n' => $n + 1, 'by' => $p['by'] ?? null, 'done' => !empty($p['done']), 'mine' => $me !== '' && ($p['m'] ?? '') === $me];
+        $parts[] = ['n' => $n + 1, 'by' => $p['by'] ?? null, 'done' => !empty($p['done']), 'mine' => $mh !== '' && hash_equals((string)($p['m'] ?? ''), $mh)];
     }
     return ['id' => $g['id'], 'name' => $g['name'], 'owner' => $g['owner'], 'note' => $g['note'], 'deadline' => $g['deadline'],
             'round' => $g['round'], 'parts' => $parts, 'admin' => false];
+}
+
+/** قراءة الختمة بقفل مشترك (لا نقرأ ملفًا في منتصف كتابته) */
+function read_group($id) {
+    $f = path_of($id);
+    $h = @fopen($f, 'r');
+    if (!$h) fail('لم نجد هذه الختمة، ربما حُذفت', 404);
+    flock($h, LOCK_SH);
+    $g = json_decode(stream_get_contents($h), true);
+    flock($h, LOCK_UN); fclose($h);
+    if (!is_array($g)) fail('ملف الختمة تالف', 500);
+    return $g;
 }
 
 /** حد بسيط لإنشاء الختمات من العنوان نفسه (٢٠ في الساعة) */
@@ -101,7 +117,7 @@ switch ($action) {
         rate_limit_create();
         do { $id = new_id(); $f = path_of($id); } while (file_exists($f));
         $admin = bin2hex(random_bytes(16));
-        $deadline = preg_match('/^\d{4}-\d{2}-\d{2}$/', (string)($in['deadline'] ?? '')) ? $in['deadline'] : '';
+        $deadline = preg_match('/^\d{4}-\d{2}-\d{2}\z/', (string)($in['deadline'] ?? '')) ? $in['deadline'] : '';
         $g = ['id' => $id, 'name' => $name, 'owner' => $owner, 'note' => clean($in['note'] ?? '', 80), 'deadline' => $deadline,
               'round' => 1, 'admin' => hash('sha256', $admin), 'created' => time(), 'parts' => array_fill(0, PARTS, ['by' => null])];
         if (file_put_contents($f, json_encode($g, JSON_UNESCAPED_UNICODE), LOCK_EX) === false) fail('تعذّر الحفظ على الخادم', 500);
@@ -109,10 +125,7 @@ switch ($action) {
         ok(['group' => $v, 'adminKey' => $admin]);
 
     case 'get':
-        $f = path_of($in['id'] ?? '');
-        if (!is_file($f)) fail('لم نجد هذه الختمة، ربما حُذفت', 404);
-        $g = json_decode((string)file_get_contents($f), true);
-        if (!is_array($g)) fail('ملف الختمة تالف', 500);
+        $g = read_group($in['id'] ?? '');
         $v = public_view($g, $me);
         $v['admin'] = isset($in['adminKey']) && is_string($in['adminKey']) && hash_equals($g['admin'], hash('sha256', $in['adminKey']));
         ok(['group' => $v]);
@@ -128,11 +141,12 @@ switch ($action) {
         $who = clean($in['who'] ?? '', 30);
         $res = with_group($in['id'] ?? '', function ($g) use ($action, $n, $me, $who) {
             $p = &$g['parts'][$n - 1];
-            $mine = ($p['m'] ?? '') === $me;
+            $mh = member_hash($me);
+            $mine = hash_equals((string)($p['m'] ?? ''), $mh);
             if ($action === 'take') {
                 if (!empty($p['by']) && !$mine) return [null, ['taken' => true]];
                 if ($who === '') return [null, ['needName' => true]];
-                $p = ['by' => $who, 'm' => $me, 'done' => false, 'at' => time()];
+                $p = ['by' => $who, 'm' => $mh, 'done' => false, 'at' => time()];
             } elseif (!$mine) {
                 return [null, ['notMine' => true]];
             } elseif ($action === 'done') {
@@ -157,9 +171,13 @@ switch ($action) {
         $id = $in['id'] ?? '';
         if ($action === 'delete') {
             $f = path_of($id);
-            $g = is_file($f) ? json_decode((string)file_get_contents($f), true) : null;
-            if (!is_array($g) || !hash_equals($g['admin'], hash('sha256', $key))) fail('هذا لمنشئ الختمة فقط', 403);
+            $h = @fopen($f, 'r+');
+            if (!$h) fail('لم نجد هذه الختمة، ربما حُذفت', 404);
+            flock($h, LOCK_EX);
+            $g = json_decode(stream_get_contents($h), true);
+            if (!is_array($g) || !hash_equals($g['admin'], hash('sha256', $key))) { flock($h, LOCK_UN); fclose($h); fail('هذا لمنشئ الختمة فقط', 403); }
             @unlink($f);
+            flock($h, LOCK_UN); fclose($h);
             ok(['deleted' => true]);
         }
         $res = with_group($id, function ($g) use ($key, $me) {

@@ -97,6 +97,8 @@ final class HawlSchemeHandler: NSObject, WKURLSchemeHandler {
 
 final class HawlBridge: NSObject, WKScriptMessageHandler {
     weak var web: WKWebView?
+    /** الميكروفون (التسميع) مسموح لصفحة المصحف وحدها، ومن إطارها الرئيسي فقط */
+    var allowSpeech = false
     private var queried = Set<String>()
 
     override init() {
@@ -112,6 +114,7 @@ final class HawlBridge: NSObject, WKScriptMessageHandler {
         guard let str = message.body as? String, let data = str.data(using: .utf8),
               let o = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
               let cmd = o["cmd"] as? String else { return }
+        if cmd == "speech" && (!allowSpeech || !message.frameInfo.isMainFrame) { return }
         Task { @MainActor in self.handle(cmd, o) }
     }
 
@@ -218,6 +221,7 @@ struct MushafWebView: UIViewRepresentable {
         web.scrollView.backgroundColor = .clear
         web.navigationDelegate = context.coordinator
         context.coordinator.bridge.web = web
+        context.coordinator.bridge.allowSpeech = true
         context.coordinator.observe(web)
         context.coordinator.night = night
         context.coordinator.zoom = zoom

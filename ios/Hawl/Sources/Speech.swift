@@ -21,18 +21,24 @@ final class SpeechService {
     private var lastText = ""
     /** رقم الطلب الحالي: نتجاهل ردود الطلبات القديمة (إلغاؤها يرسل خطأ، فلا نبدأ بسببه طلبًا جديدًا) */
     private var gen = 0
+    /** يتوقف بعد دقيقة بلا كلام (التعرّف على الجهاز لا ينتهي وحده) */
+    private var silence: Task<Void, Never>?
 
     func start(web: WKWebView?, lang: String) {
         self.web = web
         self.lang = lang.isEmpty ? "ar-SA" : lang
+        gen += 1
+        let token = gen                     // إن ضغط «إيقاف» أثناء طلب الإذن لا نبدأ بعده
         SFSpeechRecognizer.requestAuthorization { status in
             Task { @MainActor in
+                guard self.gen == token else { return }
                 guard status == .authorized else {
                     self.state("error", "اسمح للتطبيق بالتعرّف على الكلام من: الإعدادات ← حول العالم")
                     return
                 }
                 AVAudioSession.sharedInstance().requestRecordPermission { granted in
                     Task { @MainActor in
+                        guard self.gen == token else { return }
                         guard granted else {
                             self.state("error", "اسمح للتطبيق باستخدام الميكروفون من: الإعدادات ← حول العالم")
                             return
@@ -51,9 +57,12 @@ final class SpeechService {
     func stop() {
         active = false
         gen += 1
+        silence?.cancel()
         finishRequest()
-        // نعيد الصوت إلى وضع التلاوة المعتاد (يستمر مع قفل الشاشة)
-        try? AVAudioSession.sharedInstance().setCategory(.playback, mode: .spokenAudio)
+        // نعيد الصوت إلى وضع التلاوة المعتاد، ونُعلم التطبيقات الأخرى فيعود صوتها كما كان
+        let session = AVAudioSession.sharedInstance()
+        try? session.setActive(false, options: .notifyOthersOnDeactivation)
+        try? session.setCategory(.playback, mode: .spokenAudio)
         state("stopped", "")
     }
 
@@ -96,6 +105,7 @@ final class SpeechService {
                 }
             }
             state("listening", "")
+            armSilence()
         } catch {
             active = false
             finishRequest()
@@ -103,7 +113,17 @@ final class SpeechService {
         }
     }
 
+    private func armSilence() {
+        silence?.cancel()
+        silence = Task { @MainActor [weak self] in
+            try? await Task.sleep(nanoseconds: 60_000_000_000)
+            guard !Task.isCancelled, let self, self.active else { return }
+            self.stop()
+        }
+    }
+
     private func handle(text: String, isFinal: Bool, failed: Bool) {
+        if !text.isEmpty && text != lastText { armSilence() }
         if !text.isEmpty { lastText = text }
         if isFinal || failed {
             // انتهى هذا الطلب (توقّف طويل أو حدّ الدقيقة): نثبّت ما سُمع ونبدأ طلبًا جديدًا إن كان المستخدم ما زال يقرأ
