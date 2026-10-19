@@ -145,7 +145,6 @@ button{font-family:inherit;cursor:pointer}
     h += '<form class="card" id="cf" autocomplete="off"><h2>ختمة جديدة</h2>' +
       '<label>اسم الختمة<input id="cName" maxlength="40" required placeholder="مثل: ختمة آل فلان"></label>' +
       '<label>اسمك كما يراه أهلك<input id="cOwner" maxlength="30" required value="' + esc(myName) + '"></label>' +
-      '<label>إهداء (اختياري)<input id="cNote" maxlength="80" placeholder="مثل: لروح الوالدة رحمها الله"></label>' +
       '<label>نختم قبل (اختياري)<input id="cDate" type="date"></label>' +
       '<button class="btn pri" type="submit">أنشئ الختمة</button>' +
       '<p class="dim">لا نطلب بريدًا ولا رقمًا. الختمة يراها من معه رابطها فقط.</p></form>';
@@ -157,7 +156,7 @@ button{font-family:inherit;cursor:pointer}
       if (!name || !owner) { toast('اكتب اسم الختمة واسمك'); return; }
       myName = owner; ls.set('hawl_name', owner);
       var btn = this.querySelector('button[type=submit]'); btn.disabled = true; btn.textContent = 'جارٍ الإنشاء…';
-      api({ action: 'create', name: name, owner: owner, note: $('cNote').value.trim(), deadline: $('cDate').value || '' })
+      api({ action: 'create', name: name, owner: owner, deadline: $('cDate').value || '' })
         .then(function (d) { remember(d.group, d.adminKey); go(d.group.id); show(d.group); setTimeout(function () { share(d.group); }, 400); })
         .catch(function (err) { toast(err.message); btn.disabled = false; btn.textContent = 'أنشئ الختمة'; });
     };
