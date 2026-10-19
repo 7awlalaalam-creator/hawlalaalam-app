@@ -64,24 +64,21 @@ jobs:
           ARGS=(-welcomed '<true/>' -tour_v '<integer>99</integer>' -lat '<real>21.5433</real>' -lng '<real>39.1728</real>' -city 'جدة' -country 'SA' -live_prayer '<true/>')
           shot() { sleep "${3:-4}"; xcrun simctl io "$UDID" screenshot "shots/$1.png"; }
           go() { xcrun simctl openurl "$UDID" "$1" || true; shot "$2" "$3"; }
+          # كل شاشة بتشغيل جديد ووسيط -open_route (دون نافذة «فتح في…؟» التي يُظهرها openurl)
+          route() { xcrun simctl terminate "$UDID" com.hawlalaalam.quran || true; sleep 1
+                    xcrun simctl launch "$UDID" com.hawlalaalam.quran "${ARGS[@]}" -open_route "$1"; shot "$2" "${3:-7}"; }
           for mode in light dark; do
             xcrun simctl ui "$UDID" appearance $mode
             xcrun simctl terminate "$UDID" com.hawlalaalam.quran || true
             xcrun simctl launch "$UDID" com.hawlalaalam.quran "${ARGS[@]}"
-            shot "$mode-01-today" 8
-            go "hawlapp://mushaf?page=2" "$mode-02-mushaf" 7
-            go "hawlapp://khatma" "$mode-03-khatma"
-            go "hawlapp://tools" "$mode-04-tools"
-            go "hawlapp://prayer" "$mode-05-prayer"
-            go "hawlapp://settings" "$mode-06-settings"
-            go "hawlapp://tasbeeh" "$mode-07-tasbeeh"
-            go "hawlapp://qibla" "$mode-08-qibla"
-            go "hawlapp://mood?m=1" "$mode-09-mood"
-            go "hawlapp://dedicate" "$mode-10-dedicate"
-            go "hawlapp://index" "$mode-11-index"
-            go "hawlapp://downloads" "$mode-12-downloads"
-            go "hawlapp://listen" "$mode-13-listen" 8
-            go "hawlapp://prayer-azkar" "$mode-14-prayer-azkar"
+            shot "$mode-01-today" 12
+            route "mushaf?page=562" "$mode-02-mushaf" 9
+            route "tools" "$mode-03-tools"
+            route "journey" "$mode-04-journey"
+            route "hifz" "$mode-05-hifz" 10
+            route "find" "$mode-06-find" 10
+            route "notifications" "$mode-07-notifications"
+            route "khatma" "$mode-08-khatma"
           done
           # النشاط الحي «الصلاة القادمة»: نفتح التطبيق ثم الإعدادات فتظهر الجزيرة الديناميكية
           xcrun simctl ui "$UDID" appearance light
