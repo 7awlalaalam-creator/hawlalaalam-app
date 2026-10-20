@@ -85,9 +85,7 @@ struct PrayerPage: View {
                     Text("الصلاة القادمة").font(.system(size: 13, weight: .bold)).foregroundColor(WColor.gold)
                     if let first = list.first {
                         Text(Prayer.displayName(first.0, on: first.1)).font(.system(size: 30, weight: .bold))
-                        Text(timerInterval: ctx.date...max(ctx.date, first.1), countsDown: true)
-                            .font(.system(size: 30, weight: .bold).monospacedDigit())
-                            .foregroundColor(WColor.gold)
+                        Countdown(to: first.1)
                         Text(formatTime(first.1) + (Geo.city.isEmpty ? "" : " · " + Geo.city))
                             .font(.system(size: 13)).foregroundColor(WColor.muted)
                     }
@@ -105,6 +103,20 @@ struct PrayerPage: View {
                     }
                 }
             }
+        }
+    }
+}
+
+/** عدّاد تنازلي بالأرقام العربية (Text(timerInterval:) يعرض الأرقام الغربية) */
+struct Countdown: View {
+    let to: Date
+
+    var body: some View {
+        TimelineView(.periodic(from: Date(), by: 1)) { ctx in
+            let left = max(0, Int(to.timeIntervalSince(ctx.date)))
+            Text(left == 0 ? "حان الآن" : ar(String(format: "%d:%02d:%02d", left / 3600, (left % 3600) / 60, left % 60)))
+                .font(.system(size: 30, weight: .bold).monospacedDigit())
+                .foregroundColor(WColor.gold)
         }
     }
 }
