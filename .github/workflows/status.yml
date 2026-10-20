@@ -1,0 +1,35 @@
+name: حالة المراجعة في أبل
+# يقرأ فقط (لا يغيّر شيئًا): حالة نسخة المتجر ونسخ TestFlight عبر App Store Connect API
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  status:
+    runs-on: ubuntu-latest
+    env:
+      ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
+      ASC_ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
+      ASC_KEY_P8: ${{ secrets.ASC_KEY_P8 }}
+    steps:
+      - name: الحالة
+        run: |
+          pip install -q pyjwt cryptography requests
+          python3 - <<'PY'
+          import os, time, jwt, requests
+          tok = jwt.encode({"iss": os.environ["ASC_ISSUER_ID"], "iat": int(time.time()), "exp": int(time.time()) + 600, "aud": "appstoreconnect-v1"},
+                           os.environ["ASC_KEY_P8"], algorithm="ES256", headers={"kid": os.environ["ASC_KEY_ID"], "typ": "JWT"})
+          H = {"Authorization": "Bearer " + tok}
+          B = "https://api.appstoreconnect.apple.com/v1"
+          app = "6823910862"
+          v = requests.get(f"{B}/apps/{app}/appStoreVersions?limit=5", headers=H).json()
+          for x in v.get("data", []):
+              a = x["attributes"]
+              print(f"::notice title=store::{a.get('platform')} {a.get('versionString')} = {a.get('appStoreState')} / {a.get('appVersionState')}")
+          b = requests.get(f"{B}/builds?filter[app]={app}&sort=-uploadedDate&limit=3&include=buildBetaDetail", headers=H).json()
+          det = {i["id"]: i["attributes"] for i in b.get("included", []) if i["type"] == "buildBetaDetails"}
+          for x in b.get("data", []):
+              d = det.get(x["relationships"]["buildBetaDetail"]["data"]["id"], {})
+              print(f"::notice title=testflight::build {x['attributes']['version']} external={d.get('externalBuildState')} internal={d.get('internalBuildState')}")
+          if "errors" in v: print("::error::" + str(v["errors"])[:300])
+          PY
