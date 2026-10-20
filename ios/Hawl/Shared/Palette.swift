@@ -1,5 +1,6 @@
 import SwiftUI
 import UIKit
+import CoreText
 
 // هوية «حول العالم»: نفس ألوان تطبيق أندرويد (res/values/colors.xml و values-night/colors.xml)
 
@@ -52,8 +53,28 @@ enum AppFont {
     /** خط الواجهة Tajawal (نفس ملفات تطبيق أندرويد) */
     static func ui(_ size: CGFloat, _ weight: Int = 400) -> Font {
         let name = weight >= 700 ? "Tajawal-Bold" : (weight >= 500 ? "Tajawal-Medium" : "Tajawal-Regular")
+        if !tajawalOK {                                       // خط النظام العربي بدل خط لا يُشكّل الحروف على هذا الجهاز
+            return .system(size: size, weight: weight >= 700 ? .bold : (weight >= 500 ? .medium : .regular))
+        }
         return Font.custom(name, size: size)
     }
+
+    /**
+     * هل يعرض خط Tajawal العربية متصلة؟ على جهاز ثُبّت فيه خط آخر بالاسم نفسه (تطبيق خطوط أو ملف تعريف)
+     * قد يأخذ النظام ذلك الخط فتظهر الحروف منفصلة ومعكوسة. نتحقق مرة واحدة: الخط من ملفات التطبيق،
+     * و«لا» تُرسم حرفًا واحدًا مركّبًا كما في الخط الأصلي.
+     */
+    static let tajawalOK: Bool = {
+        guard let f = UIFont(name: "Tajawal-Regular", size: 20) else { return false }
+        let ct = f as CTFont
+        if let url = CTFontCopyAttribute(ct, kCTFontURLAttribute) as? URL,
+           !url.standardizedFileURL.path.hasPrefix(Bundle.main.bundleURL.standardizedFileURL.path) {
+            return false
+        }
+        let attr = NSAttributedString(string: "لا", attributes: [.font: f])
+        let line = CTLineCreateWithAttributedString(attr)
+        return CTLineGetGlyphCount(line) == 1
+    }()
 
     /** خط مصحف المدينة (مجمع الملك فهد، الإصدار ١٨) */
     /** خط الأذكار المشكولة (Amiri Quran، كما في مسبحة أندرويد) */
