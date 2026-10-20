@@ -1,0 +1,80 @@
+name: إضافة آخر نسخة لمجموعة الأهل والأصدقاء
+# يضيف أحدث بناء في TestFlight إلى مجموعة المختبرين الخارجية، ويكتب «ما الذي نجرّبه»، ويرسله لمراجعة TestFlight إن لزم.
+# يُشغَّل يدويًا فقط بعد موافقة صاحب التطبيق.
+on:
+  workflow_dispatch:
+    inputs:
+      build:
+        description: 'رقم البناء (اتركه فارغًا لأحدث بناء)'
+        required: false
+        default: ''
+      notes:
+        description: 'ما الذي نجرّبه'
+        required: false
+        default: ''
+permissions:
+  contents: read
+jobs:
+  add:
+    runs-on: ubuntu-latest
+    env:
+      ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
+      ASC_ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
+      ASC_KEY_P8: ${{ secrets.ASC_KEY_P8 }}
+      BUILD: ${{ inputs.build }}
+      NOTES: ${{ inputs.notes }}
+    steps:
+      - name: الإضافة والإرسال
+        run: |
+          pip install -q pyjwt cryptography requests
+          python3 - <<'PY'
+          import os, time, jwt, requests, sys
+          def tok():
+              return jwt.encode({"iss": os.environ["ASC_ISSUER_ID"], "iat": int(time.time()), "exp": int(time.time()) + 900, "aud": "appstoreconnect-v1"},
+                                os.environ["ASC_KEY_P8"], algorithm="ES256", headers={"kid": os.environ["ASC_KEY_ID"], "typ": "JWT"})
+          B = "https://api.appstoreconnect.apple.com/v1"
+          def call(m, path, **kw):
+              r = requests.request(m, B + path, headers={"Authorization": "Bearer " + tok(), "Content-Type": "application/json"}, **kw)
+              if r.status_code >= 400:
+                  print(f"::warning::{m} {path} -> {r.status_code} {r.text[:400]}")
+              return r
+          APP = "6823910862"
+          GROUP_NAME = "الأهل والأصدقاء"
+          want = os.environ.get("BUILD", "").strip()
+          # انتظار انتهاء معالجة البناء (حتى ٤٥ دقيقة)
+          build = None
+          for _ in range(90):
+              bs = call("GET", f"/builds?filter[app]={APP}&sort=-uploadedDate&limit=10").json().get("data", [])
+              cand = [b for b in bs if not want or b["attributes"]["version"] == want]
+              if cand and cand[0]["attributes"]["processingState"] == "VALID":
+                  build = cand[0]; break
+              print("waiting:", [(b["attributes"]["version"], b["attributes"]["processingState"]) for b in cand[:2]])
+              time.sleep(30)
+          if not build: print("::error::لم يكتمل البناء"); sys.exit(1)
+          bid, ver = build["id"], build["attributes"]["version"]
+          print(f"::notice title=build::{ver}")
+          # الامتثال للتشفير إن لم يُضبط
+          if build["attributes"].get("usesNonExemptEncryption") is None:
+              call("PATCH", f"/builds/{bid}", json={"data": {"type": "builds", "id": bid, "attributes": {"usesNonExemptEncryption": False}}})
+          # «ما الذي نجرّبه» بالعربية
+          notes = os.environ.get("NOTES", "").strip() or "جرّبوا الجديد في المصحف: التظليل بالألوان، و«ملاحظاتي»، والكلمة التالية في التسميع، ومراجعة الآيات الضعيفة. أرسلوا ملاحظاتكم من TestFlight بلقطة شاشة."
+          locs = call("GET", f"/builds/{bid}/betaBuildLocalizations").json().get("data", [])
+          ar = [l for l in locs if l["attributes"]["locale"].startswith("ar")]
+          if ar:
+              call("PATCH", f"/betaBuildLocalizations/{ar[0]['id']}", json={"data": {"type": "betaBuildLocalizations", "id": ar[0]["id"], "attributes": {"whatsNew": notes}}})
+          else:
+              call("POST", "/betaBuildLocalizations", json={"data": {"type": "betaBuildLocalizations", "attributes": {"locale": "ar-SA", "whatsNew": notes},
+                    "relationships": {"build": {"data": {"type": "builds", "id": bid}}}}})
+          # المجموعة
+          gs = call("GET", f"/betaGroups?filter[app]={APP}&limit=50").json().get("data", [])
+          g = [x for x in gs if x["attributes"]["name"] == GROUP_NAME]
+          if not g: print("::error::لم أجد المجموعة"); sys.exit(1)
+          r = call("POST", f"/betaGroups/{g[0]['id']}/relationships/builds", json={"data": [{"type": "builds", "id": bid}]})
+          print(f"::notice title=group::add -> {r.status_code}")
+          # الإرسال لمراجعة TestFlight (قد يكون معتمدًا تلقائيًا لنفس الإصدار)
+          r = call("POST", "/betaAppReviewSubmissions", json={"data": {"type": "betaAppReviewSubmissions", "relationships": {"build": {"data": {"type": "builds", "id": bid}}}}})
+          print(f"::notice title=review::submit -> {r.status_code}")
+          time.sleep(20)
+          d = call("GET", f"/builds/{bid}/buildBetaDetail").json().get("data", {}).get("attributes", {})
+          print(f"::notice title=state::external={d.get('externalBuildState')} internal={d.get('internalBuildState')}")
+          PY
