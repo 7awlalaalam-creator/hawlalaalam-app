@@ -198,15 +198,8 @@ targets:
       # نفس حساب المواقيت وتنسيق الأرقام في الآيفون (لا يعتمدان على UIKit)
       - path: Hawl/Shared/PrayerTimes.swift
       - path: Hawl/Shared/Format.swift
-    dependencies:
-      - target: HawlWatchWidgets
-        embed: true
-        codeSign: true
-    entitlements:
-      path: HawlWatch/HawlWatch.entitlements
-      properties:
-        com.apple.security.application-groups:
-          - group.com.hawlalaalam.quran
+    # تعقيدات واجهة الساعة (HawlWatchWidgets) تحتاج ربط «App Group» بمعرّفي الساعة في بوابة المطوّرين أولًا؛
+    # إلى ذلك الحين لا تُضمَّن، ويحفظ تطبيق الساعة بياناته محليًا.
     info:
       path: HawlWatch/Info.plist
       properties:
@@ -269,4 +262,3 @@ schemes:
     build:
       targets:
         HawlWatch: all
-        HawlWatchWidgets: all
