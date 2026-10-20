@@ -71,7 +71,7 @@ targets:
     info:
       path: Hawl/Info.plist
       properties:
-        CFBundleDisplayName: "حول العالم"
+        CFBundleDisplayName: "القرآن | حول العالم"
         CFBundleDevelopmentRegion: ar
         CFBundleShortVersionString: $(MARKETING_VERSION)
         CFBundleVersion: $(CURRENT_PROJECT_VERSION)
@@ -167,7 +167,7 @@ targets:
     info:
       path: HawlWidgets/Info.plist
       properties:
-        CFBundleDisplayName: "حول العالم"
+        CFBundleDisplayName: "القرآن | حول العالم"
         CFBundleDevelopmentRegion: ar
         CFBundleShortVersionString: $(MARKETING_VERSION)
         CFBundleVersion: $(CURRENT_PROJECT_VERSION)
@@ -203,7 +203,7 @@ targets:
     info:
       path: HawlWatch/Info.plist
       properties:
-        CFBundleDisplayName: "حول العالم"
+        CFBundleDisplayName: "القرآن | حول العالم"
         CFBundleDevelopmentRegion: ar
         CFBundleShortVersionString: $(MARKETING_VERSION)
         CFBundleVersion: $(CURRENT_PROJECT_VERSION)
@@ -236,7 +236,7 @@ targets:
     info:
       path: HawlWatchWidgets/Info.plist
       properties:
-        CFBundleDisplayName: "حول العالم"
+        CFBundleDisplayName: "القرآن | حول العالم"
         CFBundleDevelopmentRegion: ar
         CFBundleShortVersionString: $(MARKETING_VERSION)
         CFBundleVersion: $(CURRENT_PROJECT_VERSION)
