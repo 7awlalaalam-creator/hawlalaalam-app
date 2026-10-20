@@ -44,10 +44,10 @@ enum Backup {
     static func payload(includeWeb: Bool = true) -> [String: Any] {
         var prefs: [String: Any] = [:]
         for (k, v) in domain where keep(k) && k != "web_state" { if let c = clean(v) { prefs[k] = c } }
-        // «تابع الاستماع» بالصيغة الموحّدة مع أندرويد: {reciter, moshaf, surah, pos (ملّي ثانية)}
+        // «تابع الاستماع» بالصيغة الموحّدة مع أندرويد: {reciter, moshaf, surah, pos (بالثواني في الملف)}
         if let l = ListenLast.decodeRich(Store.d.string(forKey: "listen_last")), l.track.reciterID > 0, l.track.surah > 0 {
             prefs["listen_last"] = ["reciter": l.track.reciterID, "moshaf": l.track.moshafID, "surah": l.track.surah,
-                                    "pos": Int(l.pos * 1000), "name": l.track.reciter]
+                                    "pos": l.pos, "name": l.track.reciter]
         } else if let s = Store.d.string(forKey: "listen_last"), let d = s.data(using: .utf8),
                   let o = try? JSONSerialization.jsonObject(with: d) as? [String: Any] {
             prefs["listen_last"] = o
@@ -93,6 +93,11 @@ enum Backup {
             return nil
         case "listen_last":
             // الصيغة الموحّدة كائن؛ نخزّنه نصًّا كما هو (يفهمه AudioPlayer.last)، والنص القديم من آيفون يُخزَّن كما هو
+            // الملف يحمل الموضع بالثواني، والتخزين الداخلي بالملّي ثانية
+            if var o = value as? [String: Any] {
+                if let p = (o["pos"] as? NSNumber)?.doubleValue { o["pos"] = Int(p * 1000) }
+                if let d = try? JSONSerialization.data(withJSONObject: o), let s = String(data: d, encoding: .utf8) { return (k, s) }
+            }
             if let o = value as? [String: Any], let d = try? JSONSerialization.data(withJSONObject: o),
                let s = String(data: d, encoding: .utf8) { return (k, s) }
             if let s = value as? String { return (k, s) }
