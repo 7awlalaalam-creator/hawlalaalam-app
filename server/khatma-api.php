@@ -70,7 +70,7 @@ function public_view($g, $me) {
     foreach ($g['parts'] as $n => $p) {
         $parts[] = ['n' => $n + 1, 'by' => $p['by'] ?? null, 'done' => !empty($p['done']), 'mine' => $mh !== '' && hash_equals((string)($p['m'] ?? ''), $mh)];
     }
-    return ['id' => $g['id'], 'name' => $g['name'], 'owner' => $g['owner'], 'note' => $g['note'], 'deadline' => $g['deadline'],
+    return ['id' => $g['id'], 'name' => $g['name'], 'owner' => $g['owner'], 'deadline' => $g['deadline'],
             'round' => $g['round'], 'parts' => $parts, 'admin' => false];
 }
 
@@ -118,7 +118,7 @@ switch ($action) {
         do { $id = new_id(); $f = path_of($id); } while (file_exists($f));
         $admin = bin2hex(random_bytes(16));
         $deadline = preg_match('/^\d{4}-\d{2}-\d{2}\z/', (string)($in['deadline'] ?? '')) ? $in['deadline'] : '';
-        $g = ['id' => $id, 'name' => $name, 'owner' => $owner, 'note' => clean($in['note'] ?? '', 80), 'deadline' => $deadline,
+        $g = ['id' => $id, 'name' => $name, 'owner' => $owner, 'deadline' => $deadline,
               'round' => 1, 'admin' => hash('sha256', $admin), 'created' => time(), 'parts' => array_fill(0, PARTS, ['by' => null])];
         if (file_put_contents($f, json_encode($g, JSON_UNESCAPED_UNICODE), LOCK_EX) === false) fail('تعذّر الحفظ على الخادم', 500);
         $v = public_view($g, $me); $v['admin'] = true;
