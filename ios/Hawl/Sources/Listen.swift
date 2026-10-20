@@ -65,7 +65,12 @@ struct Reciter: Codable, Hashable, Identifiable {
         let c = try d.container(keyedBy: K.self)
         id = (try? c.decode(FlexInt.self, forKey: .id).v) ?? 0
         name = ((try? c.decode(String.self, forKey: .name)) ?? "").trimmingCharacters(in: .whitespaces)
+        // رواية حفص أولًا، ثم الأكمل
         moshaf = ((try? c.decode([Moshaf].self, forKey: .moshaf)) ?? []).filter { !$0.server.isEmpty && !$0.surahs.isEmpty }
+            .sorted { a, b in
+                let ha = a.name.contains("حفص"), hb = b.name.contains("حفص")
+                return ha != hb ? ha : a.surahs.count > b.surahs.count
+            }
     }
 
     func encode(to e: Encoder) throws {
@@ -75,7 +80,13 @@ struct Reciter: Codable, Hashable, Identifiable {
         try c.encode(moshaf, forKey: .moshaf)
     }
 
-    var initial: String { String(name.first ?? "ق") }
+    /** الحرف في الشارة: أول حرف من الاسم، وإن كان ألفًا (إ أ آ ا) فأول حرف من آخر كلمة (حتى لا تبدو «إ» علامة تعجب) */
+    var initial: String {
+        let alef: Set<Character> = ["ا", "أ", "إ", "آ"]
+        guard let f = name.first else { return "ق" }
+        if alef.contains(f), let last = name.split(separator: " ").last?.first, !alef.contains(last) { return String(last) }
+        return String(f)
+    }
     var surahCount: Int { moshaf.map { $0.surahs.count }.max() ?? 0 }
 }
 
@@ -198,6 +209,13 @@ final class ListenCatalog: ObservableObject {
             Track(url: m.url(s), title: "سورة " + Quran.surahName(s), reciter: r.name, reciterID: r.id, moshafID: m.id, surah: s)
         }
     }
+}
+
+/** «سورة واحدة»، «سورتان»، «٥ سور»، «١١٤ سورة» */
+func surahsText(_ n: Int) -> String {
+    if n == 1 { return "سورة واحدة" }
+    if n == 2 { return "سورتان" }
+    return ar(n) + (n >= 3 && n <= 10 ? " سور" : " سورة")
 }
 
 /** للبحث: دون تشكيل، والهمزات والتاء المربوطة والألف المقصورة موحّدة */
@@ -345,7 +363,7 @@ struct ListenView: View {
             NavigationLink(value: Screen.reciter(r.id)) {
                 HStack(spacing: 12) {
                     Text(r.initial).font(AppFont.ui(18, 700)).foregroundColor(Palette.gold)
-                        .frame(width: 46, height: 46).background(Circle().fill(Palette.dark))
+                        .frame(width: 46, height: 46).background(Circle().fill(Color(hex: 0x1C5249)))
                     VStack(alignment: .leading, spacing: 4) {
                         Text(r.name).font(AppFont.ui(15, 700)).foregroundColor(Palette.ink).lineLimit(1)
                         HStack(spacing: 6) {
@@ -506,7 +524,7 @@ struct ReciterView: View {
                     Text(r.initial).font(AppFont.ui(28, 700)).foregroundColor(Palette.gold)
                         .frame(width: 70, height: 70).background(Circle().fill(Color(hex: 0x1C5249)))
                     Text(r.name).font(AppFont.ui(21, 700)).foregroundColor(.white).multilineTextAlignment(.center)
-                    Text(m.shortName + " · " + ar(m.surahs.count) + " سورة").font(AppFont.ui(13)).foregroundColor(Palette.onDarkMuted)
+                    Text(m.shortName + " · " + surahsText(m.surahs.count)).font(AppFont.ui(13)).foregroundColor(Palette.onDarkMuted)
                     Button { player.play(queue: tracks, start: 0) } label: {
                         Label("استمع للمصحف كاملًا", systemImage: "play.fill")
                             .font(AppFont.ui(15, 700)).foregroundColor(Palette.dark)
@@ -559,7 +577,7 @@ struct ReciterView: View {
             .padding(16)
         }
         .navigationTitle(r.name)
-        .alert("تحميل \(ar(missing.count)) سورة؟", isPresented: $confirmAll) {
+        .alert("تحميل " + surahsText(missing.count) + "؟", isPresented: $confirmAll) {
             Button("حمّل") { for t in missing { dl.start(url: t.url, title: t.title, reciter: t.reciter) } }
             Button("إلغاء", role: .cancel) { }
         } message: { Text("يُفضّل التحميل عبر شبكة Wi-Fi. تجدها في «المحمّلة» وتعمل دون إنترنت.") }
