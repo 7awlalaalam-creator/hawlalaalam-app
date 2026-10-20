@@ -29,7 +29,9 @@ struct PrayerProvider: TimelineProvider {
             start = p.1.addingTimeInterval(1)
         }
         if entries.isEmpty { entries = [placeholder(in: context)] }
-        completion(Timeline(entries: entries, policy: .after(start)))
+        // دون موقع: نعيد المحاولة بعد ساعة (حين يرسل الجوال الموقع يُعاد تحميل التعقيدات أيضًا)
+        let policy: TimelineReloadPolicy = Geo.has ? .after(start) : .after(now.addingTimeInterval(3600))
+        completion(Timeline(entries: Geo.has ? entries : [PrayerEntry(date: now, index: Prayer.fajr, at: now, located: false)], policy: policy))
     }
 }
 
@@ -38,6 +40,28 @@ struct PrayerComplicationView: View {
     let entry: PrayerEntry
 
     var body: some View {
+        if entry.located { located } else { unlocated }
+    }
+
+    /** لم يصل موقع من الجوال بعد: لا نعرض مواقيت مكان آخر كأنها مواقيت القارئ */
+    @ViewBuilder private var unlocated: some View {
+        switch family {
+        case .accessoryCircular:
+            ZStack { AccessoryWidgetBackground(); Image(systemName: "location.slash").font(.system(size: 16, weight: .semibold)) }
+        case .accessoryInline:
+            Text("افتح التطبيق في جوالك")
+        case .accessoryCorner:
+            Image(systemName: "location.slash").widgetLabel { Text("حدّد موقعك") }
+        default:
+            VStack(alignment: .leading, spacing: 1) {
+                Text("الصلاة القادمة").font(.system(size: 12, weight: .bold)).foregroundColor(WColor.gold)
+                Text("افتح التطبيق في جوالك لتحديد موقعك").font(.system(size: 13, weight: .semibold)).lineLimit(2)
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
+        }
+    }
+
+    @ViewBuilder private var located: some View {
         let name = Prayer.displayName(entry.index, on: entry.at)
         switch family {
         case .accessoryCircular:

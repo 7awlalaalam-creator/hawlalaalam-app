@@ -128,23 +128,31 @@ final class ListenCatalog: ObservableObject {
     @Published private(set) var failed = false
     @Published private(set) var favorites: [Int] = []
 
-    private struct RecitersDoc: Codable { let reciters: [Reciter] }
-    private struct RadiosDoc: Codable { let radios: [Radio] }
+    fileprivate struct RecitersDoc: Codable { let reciters: [Reciter] }
+    fileprivate struct RadiosDoc: Codable { let radios: [Radio] }
 
     private static let api = "https://mp3quran.net/api/v3/"
     private static let maxAge: Double = 3 * 24 * 3600
 
     private init() {
         favorites = (Store.d.array(forKey: "listen_favs") as? [Int]) ?? []
-        if let d = try? Data(contentsOf: Self.file("reciters")), let doc = try? JSONDecoder().decode(RecitersDoc.self, from: d) {
-            reciters = Self.sorted(doc.reciters)
-        }
-        if let d = try? Data(contentsOf: Self.file("radios")), let doc = try? JSONDecoder().decode(RadiosDoc.self, from: d) {
-            radios = doc.radios.filter { !$0.url.isEmpty }
+        // القائمة المحفوظة (قرابة ١ م.ب) تُقرأ وتُفك في الخلفية، لا على خيط الواجهة
+        let rf = Self.file("reciters"), of = Self.file("radios")
+        Task.detached(priority: .userInitiated) {
+            let r = (try? Data(contentsOf: rf)).flatMap { try? JSONDecoder().decode(RecitersDoc.self, from: $0) }.map { ListenCatalog.sorted($0.reciters) }
+            let o = (try? Data(contentsOf: of)).flatMap { try? JSONDecoder().decode(RadiosDoc.self, from: $0) }.map { $0.radios.filter { !$0.url.isEmpty } }
+            await MainActor.run {
+                let c = ListenCatalog.shared
+                if c.reciters.isEmpty, let r = r { c.reciters = r }
+                if c.radios.isEmpty, let o = o { c.radios = o }
+            }
         }
     }
 
-    private static func file(_ name: String) -> URL {
+    /** بعد استعادة نسخة احتياطية */
+    func reloadFavorites() { favorites = (Store.d.array(forKey: "listen_favs") as? [Int]) ?? [] }
+
+    nonisolated private static func file(_ name: String) -> URL {
         let base = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask)[0]
         let d = base.appendingPathComponent("listen", isDirectory: true)
         try? FileManager.default.createDirectory(at: d, withIntermediateDirectories: true)
@@ -156,7 +164,7 @@ final class ListenCatalog: ObservableObject {
         return Date().timeIntervalSince(a)
     }
 
-    private static func sorted(_ l: [Reciter]) -> [Reciter] {
+    nonisolated fileprivate static func sorted(_ l: [Reciter]) -> [Reciter] {
         l.filter { !$0.moshaf.isEmpty && !$0.name.isEmpty }
             .sorted { $0.name.compare($1.name, locale: Locale(identifier: "ar")) == .orderedAscending }
     }

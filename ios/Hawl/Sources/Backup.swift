@@ -1,5 +1,6 @@
 import SwiftUI
 import UniformTypeIdentifiers
+import CryptoKit
 
 // MARK: - النسخة الاحتياطية (ملف موحّد مع أندرويد) ومزامنة iCloud
 
@@ -9,7 +10,12 @@ enum Backup {
         "fcm_token", "push_token", "push_topic", "notice_checked", "notice_seen", "notif_until", "v_try", "loc_time",
         "bridge_diag", "open_route", "migrated_v2", "audio_downloads", "internal_device", "icloud_on", "sync_at",
         "sync_device", "web_restore_pending", "update_checked", "wird_snooze_at", "welcomed",
+        "sync_hash", "sync_dirty_at",
     ]
+    /** قيم تتغيّر وحدها على كل جهاز (آية اليوم، الموقع، الجولة…) فلا تُعدّ تغييرًا في بيانات القارئ عند المزامنة */
+    private static let volatile: Set<String> = ["lat", "lng", "city", "country", "read_time", "tour_v", "push_last_msg",
+                                                 "hifz_total", "hifz_next", "hifz_held", "hifz_pct"]
+    private static let volatilePrefixes = ["v_"]
     private static let skipPrefixes = ["live_", "push_", "dismiss", "NS", "Apple", "com.apple", "WebKit", "WebDatabase", "azkar_progress_"]
 
     private static func keep(_ k: String) -> Bool {
@@ -38,6 +44,16 @@ enum Backup {
     static func payload(includeWeb: Bool = true) -> [String: Any] {
         var prefs: [String: Any] = [:]
         for (k, v) in domain where keep(k) && k != "web_state" { if let c = clean(v) { prefs[k] = c } }
+        // «تابع الاستماع» بالصيغة الموحّدة مع أندرويد: {reciter, moshaf, surah, pos (ملّي ثانية)}
+        if let l = ListenLast.decodeRich(Store.d.string(forKey: "listen_last")), l.track.reciterID > 0, l.track.surah > 0 {
+            prefs["listen_last"] = ["reciter": l.track.reciterID, "moshaf": l.track.moshafID, "surah": l.track.surah,
+                                    "pos": Int(l.pos * 1000), "name": l.track.reciter]
+        } else if let s = Store.d.string(forKey: "listen_last"), let d = s.data(using: .utf8),
+                  let o = try? JSONSerialization.jsonObject(with: d) as? [String: Any] {
+            prefs["listen_last"] = o
+        } else {
+            prefs.removeValue(forKey: "listen_last")
+        }
         var out: [String: Any] = ["app": "hawlalaalam", "v": 1, "at": Int(Date().timeIntervalSince1970), "platform": "ios", "prefs": prefs]
         if includeWeb, let s = Store.d.string(forKey: "web_state"), let d = s.data(using: .utf8),
            let w = try? JSONSerialization.jsonObject(with: d) as? [String: Any] { out["web"] = w }
@@ -48,19 +64,61 @@ enum Backup {
         try? JSONSerialization.data(withJSONObject: payload(includeWeb: includeWeb), options: [.sortedKeys])
     }
 
+    /** بصمة بيانات القارئ (دون الوقت والقيم المتغيّرة وحدها، ومع ترتيب ثابت لمفاتيح صفحة المصحف) */
+    static func fingerprint() -> String {
+        var p = payload()
+        p.removeValue(forKey: "at")
+        if var prefs = p["prefs"] as? [String: Any] {
+            for k in Array(prefs.keys) where volatile.contains(k) || volatilePrefixes.contains(where: { k.hasPrefix($0) }) {
+                prefs.removeValue(forKey: k)
+            }
+            p["prefs"] = prefs
+        }
+        guard let d = try? JSONSerialization.data(withJSONObject: p, options: [.sortedKeys]) else { return "" }
+        return SHA256.hash(data: d).map { String(format: "%02x", $0) }.joined()
+    }
+
+    /** يحوّل صيغ أندرويد القديمة إلى أسماء آيفون: khatma.X ← khatma_X، وقائمة المفضّلين نصًّا ← أرقام */
+    private static func normalize(_ key: String, _ value: Any) -> (String, Any)? {
+        var k = key
+        if k.hasPrefix("khatma.") { k = "khatma_" + k.dropFirst("khatma.".count) }
+        else if k.hasPrefix("reading.") { k = String(k.dropFirst("reading.".count)) }
+        else if k.hasPrefix("tasbeeh.") { k = String(k.dropFirst("tasbeeh.".count)) }
+        switch k {
+        case "listen_favs":
+            if let a = value as? [Any] { return (k, a.compactMap { ($0 as? NSNumber)?.intValue ?? Int("\($0)") }) }
+            if let s = value as? String, let d = s.data(using: .utf8), let a = try? JSONSerialization.jsonObject(with: d) as? [Any] {
+                return (k, a.compactMap { ($0 as? NSNumber)?.intValue ?? Int("\($0)") })
+            }
+            return nil
+        case "listen_last":
+            // الصيغة الموحّدة كائن؛ نخزّنه نصًّا كما هو (يفهمه AudioPlayer.last)، والنص القديم من آيفون يُخزَّن كما هو
+            if let o = value as? [String: Any], let d = try? JSONSerialization.data(withJSONObject: o),
+               let s = String(data: d, encoding: .utf8) { return (k, s) }
+            if let s = value as? String { return (k, s) }
+            return nil
+        default:
+            return (k, value)
+        }
+    }
+
     struct Invalid: LocalizedError { var errorDescription: String? { "هذا الملف ليس نسخة احتياطية من «القرآن حول العالم»" } }
 
     /** يكتب القيم المحفوظة (يستبدل ما يقابلها ويبقي ما سواه) */
     @MainActor static func restore(_ data: Data) throws {
         guard let o = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
               (o["app"] as? String) == "hawlalaalam", let prefs = o["prefs"] as? [String: Any] else { throw Invalid() }
-        for (k, v) in prefs where keep(k) { Store.d.set(v, forKey: k) }
+        for (k0, v0) in prefs {
+            guard let (k, v) = normalize(k0, v0), keep(k) else { continue }
+            Store.d.set(v, forKey: k)
+        }
         if let w = o["web"] as? [String: Any], !w.isEmpty,
            let d = try? JSONSerialization.data(withJSONObject: w), let s = String(data: d, encoding: .utf8) {
             Store.d.set(s, forKey: "web_state")
             Store.d.set(true, forKey: "web_restore_pending")
         }
         AppState.shared.reloadFromStore()
+        ListenCatalog.shared.reloadFavorites()
     }
 
     static func fileName(_ date: Date = Date()) -> String {
@@ -78,12 +136,19 @@ enum Backup {
     }
 }
 
-/** مزامنة iCloud (مخزن المفاتيح): الأحدث يفوز، والحمولة نفسها في ملف النسخة الاحتياطية */
+/**
+ * مزامنة iCloud (مخزن المفاتيح). الحمولة نفسها في ملف النسخة الاحتياطية.
+ * - الوقت المحفوظ هو وقت تغيّر البيانات على الجهاز، لا وقت الرفع؛ والأحدث يفوز.
+ * - لا رفع إلا إذا تغيّرت بصمة البيانات منذ آخر مزامنة، فالجهاز الذي فُتح دون تغيير لا يكتب فوق غيره.
+ * - عند فتح التطبيق نسحب أولًا ثم نرفع، ولا رفع أثناء تطبيق نسخة واردة ولا بعدها مباشرة (حتى لا يتبادل جهازان الاستعادة).
+ */
 @MainActor
 enum CloudSync {
     private static let kv = NSUbiquitousKeyValueStore.default
     private static var observing = false
     private static var pushTask: Task<Void, Never>?
+    private static var applying = false
+    private static var quietUntil = Date.distantPast
     static let limit = 900_000
 
     static var enabled: Bool { Store.bool("icloud_on", false) }
@@ -100,8 +165,24 @@ enum CloudSync {
         return t > 0 ? Date(timeIntervalSince1970: t) : nil
     }
 
-    /** ما في iCloud: وقته والجهاز الذي رفعه */
+    /** ما في iCloud: وقت تغيّر بياناته والجهاز الذي رفعه */
     static var remoteAt: Double { kv.double(forKey: "at") }
+
+    /** تغيّرت بيانات هذا الجهاز منذ آخر مزامنة؟ */
+    private static var dirty: Bool { Backup.fingerprint() != (Store.d.string(forKey: "sync_hash") ?? "") }
+    private static var dirtyAt: Double { Store.d.double(forKey: "sync_dirty_at") }
+
+    private static func markSynced(at: Double) {
+        Store.d.set(at, forKey: "sync_at")
+        Store.d.set(Backup.fingerprint(), forKey: "sync_hash")
+        Store.d.set(0.0, forKey: "sync_dirty_at")
+    }
+
+    /** يسجّل وقت أول تغيّر لم يُرفع بعد */
+    private static func noteChange() {
+        guard !applying, Date() >= quietUntil, dirty else { return }
+        if dirtyAt == 0 { Store.d.set(Date().timeIntervalSince1970, forKey: "sync_dirty_at") }
+    }
 
     static func start() {
         guard enabled else { return }
@@ -123,16 +204,33 @@ enum CloudSync {
     }
 
     static func pullIfNewer() {
-        guard enabled, let dev = kv.string(forKey: "device"), dev != deviceID,
+        guard enabled, !applying, let dev = kv.string(forKey: "device"), dev != deviceID,
               remoteAt > Store.d.double(forKey: "sync_at"), let d = kv.data(forKey: "backup") else { return }
-        if (try? Backup.restore(d)) != nil {
-            Store.d.set(remoteAt, forKey: "sync_at")
+        noteChange()
+        // تغيير محلي أحدث من الوارد: يبقى المحلي ويُرفع
+        if dirty, dirtyAt > remoteAt { push(); return }
+        apply(d, at: remoteAt)
+    }
+
+    private static func apply(_ d: Data, at: Double) {
+        applying = true
+        defer { applying = false }
+        guard (try? Backup.restore(d)) != nil else { return }
+        markSynced(at: at)
+        // صفحة المصحف تعيد إرسال حالتها بعد الاستعادة: نعدّها جزءًا منها لا تغييرًا جديدًا
+        quietUntil = Date().addingTimeInterval(15)
+        pushTask?.cancel()
+        Task { @MainActor in
+            try? await Task.sleep(nanoseconds: 16_000_000_000)
+            if !CloudSync.applying, Store.d.double(forKey: "sync_at") == at { Store.d.set(Backup.fingerprint(), forKey: "sync_hash") }
         }
     }
 
-    /** رفع مؤجّل (تُجمع التغييرات المتتالية) */
+    /** رفع مؤجّل (تُجمع التغييرات المتتالية)، فقط إن تغيّرت البيانات */
     static func schedulePush() {
-        guard enabled else { return }
+        guard enabled, !applying, Date() >= quietUntil else { return }
+        noteChange()
+        guard dirtyAt > 0 else { return }
         pushTask?.cancel()
         pushTask = Task { @MainActor in
             try? await Task.sleep(nanoseconds: 4_000_000_000)
@@ -140,26 +238,32 @@ enum CloudSync {
         }
     }
 
-    static func push() {
-        guard enabled else { return }
+    /** يرفع إن كانت هناك تغييرات لم تُرفع (يُستدعى أيضًا عند الانتقال للخلفية) */
+    static func push(force: Bool = false) {
+        guard enabled, !applying else { return }
+        if !force {
+            noteChange()
+            guard dirty else { return }
+        }
         var d = Backup.data()
         if (d?.count ?? 0) > limit { d = Backup.data(includeWeb: false) }      // الحد الأقصى في iCloud ١ م.ب
         guard let data = d, data.count <= limit else { return }
-        let at = Date().timeIntervalSince1970
+        let at = dirtyAt > 0 ? dirtyAt : Date().timeIntervalSince1970
         kv.set(data, forKey: "backup")
         kv.set(at, forKey: "at")
         kv.set(deviceID, forKey: "device")
         kv.synchronize()
-        Store.d.set(at, forKey: "sync_at")
+        markSynced(at: at)
     }
 
     static func setEnabled(_ on: Bool, takeRemote: Bool) {
         Store.d.set(on, forKey: "icloud_on")
         guard on else { return }
-        if takeRemote, let d = kv.data(forKey: "backup"), (try? Backup.restore(d)) != nil {
-            Store.d.set(remoteAt, forKey: "sync_at")
+        kv.synchronize()
+        if takeRemote, let d = kv.data(forKey: "backup") {
+            apply(d, at: remoteAt)
         } else {
-            push()
+            push(force: true)
         }
         start()
     }

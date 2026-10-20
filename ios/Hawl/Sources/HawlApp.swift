@@ -52,10 +52,10 @@ struct HawlApp: App {
 
     private func becameActive() {
         WatchSync.shared.start()
+        CloudSync.start()                            // نسحب ما في iCloud أولًا، ولا يُرفع شيء إلا إذا تغيّرت بيانات هذا الجهاز
         Task { await state.refreshVerse() }
         state.changed()                              // نجدد التنبيهات القادمة ونحدّث الويدجت كلما فُتح التطبيق
         Announce.checkSoon()
-        CloudSync.start()
         LocationService.shared.refreshIfStale()      // state.changed() أعلاه يحدّث نشاط الصلاة الحيّ أيضًا
         if let s = AppDelegate.pendingShortcut, let u = URL(string: s) {
             AppDelegate.pendingShortcut = nil

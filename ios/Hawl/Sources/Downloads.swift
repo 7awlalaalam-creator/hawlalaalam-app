@@ -172,6 +172,14 @@ final class AudioDownloads: NSObject, ObservableObject, URLSessionDownloadDelega
     }
 }
 
+/** قراءة «تابع الاستماع» بصيغة آيفون الكاملة (المقطع وقائمة التشغيل) من أي سياق */
+enum ListenLast {
+    static func decodeRich(_ s: String?) -> AudioPlayer.Last? {
+        guard let s = s, let d = s.data(using: .utf8) else { return nil }
+        return try? JSONDecoder().decode(AudioPlayer.Last.self, from: d)
+    }
+}
+
 // MARK: - مشغّل التلاوات (بث مباشر أو من الملف المحمّل، يستمر مع قفل الشاشة والتحكم من شاشة القفل)
 
 /** مقطع في قائمة التشغيل: سورة لقارئ، أو إذاعة، أو تلاوة محمّلة */
@@ -209,6 +217,8 @@ final class AudioPlayer: ObservableObject {
     private var timeObserver: Any?
     private var endObserver: NSObjectProtocol?
     private var statusObservation: NSKeyValueObservation?
+    private var controlObservation: NSKeyValueObservation?
+    private var wasPlayingBeforeInterruption = false
     private var sleepTask: Task<Void, Never>?
     private var lastSave: Double = 0
 
@@ -233,6 +243,31 @@ final class AudioPlayer: ObservableObject {
             return .success
         }
         updateRemote()
+        // مكالمة أو منبّه أو Siri: يتوقف الصوت ونعكس ذلك على الزر وشاشة القفل، ونستأنف إن سمح النظام
+        NotificationCenter.default.addObserver(forName: AVAudioSession.interruptionNotification, object: nil, queue: .main) { n in
+            let type = (n.userInfo?[AVAudioSessionInterruptionTypeKey] as? UInt).flatMap(AVAudioSession.InterruptionType.init(rawValue:))
+            let opts = AVAudioSession.InterruptionOptions(rawValue: (n.userInfo?[AVAudioSessionInterruptionOptionKey] as? UInt) ?? 0)
+            Task { @MainActor in AudioPlayer.shared.interrupted(type, shouldResume: opts.contains(.shouldResume)) }
+        }
+        // فصل السماعة أو انقطاع البلوتوث: إيقاف مؤقت (لا يعلو الصوت من مكبّر الجوال فجأة)
+        NotificationCenter.default.addObserver(forName: AVAudioSession.routeChangeNotification, object: nil, queue: .main) { n in
+            let reason = (n.userInfo?[AVAudioSessionRouteChangeReasonKey] as? UInt).flatMap(AVAudioSession.RouteChangeReason.init(rawValue:))
+            if reason == .oldDeviceUnavailable { Task { @MainActor in AudioPlayer.shared.pause() } }
+        }
+    }
+
+    private func interrupted(_ type: AVAudioSession.InterruptionType?, shouldResume: Bool) {
+        switch type {
+        case .began?:
+            wasPlayingBeforeInterruption = playing
+            playing = false
+            saveLast(force: true)
+            updateNowPlaying()
+        case .ended?:
+            if shouldResume && wasPlayingBeforeInterruption { resume() }
+            wasPlayingBeforeInterruption = false
+        default: break
+        }
     }
 
     var hasNext: Bool { index + 1 < queue.count }
@@ -282,6 +317,17 @@ final class AudioPlayer: ObservableObject {
                 if st == .failed { AudioPlayer.shared.failed = true; AudioPlayer.shared.buffering = false; AudioPlayer.shared.playing = false }
             }
         }
+        // الحالة الفعلية للمشغّل هي المرجع (إيقاف من النظام أو انتهاء أو تعثّر)
+        controlObservation = p.observe(\.timeControlStatus, options: [.new]) { pl, _ in
+            let st = pl.timeControlStatus
+            Task { @MainActor in
+                let a = AudioPlayer.shared
+                guard a.player === pl else { return }
+                a.buffering = st == .waitingToPlayAtSpecifiedRate
+                let now = st != .paused
+                if a.playing != now { a.playing = now; a.updateNowPlaying() }
+            }
+        }
         if at > 1 { p.seek(to: CMTime(seconds: at, preferredTimescale: 600)) }
         p.playImmediately(atRate: speed)
         playing = true
@@ -299,8 +345,8 @@ final class AudioPlayer: ObservableObject {
     }
 
     private func ended() {
+        if sleepAtEnd { cancelSleep(); finish(); return }      // مؤقت «نهاية السورة» مقدَّم على التكرار
         if repeatOne { seek(0); player?.playImmediately(atRate: speed); return }
-        if sleepAtEnd { cancelSleep(); finish(); return }
         if hasNext { index += 1; load() } else { finish() }
     }
 
@@ -313,7 +359,7 @@ final class AudioPlayer: ObservableObject {
     }
 
     func resume() {
-        if player == nil, current != nil { load(at: position); return }
+        if current != nil, player == nil || failed || player?.currentItem?.status == .failed { load(at: position); return }
         player?.playImmediately(atRate: speed)
         playing = player != nil
         updateNowPlaying()
@@ -397,6 +443,7 @@ final class AudioPlayer: ObservableObject {
         if let e = endObserver { NotificationCenter.default.removeObserver(e) }
         endObserver = nil
         statusObservation = nil
+        controlObservation = nil
         player?.pause()
         player = nil
     }
@@ -406,8 +453,18 @@ final class AudioPlayer: ObservableObject {
     struct Last: Codable { var track: Track; var pos: Double; var queue: [Track]; var index: Int }
 
     static var last: Last? {
-        guard let s = Store.d.string(forKey: "listen_last"), let d = s.data(using: .utf8) else { return nil }
-        return try? JSONDecoder().decode(Last.self, from: d)
+        guard let s = Store.d.string(forKey: "listen_last") else { return nil }
+        if let l = ListenLast.decodeRich(s) { return l }
+        // الصيغة الموحّدة (من نسخة احتياطية أو من أندرويد): {reciter, moshaf, surah, pos بالملّي ثانية}
+        guard let d = s.data(using: .utf8), let o = try? JSONSerialization.jsonObject(with: d) as? [String: Any],
+              let rid = (o["reciter"] as? NSNumber)?.intValue, let sura = (o["surah"] as? NSNumber)?.intValue,
+              let r = ListenCatalog.shared.reciter(rid) else { return nil }
+        let mid = (o["moshaf"] as? NSNumber)?.intValue ?? 0
+        guard let m = r.moshaf.first(where: { $0.id == mid }) ?? r.moshaf.first, m.surahs.contains(sura) else { return nil }
+        let q = ListenCatalog.tracks(r, m)
+        guard let i = q.firstIndex(where: { $0.surah == sura }) else { return nil }
+        let pos = ((o["pos"] as? NSNumber)?.doubleValue ?? 0) / 1000
+        return Last(track: q[i], pos: pos, queue: q, index: i)
     }
 
     func resumeLast() {

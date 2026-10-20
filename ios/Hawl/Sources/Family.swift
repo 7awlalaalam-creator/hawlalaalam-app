@@ -16,7 +16,7 @@ struct FamilyGroup: Decodable, Hashable {
     let deadline: String?
     let round: Int?
     let parts: [FamilyPart]
-    let admin: Bool?
+    var admin: Bool?
 
     var doneCount: Int { parts.filter { $0.done }.count }
     var takenCount: Int { parts.filter { $0.by != nil }.count }
@@ -110,10 +110,12 @@ enum FamilyAPI {
     /** رمز الختمة من رابط الدعوة أو من الرمز نفسه */
     static func parseID(_ s: String) -> String? {
         let t = s.trimmingCharacters(in: .whitespacesAndNewlines)
-        if let u = URL(string: t), let id = URLComponents(url: u, resolvingAgainstBaseURL: false)?.queryItems?.first(where: { $0.name == "id" })?.value {
-            return valid(id) ? id.uppercased() : nil
+        if valid(t) { return t.uppercased() }
+        // رسالة الدعوة كاملة أو رابط بمعاملات إضافية: نبحث عن id=XXXXXX في أي موضع
+        if let r = t.range(of: "[?&]id=([A-Za-z2-9]{6})(?![A-Za-z0-9])", options: .regularExpression) {
+            return String(t[r].suffix(6)).uppercased()
         }
-        return valid(t) ? t.uppercased() : nil
+        return nil
     }
 
     static func valid(_ id: String) -> Bool { id.range(of: "^[A-Za-z2-9]{6}$", options: .regularExpression) != nil }
@@ -308,6 +310,7 @@ struct FamilyGroupView: View {
     @State private var loadError: String?
     @State private var sheet: FamilyPart?
     @State private var who = FamilyAPI.myName
+    @State private var seq = 0                       // ردود التحديث الأقدم من آخر إجراء تُهمل
     @State private var busy = false
     @State private var confirmDelete = false
     @State private var confirmRound = false
@@ -549,8 +552,11 @@ struct FamilyGroupView: View {
     }
 
     private func refresh(quiet: Bool = false) async {
+        seq += 1
+        let mine = seq
         do {
             let g = try await FamilyAPI.get(id)
+            guard mine == seq else { return }
             group = g
             loadError = nil
             FamilyAPI.remember(g)
@@ -564,7 +570,11 @@ struct FamilyGroupView: View {
         busy = true
         defer { busy = false }
         do {
-            group = try await f()
+            var g = try await f()
+            // ردود الحجز والإتمام لا تحمل صلاحية المنشئ: نعيدها من مفتاحه المحفوظ
+            if FamilyAPI.adminKey(id) != nil { g.admin = true }
+            seq += 1                                 // أي تحديث أُرسل قبل هذا الرد صار قديمًا
+            group = g
             UIImpactFeedbackGenerator(style: .light).impactOccurred()
         } catch {
             self.error = error.localizedDescription

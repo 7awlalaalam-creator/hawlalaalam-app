@@ -20,7 +20,11 @@ enum TafsirData {
         return l[s - 1][a - 1]
     }
 
-    static var source: String { _ = text(1, 1); return doc?.src ?? "التفسير الميسر — مجمع الملك فهد لطباعة المصحف الشريف" }
+    /** لا يقرأ الملف: يُعرض الاسم الافتراضي حتى يُحمَّل التفسير في الخلفية */
+    static var source: String {
+        lock.lock(); defer { lock.unlock() }
+        return doc?.src ?? "التفسير الميسر — مجمع الملك فهد لطباعة المصحف الشريف"
+    }
 
     /** صفحة الآية في مصحف المدينة (من mushaf.json) */
     static func page(_ s: Int, _ a: Int) -> Int {
@@ -46,6 +50,7 @@ struct TafsirView: View {
     @State private var verse = ""
     @State private var tafsir = ""
     @State private var loaded = false
+    @State private var page = 0
 
     init(surah: Int, ayah: Int) {
         let ok = Quran.valid(surah, ayah)
@@ -82,7 +87,7 @@ struct TafsirView: View {
                 .card()
 
                 HStack(spacing: 8) {
-                    Button { state.openMushaf(page: TafsirData.page(s, a)) } label: {
+                    Button { state.openMushaf(page: page > 0 ? page : Quran.surahStart[max(0, min(113, s - 1))]) } label: {
                         Pill(title: "افتح في المصحف", systemImage: "book", primary: true, height: 48)
                     }
                     Button { shareImage() } label: { Pill(title: "صورة للمشاركة", systemImage: "photo", height: 48) }
@@ -118,10 +123,11 @@ struct TafsirView: View {
 
     private func load() async {
         let (ss, aa) = (s, a)
-        let r = await Task.detached(priority: .userInitiated) { (Quran.verse(ss, aa) ?? "", TafsirData.text(ss, aa)) }.value
+        let r = await Task.detached(priority: .userInitiated) { (Quran.verse(ss, aa) ?? "", TafsirData.text(ss, aa), TafsirData.page(ss, aa)) }.value
         guard ss == s, aa == a else { return }
         verse = r.0
         tafsir = r.1
+        page = r.2
         loaded = true
     }
 
