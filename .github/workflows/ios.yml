@@ -65,7 +65,9 @@ jobs:
         working-directory: ios
         run: |
           APP=build/dd/Build/Products/Debug-iphonesimulator/Hawl.app
-          MODEL=$(xcrun simctl list devicetypes | grep -oE "iPhone 1[5-7] Pro \(" | head -1 | sed 's/ ($//')
+          # Pro Max: مقاس 6.9 بوصة المطلوب لصور متجر App Store
+          MODEL=$(xcrun simctl list devicetypes | grep -oE "iPhone 1[6-7] Pro Max \(" | tail -1 | sed 's/ ($//')
+          [ -n "$MODEL" ] || MODEL=$(xcrun simctl list devicetypes | grep -oE "iPhone 1[5-7] Pro \(" | head -1 | sed 's/ ($//')
           UDID=$(xcrun simctl create shots "${MODEL:-iPhone 15 Pro}")
           xcrun simctl boot "$UDID"
           xcrun simctl bootstatus "$UDID" -b
@@ -78,7 +80,7 @@ jobs:
           go() { xcrun simctl openurl "$UDID" "$1" || true; shot "$2" "$3"; }
           # كل شاشة بتشغيل جديد ووسيط -open_route (دون نافذة «فتح في…؟» التي يُظهرها openurl)
           route() { xcrun simctl terminate "$UDID" com.hawlalaalam.quran || true; sleep 1
-                    xcrun simctl launch "$UDID" com.hawlalaalam.quran "${ARGS[@]}" -open_route "$1"; shot "$2" "${3:-7}"; }
+                    SIMCTL_CHILD_TZ=Asia/Riyadh xcrun simctl launch "$UDID" com.hawlalaalam.quran "${ARGS[@]}" -open_route "$1"; shot "$2" "${3:-7}"; }
           for mode in light dark; do
             xcrun simctl ui "$UDID" appearance $mode
             xcrun simctl terminate "$UDID" com.hawlalaalam.quran || true
@@ -126,7 +128,7 @@ jobs:
           mkdir -p shots
           # بيانات تجريبية كما يرسلها الآيفون (جدة، ختمة جارية، آية اليوم)
           A=(-lat '<real>21.5433</real>' -lng '<real>39.1728</real>' -city 'جدة' -country 'SA' -w_k_active '<true/>' -w_k_done '<integer>8</integer>' -w_k_target '<integer>20</integer>' -w_k_line 'بقي ١٢ صفحة · من صفحة ٢٨٢' -w_tasbeeh '<integer>27</integer>')
-          xcrun simctl launch "$W" com.hawlalaalam.quran.watchkitapp "${A[@]}"; sleep 12
+          SIMCTL_CHILD_TZ=Asia/Riyadh xcrun simctl launch "$W" com.hawlalaalam.quran.watchkitapp "${A[@]}"; sleep 12
           xcrun simctl io "$W" screenshot shots/watch-1-prayer.png || true
           ls -la shots | grep watch || true
 
