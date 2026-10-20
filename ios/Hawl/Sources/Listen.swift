@@ -84,8 +84,13 @@ struct Reciter: Codable, Hashable, Identifiable {
     var initial: String {
         let alef: Set<Character> = ["ا", "أ", "إ", "آ"]
         guard let f = name.first else { return "ق" }
-        if alef.contains(f), let last = name.split(separator: " ").last?.first, !alef.contains(last) { return String(last) }
-        return String(f)
+        if !alef.contains(f) { return String(f) }
+        // «إبراهيم الأخضر» ← «خ»: من آخر كلمة دون «ال»
+        for w in name.split(separator: " ").reversed() {
+            let core = w.hasPrefix("ال") && w.count > 2 ? w.dropFirst(2) : Substring(w)
+            if let c = core.first, !alef.contains(c) { return String(c) }
+        }
+        return String(name.first(where: { !alef.contains($0) && $0 != " " }) ?? f)
     }
     var surahCount: Int { moshaf.map { $0.surahs.count }.max() ?? 0 }
 }
