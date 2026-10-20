@@ -51,6 +51,7 @@ struct HawlApp: App {
     }
 
     private func becameActive() {
+        WatchSync.shared.start()
         Task { await state.refreshVerse() }
         state.changed()                              // نجدد التنبيهات القادمة ونحدّث الويدجت كلما فُتح التطبيق
         Announce.checkSoon()

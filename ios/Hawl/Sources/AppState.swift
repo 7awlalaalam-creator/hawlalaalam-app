@@ -108,6 +108,7 @@ final class AppState: ObservableObject {
         Push.sync()                                  // مفتاح الأخبار: الاشتراك أو إلغاؤه في الإشعارات الفورية
         LiveActivities.refresh()                     // الموقع أو طريقة الحساب أو مفتاح النشاط الحي تغيّرت
         CloudSync.schedulePush()
+        WatchSync.shared.send()                      // الساعة: الموقع والورد وآية اليوم
     }
 
     /** بعد استعادة نسخة احتياطية أو مزامنة من iCloud: نقرأ الإعدادات من جديد */
@@ -125,7 +126,7 @@ final class AppState: ObservableObject {
     }
 
     /** إعادة رسم الشاشات بعد تغيّر بيانات خارجية (حالة الحفظ من صفحة المصحف) */
-    func touch() { rev += 1 }
+    func touch() { rev += 1; WatchSync.shared.send() }
 
     // MARK: الإعدادات كمفاتيح
 
@@ -238,6 +239,7 @@ final class AppState: ObservableObject {
         if let v = await Self.fetchVerse() {
             verse = v
             WidgetCenter.shared.reloadAllTimelines()
+            WatchSync.shared.send()
             Notifications.reschedule()
         }
     }

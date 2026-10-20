@@ -6,6 +6,7 @@ options:
   bundleIdPrefix: com.hawlalaalam
   deploymentTarget:
     iOS: "16.1"
+    watchOS: "9.0"
   developmentLanguage: ar
   createIntermediateGroups: true
 # الإشعارات الفورية (نفس مشروع Firebase المستخدم في أندرويد)
@@ -50,6 +51,13 @@ targets:
       - target: HawlWidgets
         embed: true
         codeSign: true
+      # تطبيق الساعة: يُثبَّت تلقائيًا على Apple Watch مع تطبيق الآيفون
+      - target: HawlWatch
+        embed: true
+        codeSign: true
+        copy:
+          destination: productsDirectory
+          subpath: "$(CONTENTS_FOLDER_PATH)/Watch"
       - package: Firebase
         product: FirebaseMessaging
     entitlements:
@@ -178,6 +186,77 @@ targets:
         SKIP_INSTALL: YES
         ENABLE_PREVIEWS: NO
         LD_RUNPATH_SEARCH_PATHS: "$(inherited) @executable_path/Frameworks @executable_path/../../Frameworks"
+
+  # تطبيق Apple Watch: الصلاة القادمة، ورد اليوم، التسبيح، آية اليوم (watchOS 9+، تطبيق واحد بلا امتداد WatchKit)
+  HawlWatch:
+    type: application
+    platform: watchOS
+    sources:
+      - path: HawlWatch/Sources
+      - path: HawlWatch/Common
+      - path: HawlWatch/Assets.xcassets
+      # نفس حساب المواقيت وتنسيق الأرقام في الآيفون (لا يعتمدان على UIKit)
+      - path: Hawl/Shared/PrayerTimes.swift
+      - path: Hawl/Shared/Format.swift
+    dependencies:
+      - target: HawlWatchWidgets
+        embed: true
+        codeSign: true
+    entitlements:
+      path: HawlWatch/HawlWatch.entitlements
+      properties:
+        com.apple.security.application-groups:
+          - group.com.hawlalaalam.quran
+    info:
+      path: HawlWatch/Info.plist
+      properties:
+        CFBundleDisplayName: "حول العالم"
+        CFBundleDevelopmentRegion: ar
+        CFBundleShortVersionString: $(MARKETING_VERSION)
+        CFBundleVersion: $(CURRENT_PROJECT_VERSION)
+        WKApplication: true
+        WKCompanionAppBundleIdentifier: com.hawlalaalam.quran
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.hawlalaalam.quran.watchkitapp
+        TARGETED_DEVICE_FAMILY: "4"
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+        ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME: AccentColor
+        CODE_SIGN_STYLE: Automatic
+        SKIP_INSTALL: YES
+        ENABLE_PREVIEWS: NO
+
+  # تعقيدات واجهة الساعة: الصلاة القادمة والعدّ التنازلي
+  HawlWatchWidgets:
+    type: app-extension
+    platform: watchOS
+    sources:
+      - path: HawlWatchWidgets/Sources
+      - path: HawlWatch/Common
+      - path: Hawl/Shared/PrayerTimes.swift
+      - path: Hawl/Shared/Format.swift
+    entitlements:
+      path: HawlWatchWidgets/HawlWatchWidgets.entitlements
+      properties:
+        com.apple.security.application-groups:
+          - group.com.hawlalaalam.quran
+    info:
+      path: HawlWatchWidgets/Info.plist
+      properties:
+        CFBundleDisplayName: "حول العالم"
+        CFBundleDevelopmentRegion: ar
+        CFBundleShortVersionString: $(MARKETING_VERSION)
+        CFBundleVersion: $(CURRENT_PROJECT_VERSION)
+        NSExtension:
+          NSExtensionPointIdentifier: com.apple.widgetkit-extension
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.hawlalaalam.quran.watchkitapp.widgets
+        TARGETED_DEVICE_FAMILY: "4"
+        CODE_SIGN_STYLE: Automatic
+        SKIP_INSTALL: YES
+        ENABLE_PREVIEWS: NO
+        LD_RUNPATH_SEARCH_PATHS: "$(inherited) @executable_path/Frameworks @executable_path/../../Frameworks"
 schemes:
   Hawl:
     build:
@@ -186,3 +265,8 @@ schemes:
         HawlWidgets: all
     archive:
       config: Release
+  HawlWatch:
+    build:
+      targets:
+        HawlWatch: all
+        HawlWatchWidgets: all

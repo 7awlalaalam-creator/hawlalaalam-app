@@ -31,6 +31,12 @@ jobs:
           R=$(dirname "$(find /tmp/p -name settings.gradle.kts | head -1)")
           cp -r "$R"/app .
 
+      - name: منصة watchOS (لتطبيق الساعة)
+        run: |
+          xcodebuild -showsdks | grep -i watch || true
+          if ! xcodebuild -showsdks | grep -qi watchos; then xcodebuild -downloadPlatform watchOS; fi
+          xcrun simctl list runtimes | grep -i watch || true
+
       - name: تثبيت XcodeGen
         run: brew install xcodegen
 
@@ -42,8 +48,9 @@ jobs:
         working-directory: ios
         run: |
           set -o pipefail
+          # دون -sdk: تطبيق الساعة المضمَّن يُبنى تلقائيًا لمحاكي الساعة
           xcodebuild -project Hawl.xcodeproj -scheme Hawl -configuration Debug \
-            -sdk iphonesimulator -destination 'generic/platform=iOS Simulator' -derivedDataPath build/dd \
+            -destination 'generic/platform=iOS Simulator' -derivedDataPath build/dd \
             CODE_SIGNING_ALLOWED=NO build 2>&1 | tee build.log | grep -E "error:|warning: |BUILD (SUCCEEDED|FAILED)" || true
           if ! grep -q "BUILD SUCCEEDED" build.log; then
             # الأخطاء تظهر في صفحة التشغيل (Annotations) لتسهيل إصلاحها
@@ -100,6 +107,29 @@ jobs:
           shot "live-island" 5
           ls -la shots
 
+      - name: لقطات تطبيق الساعة على محاكي Apple Watch
+        continue-on-error: true
+        timeout-minutes: 15
+        working-directory: ios
+        run: |
+          set -x
+          WAPP=$(find build/dd/Build/Products -path "*watchsimulator*" -name "HawlWatch.app" -maxdepth 3 | head -1)
+          echo "watch app: $WAPP"
+          [ -n "$WAPP" ] || exit 0
+          WT=$(xcrun simctl list devicetypes | grep -oE "Apple Watch Series [0-9]+ \(4[56]mm\)" | tail -1)
+          [ -n "$WT" ] || WT=$(xcrun simctl list devicetypes | grep -oE "Apple Watch[^()]*\([0-9]+mm\)" | tail -1)
+          WR=$(xcrun simctl list runtimes | grep -i watchos | grep -oE "com\.apple\.CoreSimulator\.SimRuntime\.watchOS-[0-9-]+" | tail -1)
+          [ -n "$WT" ] && [ -n "$WR" ] || { echo "no watch simulator"; exit 0; }
+          W=$(xcrun simctl create wshots "$WT" "$WR")
+          xcrun simctl boot "$W"; xcrun simctl bootstatus "$W" -b || sleep 30
+          xcrun simctl install "$W" "$WAPP"
+          mkdir -p shots
+          # بيانات تجريبية كما يرسلها الآيفون (جدة، ختمة جارية، آية اليوم)
+          A=(-lat '<real>21.5433</real>' -lng '<real>39.1728</real>' -city 'جدة' -country 'SA' -w_k_active '<true/>' -w_k_done '<integer>8</integer>' -w_k_target '<integer>20</integer>' -w_k_line 'بقي ١٢ صفحة · من صفحة ٢٨٢' -w_tasbeeh '<integer>27</integer>')
+          xcrun simctl launch "$W" com.hawlalaalam.quran.watchkitapp "${A[@]}"; sleep 12
+          xcrun simctl io "$W" screenshot shots/watch-1-prayer.png || true
+          ls -la shots | grep watch || true
+
       - name: نشر اللقطات في فرع ci-shots (للمراجعة دون تنزيل)
         if: always()
         working-directory: ios
@@ -137,6 +167,12 @@ jobs:
           R=$(dirname "$(find /tmp/p -name settings.gradle.kts | head -1)")
           cp -r "$R"/app .
 
+      - name: منصة watchOS (لتطبيق الساعة)
+        run: |
+          xcodebuild -showsdks | grep -i watch || true
+          if ! xcodebuild -showsdks | grep -qi watchos; then xcodebuild -downloadPlatform watchOS; fi
+          xcrun simctl list runtimes | grep -i watch || true
+
       - name: توليد المشروع
         working-directory: ios
         run: |
@@ -148,7 +184,7 @@ jobs:
         run: |
           set -o pipefail
           xcodebuild -project Hawl.xcodeproj -scheme Hawl -configuration Release \
-            -sdk iphoneos -destination 'generic/platform=iOS' -derivedDataPath build/dev \
+            -destination 'generic/platform=iOS' -derivedDataPath build/dev \
             CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO CODE_SIGN_IDENTITY="" \
             CURRENT_PROJECT_VERSION="${{ github.run_number }}" build 2>&1 | tee ipa.log | grep -E "error:|BUILD (SUCCEEDED|FAILED)" || true
           grep -q "BUILD SUCCEEDED" ipa.log
@@ -216,6 +252,13 @@ jobs:
                   r = requests.delete(f"{B}/certificates/{c['id']}", headers=H)
                   print("revoked", c["id"], r.status_code)
           PY
+
+      - name: منصة watchOS (لتطبيق الساعة)
+        if: steps.check.outputs.ready == 'true'
+        run: |
+          xcodebuild -showsdks | grep -i watch || true
+          if ! xcodebuild -showsdks | grep -qi watchos; then xcodebuild -downloadPlatform watchOS; fi
+          xcrun simctl list runtimes | grep -i watch || true
 
       - name: توليد المشروع
         if: steps.check.outputs.ready == 'true'
