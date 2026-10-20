@@ -28,7 +28,10 @@ run() {
   shot ${m}-06-tafsir "$H/ayah-2-152.html" 6
   shot ${m}-07-family "$H/family-khatma.html" 8
   shot ${m}-08-tools .ToolsActivity 6
+  adb logcat -c
   shot ${m}-09-mushaf .MainActivity 10
+  adb logcat -d | grep -iE "AndroidRuntime|FATAL|chromium|hawl|Exception" | tail -80 > shots/${m}-mushaf-log.txt
+  shot ${m}-10-mushaf-url "https://7awlalaalam.com/quran/index.php?action=quran" 10
 }
 run light
 adb shell cmd uimode night yes; sleep 2

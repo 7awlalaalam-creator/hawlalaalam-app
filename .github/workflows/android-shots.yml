@@ -43,6 +43,6 @@ jobs:
         run: |
           [ -d shots ] || exit 0
           git config --global user.name "ci"; git config --global user.email "ci@users.noreply.github.com"
-          rm -rf /tmp/cs && mkdir -p /tmp/cs && cp shots/*.png /tmp/cs/ 2>/dev/null || exit 0
+          rm -rf /tmp/cs && mkdir -p /tmp/cs && cp shots/*.png shots/*.txt /tmp/cs/ 2>/dev/null; ls /tmp/cs | grep -q . || exit 0
           cd /tmp/cs && git init -q && git checkout -q -b ci-shots-android && git add . && git commit -qm "android shots ${{ github.sha }}"
           git push -qf "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git" ci-shots-android
