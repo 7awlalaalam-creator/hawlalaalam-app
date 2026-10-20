@@ -200,6 +200,23 @@ jobs:
           printf '%s' "$ASC_KEY_P8" > "$RUNNER_TEMP/keys/AuthKey_$ASC_KEY_ID.p8"
           echo "ASC_KEY_PATH=$RUNNER_TEMP/keys/AuthKey_$ASC_KEY_ID.p8" >> "$GITHUB_ENV"
 
+      - name: تنظيف شهادات التطوير المؤقتة (كل بناء على GitHub يصنع واحدة ولا يحتفظ بمفتاحها)
+        if: steps.check.outputs.ready == 'true'
+        run: |
+          pip3 install -q --break-system-packages pyjwt cryptography requests 2>/dev/null || pip3 install -q pyjwt cryptography requests
+          python3 - <<'PY'
+          import os, time, jwt, requests
+          t = jwt.encode({"iss": os.environ["ASC_ISSUER_ID"], "iat": int(time.time()), "exp": int(time.time()) + 600, "aud": "appstoreconnect-v1"},
+                         os.environ["ASC_KEY_P8"], algorithm="ES256", headers={"kid": os.environ["ASC_KEY_ID"], "typ": "JWT"})
+          H = {"Authorization": "Bearer " + t}
+          B = "https://api.appstoreconnect.apple.com/v1"
+          cs = requests.get(B + "/certificates?filter[certificateType]=DEVELOPMENT&limit=50", headers=H).json().get("data", [])
+          for c in cs:
+              if "Created via API" in (c["attributes"].get("name") or ""):
+                  r = requests.delete(f"{B}/certificates/{c['id']}", headers=H)
+                  print("revoked", c["id"], r.status_code)
+          PY
+
       - name: توليد المشروع
         if: steps.check.outputs.ready == 'true'
         working-directory: ios
