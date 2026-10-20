@@ -162,6 +162,20 @@ final class HawlBridge: NSObject, WKScriptMessageHandler {
             Store.d.set(o["held"] as? Int ?? 0, forKey: "hifz_held")
             Store.d.set(o["pct"] as? Int ?? 0, forKey: "hifz_pct")
             AppState.shared.touch()
+        case "state":
+            // مرآة حالة صفحة المصحف (العلامات والحفظ والملاحظات…) للنسخة الاحتياطية والمزامنة
+            let raw = o["data"]
+            guard let data = (raw as? [String: Any]) ?? ((raw as? String)?.data(using: .utf8).flatMap { try? JSONSerialization.jsonObject(with: $0) as? [String: Any] }),
+                  let d = try? JSONSerialization.data(withJSONObject: data), let s = String(data: d, encoding: .utf8) else { return }
+            if Store.d.bool(forKey: "web_restore_pending") { return }      // ننتظر الاستعادة أولًا
+            if s != Store.d.string(forKey: "web_state") {
+                Store.d.set(s, forKey: "web_state")
+                CloudSync.schedulePush()
+            }
+        case "restore":
+            guard Store.d.bool(forKey: "web_restore_pending"), let s = Store.d.string(forKey: "web_state") else { return }
+            Store.d.set(false, forKey: "web_restore_pending")
+            web?.evaluateJavaScript("window.__hawlRestore&&window.__hawlRestore(\(s))", completionHandler: nil)
         default: break                                    // media: التحكم من شاشة القفل يتولاه النظام في iOS
         }
     }
@@ -272,7 +286,8 @@ struct MushafWebView: UIViewRepresentable {
         func load(_ web: WKWebView, page: Int, extra: String = "") {
             requestedPage = page
             let p = max(1, min(Quran.pages, page))
-            let more = extra.isEmpty ? "" : "&" + extra
+            var more = extra.isEmpty ? "" : "&" + extra
+            if Store.d.bool(forKey: "web_restore_pending") { more += "&restore=1" }   // بعد استعادة نسخة احتياطية
             if let url = URL(string: "hawl://app/__hawl/mushaf-pages-offline.html?page=\(p)\(more)") {
                 web.load(URLRequest(url: url))
             }

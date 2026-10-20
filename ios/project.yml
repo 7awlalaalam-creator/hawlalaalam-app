@@ -31,6 +31,9 @@ targets:
         buildPhase: resources
       - path: ../app/src/main/assets/bridge.js
         buildPhase: resources
+      # الأذكار دون إنترنت (نفس ملف أندرويد ونصوص صفحة الموقع)
+      - path: ../app/src/main/assets/azkar.json
+        buildPhase: resources
       - path: ../app/src/main/res/font/tajawal_regular.ttf
         buildPhase: resources
       - path: ../app/src/main/res/font/tajawal_medium.ttf
@@ -55,6 +58,8 @@ targets:
         com.apple.security.application-groups:
           - group.com.hawlalaalam.quran
         aps-environment: development
+        # مزامنة الختمة والعلامات والحفظ عبر iCloud (مخزن المفاتيح فقط، دون حاويات)
+        com.apple.developer.ubiquity-kvstore-identifier: $(TeamIdentifierPrefix)$(CFBundleIdentifier)
     info:
       path: Hawl/Info.plist
       properties:

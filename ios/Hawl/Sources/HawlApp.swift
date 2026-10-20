@@ -46,7 +46,7 @@ struct HawlApp: App {
         }
         .onChange(of: phase) { p in
             if p == .active { becameActive() }
-            if p == .background { Background.schedule(); SpeechService.shared.stopIfActive() }
+            if p == .background { Background.schedule(); SpeechService.shared.stopIfActive(); CloudSync.push() }
         }
     }
 
@@ -54,6 +54,7 @@ struct HawlApp: App {
         Task { await state.refreshVerse() }
         state.changed()                              // نجدد التنبيهات القادمة ونحدّث الويدجت كلما فُتح التطبيق
         Announce.checkSoon()
+        CloudSync.start()
         LocationService.shared.refreshIfStale()      // state.changed() أعلاه يحدّث نشاط الصلاة الحيّ أيضًا
         if let s = AppDelegate.pendingShortcut, let u = URL(string: s) {
             AppDelegate.pendingShortcut = nil
@@ -76,6 +77,7 @@ struct RootView: View {
             NavigationStack(path: $state.todayPath) {
                 TodayView().navigationDestination(for: Screen.self) { ScreenView(screen: $0) }
             }
+            .safeAreaInset(edge: .bottom) { MiniPlayerBar() }
             .tabItem { Label("اليوم", systemImage: "house") }
             .tag(AppState.Tab.today)
 
@@ -83,13 +85,17 @@ struct RootView: View {
                 .tabItem { Label("المصحف", systemImage: "book") }
                 .tag(AppState.Tab.mushaf)
 
-            NavigationStack { ListenScreen() }
+            NavigationStack(path: $state.listenPath) {
+                ListenView().navigationDestination(for: Screen.self) { ScreenView(screen: $0) }
+            }
+                .safeAreaInset(edge: .bottom) { MiniPlayerBar() }
                 .tabItem { Label("الاستماع", systemImage: "headphones") }
                 .tag(AppState.Tab.listen)
 
             NavigationStack(path: $state.toolsPath) {
                 ToolsView().navigationDestination(for: Screen.self) { ScreenView(screen: $0) }
             }
+            .safeAreaInset(edge: .bottom) { MiniPlayerBar() }
             .tabItem { Label("الأدوات", systemImage: "square.grid.2x2") }
             .tag(AppState.Tab.tools)
         }
@@ -116,7 +122,8 @@ struct ScreenView: View {
 
     var body: some View {
         switch screen {
-        case .web(let url, let title): WebScreen(title: title, url: url)
+        case .web(let url, let title):
+            if let native = NativeRoute.screen(for: url) { AnyView(ScreenView(screen: native)) } else { AnyView(WebScreen(title: title, url: url)) }
         case .khatma: KhatmaView()
         case .settings: SettingsView(notificationsOnly: false)
         case .notifications: SettingsView(notificationsOnly: true)
@@ -130,6 +137,11 @@ struct ScreenView: View {
         case .dedicate: DedicateView()
         case .player(let url): PlayerView(url: url)
         case .journey: JourneyView()
+        case .azkar(let s): AzkarView(section: s)
+        case .tafsir(let s, let a): TafsirView(surah: s, ayah: a)
+        case .family(let id): FamilyListView(openID: id)
+        case .reciter(let id): ReciterView(id: id)
+        case .backup: BackupView()
         }
     }
 }
@@ -162,6 +174,7 @@ struct MushafScreen: View {
                 consumeRequest()
             }
             .onChange(of: state.mushafRequest) { _ in consumeRequest() }
+            .onChange(of: state.restoreToken) { _ in extra = ""; extraID += 1 }   // بعد الاستعادة: تُحمَّل الصفحة بحالتها
             // الانتقال إلى تبويب آخر لا يزيل صفحة المصحف: نوقف الميكروفون صراحة
             .onDisappear { SpeechService.shared.stopIfActive() }
     }
@@ -176,21 +189,5 @@ struct MushafScreen: View {
             extraID += 1
             state.mushafExtra = nil
         }
-    }
-}
-
-/** تبويب الاستماع: صفحة القرّاء في الموقع */
-struct ListenScreen: View {
-    @EnvironmentObject var state: AppState
-
-    var body: some View {
-        WebScreen(title: "الاستماع", url: state.listenRequest ?? Links.reciters)
-            .toolbar {
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    NavigationLink { DownloadsView() } label: {
-                        Label("المحمّلة", systemImage: "arrow.down.circle").labelStyle(.titleAndIcon).font(AppFont.ui(14, 700))
-                    }
-                }
-            }
     }
 }

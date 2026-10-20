@@ -79,6 +79,12 @@ jobs:
             route "find" "$mode-06-find" 10
             route "notifications" "$mode-07-notifications"
             route "khatma" "$mode-08-khatma"
+            route "listen" "$mode-09-listen" 12
+            route "reciter?id=123" "$mode-10-reciter" 12
+            route "azkar?s=morning" "$mode-11-azkar"
+            route "tafsir?s=2&a=152" "$mode-12-tafsir"
+            route "family" "$mode-13-family"
+            route "backup" "$mode-14-backup"
           done
           # النشاط الحي «الصلاة القادمة»: نفتح التطبيق ثم الإعدادات فتظهر الجزيرة الديناميكية
           xcrun simctl ui "$UDID" appearance light

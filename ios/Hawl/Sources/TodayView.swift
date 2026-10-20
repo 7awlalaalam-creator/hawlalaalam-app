@@ -289,7 +289,7 @@ struct TodayView: View {
                     .padding(.top, 10)
                 }
                 HStack(spacing: 8) {
-                    NavigationLink(value: Screen.web(Ramadan.tadabburURL(), "تدبّر اليوم")) {
+                    Button { Browser.open(Ramadan.tadabburURL()) } label: {
                         Text("تدبّر اليوم").font(AppFont.ui(14, 700)).foregroundColor(Palette.ink)
                             .frame(maxWidth: .infinity, minHeight: 42)
                             .background(Capsule().fill(Palette.card))
@@ -332,7 +332,7 @@ struct TodayView: View {
         else if h >= 15 && h < 20 { title = "حان وقت أذكار المساء" }
         else { return nil }
         return AnyView(
-            NavigationLink(value: Screen.web(Links.azkar, "الأذكار")) {
+            NavigationLink(value: Screen.azkar(nil)) {
                 HStack(spacing: 12) {
                     Image(systemName: h < 12 ? "sunrise" : "sunset")
                         .foregroundColor(Palette.goldDeep)
@@ -382,7 +382,7 @@ struct TodayView: View {
                         Pill(title: "نص", systemImage: "text.alignright", height: 44)
                     }
                     .accessibilityLabel("شارك آية اليوم نصًّا")
-                    NavigationLink(value: Screen.web(v.tafsirURL, "التفسير")) {
+                    NavigationLink(value: Screen.tafsir(v.surah, v.ayah)) {
                         Pill(title: "التفسير", systemImage: "book", height: 44)
                     }
                     .accessibilityLabel("اقرأ تفسير آية اليوم")
@@ -419,7 +419,7 @@ struct TodayView: View {
     private var toolsRow: some View {
         HStack(spacing: 8) {
             NavigationLink(value: Screen.mood(nil)) { ToolTile(title: "آية لحالك", systemImage: "heart") }
-            NavigationLink(value: Screen.web(Links.azkar, "الأذكار")) { ToolTile(title: "الأذكار", systemImage: "sun.and.horizon") }
+            NavigationLink(value: Screen.azkar(nil)) { ToolTile(title: "الأذكار", systemImage: "sun.and.horizon") }
             NavigationLink(value: Screen.qibla) { ToolTile(title: "القبلة", systemImage: "location.north.circle") }
             NavigationLink(value: Screen.tasbeeh) { ToolTile(title: "المسبحة", systemImage: "circle.grid.cross") }
         }

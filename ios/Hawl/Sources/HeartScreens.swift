@@ -72,7 +72,7 @@ struct MoodView: View {
                 Button { shareImage(p, m) } label: { Pill(title: "شارك كصورة", systemImage: "photo", primary: true) }
                 Button { choose(m) } label: { Pill(title: "آية أخرى", systemImage: "arrow.clockwise") }
             }
-            NavigationLink(value: Screen.web(Links.ayah(p.s, p.a), "التفسير")) {
+            NavigationLink(value: Screen.tafsir(p.s, p.a)) {
                 Text("اقرأ التفسير ←").font(AppFont.ui(14, 700)).foregroundColor(Palette.goldDeep)
             }
             .padding(.top, 2)
@@ -243,11 +243,11 @@ struct DownloadsView: View {
                 .background(RoundedRectangle(cornerRadius: 20).fill(Palette.dark))
 
                 if dl.items.isEmpty {
-                    Text("افتح صفحة أي قارئ، واختر السورة، ثم اضغط «⬇ تحميل للاستماع بدون إنترنت» تحت المشغّل.")
+                    Text("افتح صفحة أي قارئ في «الاستماع» واضغط ⬇ بجانب السورة لتستمع إليها دون إنترنت.")
                         .font(AppFont.ui(15)).foregroundColor(Palette.ink)
                         .padding(16).frame(maxWidth: .infinity, alignment: .leading)
                         .card(Palette.ivory, border: Palette.ivoryBorder, radius: 16)
-                    Button { state.tab = .listen; state.listenRequest = Links.reciters } label: {
+                    Button { state.tab = .listen } label: {
                         Pill(title: "تصفّح القرّاء", primary: true, height: 50)
                     }
                 } else {

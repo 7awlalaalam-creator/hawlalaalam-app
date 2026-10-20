@@ -18,6 +18,11 @@ enum Screen: Hashable {
     case dedicate
     case player(String)
     case journey
+    case azkar(String?)
+    case tafsir(Int, Int)
+    case family(String?)
+    case reciter(Int)
+    case backup
 }
 
 /** حالة التطبيق: التنقّل، وآية اليوم، ومرآة للإعدادات المحفوظة في Store (المشتركة مع الويدجت) */
@@ -31,6 +36,7 @@ final class AppState: ObservableObject {
     @Published var tab: Tab = .today
     @Published var todayPath = NavigationPath()
     @Published var toolsPath = NavigationPath()
+    @Published var listenPath = NavigationPath()
     /** طلب فتح صفحة في المصحف (من الفهرس أو «أكمل القراءة» أو الإشعار) */
     @Published var mushafRequest: Int?
     /** طلب فتح أداة في صفحة المصحف: «hifz=1» مراجعة الحفظ، «find=1» البحث بالمعنى */
@@ -41,6 +47,9 @@ final class AppState: ObservableObject {
     @Published var showTour = false
     /** صفحة الاستماع: طلب تحميل رابط معيّن */
     @Published var listenRequest: URL?
+
+    /** يزيد بعد استعادة نسخة احتياطية: يُعاد تحميل صفحة المصحف لتأخذ حالتها */
+    @Published private(set) var restoreToken = 0
 
     /** يزيد مع كل تغيير في الإعدادات أو الختمة فتُعاد رسم الشاشات */
     @Published private(set) var rev = 0
@@ -98,6 +107,21 @@ final class AppState: ObservableObject {
         WidgetCenter.shared.reloadAllTimelines()
         Push.sync()                                  // مفتاح الأخبار: الاشتراك أو إلغاؤه في الإشعارات الفورية
         LiveActivities.refresh()                     // الموقع أو طريقة الحساب أو مفتاح النشاط الحي تغيّرت
+        CloudSync.schedulePush()
+    }
+
+    /** بعد استعادة نسخة احتياطية أو مزامنة من iCloud: نقرأ الإعدادات من جديد */
+    func reloadFromStore() {
+        let d = Store.d
+        themeMode = d.integer(forKey: "theme_mode")
+        calcMethod = d.integer(forKey: "calc_method")
+        textZoom = d.object(forKey: "text_zoom") as? Int ?? 100
+        lastPage = d.integer(forKey: "last_page")
+        restoreToken += 1
+        rev += 1
+        Notifications.reschedule()
+        WidgetCenter.shared.reloadAllTimelines()
+        LiveActivities.refresh()
     }
 
     /** إعادة رسم الشاشات بعد تغيّر بيانات خارجية (حالة الحفظ من صفحة المصحف) */
@@ -146,14 +170,19 @@ final class AppState: ObservableObject {
         todayPath.append(s)
     }
 
-    /** يفتح أي رابط: صفحة المصحف ← تبويب المصحف، والاستماع ← تبويبه، وصفحات الموقع داخل التطبيق، وغيرها خارجه */
+    /** يفتح أي رابط: صفحة المصحف ← تبويب المصحف، وصفحات الموقع التي لها شاشة في التطبيق ← شاشتها، وغيرها في المتصفح */
     func open(_ url: URL, title: String = "") {
         if (url.scheme ?? "").lowercased() == "hawlapp" { handleDeepLink(url); return }
         let p = Khatma.pageOf(url)
         if p > 0 { openMushaf(page: p); return }
         if Links.isOurs(url) {
-            if url.absoluteString.contains("quran-reciters") { tab = .listen; listenRequest = url; return }
-            show(.web(url, title))
+            if url.absoluteString.contains("quran-reciters") { tab = .listen; return }
+            if let s = NativeRoute.surahPage(url) { openMushaf(page: s); return }
+            if let v = NativeRoute.verseCard(url), let t = Quran.verse(v.0, v.1) {
+                VerseImage.share(DailyVerse(surah: v.0, ayah: v.1, text: t)); return
+            }
+            if let screen = NativeRoute.screen(for: url) { show(screen); return }
+            Browser.open(url)
             return
         }
         UIApplication.shared.open(url)
@@ -173,6 +202,11 @@ final class AppState: ObservableObject {
         case "journey": show(.journey)
         case "find": openMushaf(page: nil, extra: "find=1")
         case "listen": tab = .listen
+        case "reciter": if let id = item("id").flatMap(Int.init) { tab = .listen; listenPath = NavigationPath(); listenPath.append(Screen.reciter(id)) }
+        case "family": show(.family(item("id").flatMap { FamilyAPI.parseID($0) }))
+        case "tafsir":
+            if let s = item("s").flatMap(Int.init), let a = item("a").flatMap(Int.init), Quran.valid(s, a) { show(.tafsir(s, a)) }
+        case "backup": show(.backup)
         case "tools": tab = .tools
         case "downloads": show(.downloads)
         case "dedicate": show(.dedicate)
@@ -184,7 +218,7 @@ final class AppState: ObservableObject {
         case "tasbeeh": show(.tasbeeh)
         case "mood": show(.mood(item("m").flatMap(Int.init)))
         case "prayer": show(.prayerTimes)
-        case "azkar": show(.web(Links.azkar, "الأذكار"))
+        case "azkar": show(.azkar(item("s")))
         case "prayer-azkar": tab = .today; showPrayerAzkar = true
         case "share-verse":
             tab = .today

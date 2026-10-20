@@ -172,21 +172,49 @@ final class AudioDownloads: NSObject, ObservableObject, URLSessionDownloadDelega
     }
 }
 
-// MARK: - مشغّل التلاوات المحمّلة (يستمر مع قفل الشاشة، والتحكم من شاشة القفل)
+// MARK: - مشغّل التلاوات (بث مباشر أو من الملف المحمّل، يستمر مع قفل الشاشة والتحكم من شاشة القفل)
+
+/** مقطع في قائمة التشغيل: سورة لقارئ، أو إذاعة، أو تلاوة محمّلة */
+struct Track: Codable, Equatable, Hashable {
+    var url: String
+    var title: String
+    var reciter: String
+    var reciterID: Int = 0
+    var moshafID: Int = 0
+    var surah: Int = 0
+    var radio = false
+}
 
 @MainActor
 final class AudioPlayer: ObservableObject {
     static let shared = AudioPlayer()
+    static let speeds: [Float] = [0.75, 1, 1.25, 1.5]
 
-    @Published private(set) var current: AudioDownloads.Item?
+    @Published private(set) var current: Track?
+    @Published private(set) var queue: [Track] = []
+    @Published private(set) var index = 0
     @Published private(set) var playing = false
+    @Published private(set) var buffering = false
     @Published var position: Double = 0
     @Published private(set) var duration: Double = 0
+    @Published private(set) var speed: Float = 1
+    @Published var repeatOne = false
+    /** مؤقت النوم: وقت الإيقاف، أو الإيقاف في نهاية السورة */
+    @Published private(set) var sleepAt: Date?
+    @Published private(set) var sleepAtEnd = false
+    @Published private(set) var sleepMinutes: Int?
+    @Published private(set) var failed = false
 
     private var player: AVPlayer?
     private var timeObserver: Any?
+    private var endObserver: NSObjectProtocol?
+    private var statusObservation: NSKeyValueObservation?
+    private var sleepTask: Task<Void, Never>?
+    private var lastSave: Double = 0
 
     private init() {
+        let v = Store.d.object(forKey: "listen_speed") as? Double ?? 1
+        speed = Self.speeds.contains(Float(v)) ? Float(v) : 1
         let rc = MPRemoteCommandCenter.shared()
         rc.playCommand.addTarget { _ in Task { @MainActor in AudioPlayer.shared.resume() }; return .success }
         rc.pauseCommand.addTarget { _ in Task { @MainActor in AudioPlayer.shared.pause() }; return .success }
@@ -195,6 +223,8 @@ final class AudioPlayer: ObservableObject {
         rc.skipBackwardCommand.preferredIntervals = [15]
         rc.skipForwardCommand.addTarget { _ in Task { @MainActor in AudioPlayer.shared.skip(15) }; return .success }
         rc.skipBackwardCommand.addTarget { _ in Task { @MainActor in AudioPlayer.shared.skip(-15) }; return .success }
+        rc.nextTrackCommand.addTarget { _ in Task { @MainActor in AudioPlayer.shared.next() }; return .success }
+        rc.previousTrackCommand.addTarget { _ in Task { @MainActor in AudioPlayer.shared.previous() }; return .success }
         rc.changePlaybackPositionCommand.addTarget { e in
             if let ev = e as? MPChangePlaybackPositionCommandEvent {
                 let t = ev.positionTime
@@ -202,36 +232,114 @@ final class AudioPlayer: ObservableObject {
             }
             return .success
         }
+        updateRemote()
     }
 
+    var hasNext: Bool { index + 1 < queue.count }
+    var hasPrevious: Bool { index > 0 }
+
+    /** تلاوة محمّلة من شاشة «المحمّلة» */
     func play(_ item: AudioDownloads.Item) {
-        guard let file = AudioDownloads.shared.ready(item.url) else { return }
         if current?.url == item.url, player != nil { resume(); return }
-        stop()
+        play(queue: [Track(url: item.url, title: item.title, reciter: item.reciter)], start: 0)
+    }
+
+    /** قائمة تشغيل (سور القارئ متتالية) تبدأ من مقطع معيّن، مع الاستكمال من موضع محفوظ إن وُجد */
+    func play(queue q: [Track], start: Int, at: Double = 0) {
+        guard !q.isEmpty else { return }
+        queue = q
+        index = max(0, min(q.count - 1, start))
+        load(at: at)
+    }
+
+    private func load(at: Double = 0) {
+        guard index < queue.count else { return }
+        let t = queue[index]
+        teardown()
         try? AVAudioSession.sharedInstance().setCategory(.playback, mode: .spokenAudio)
         try? AVAudioSession.sharedInstance().setActive(true)
-        let p = AVPlayer(url: file)
+        let src: URL? = AudioDownloads.shared.ready(t.url) ?? URL(string: t.url)
+        guard let url = src else { return }
+        let item = AVPlayerItem(url: url)
+        item.audioTimePitchAlgorithm = .timeDomain              // سرعة التلاوة دون تغيير طبقة الصوت
+        let p = AVPlayer(playerItem: item)
+        p.automaticallyWaitsToMinimizeStalling = true
         player = p
-        current = item
-        timeObserver = p.addPeriodicTimeObserver(forInterval: CMTime(seconds: 0.5, preferredTimescale: 600), queue: .main) { t in
+        current = t
+        failed = false
+        buffering = true
+        position = at
+        duration = 0
+        timeObserver = p.addPeriodicTimeObserver(forInterval: CMTime(seconds: 0.5, preferredTimescale: 600), queue: .main) { tm in
+            Task { @MainActor in AudioPlayer.shared.tick(tm.seconds) }
+        }
+        endObserver = NotificationCenter.default.addObserver(forName: .AVPlayerItemDidPlayToEndTime, object: item, queue: .main) { _ in
+            Task { @MainActor in AudioPlayer.shared.ended() }
+        }
+        statusObservation = item.observe(\.status, options: [.new]) { it, _ in
+            let st = it.status
             Task { @MainActor in
-                let s = AudioPlayer.shared
-                s.position = t.seconds.isFinite ? t.seconds : 0
-                if let d = s.player?.currentItem?.duration.seconds, d.isFinite, d > 0 { s.duration = d }
-                if let d = s.player?.currentItem?.duration.seconds, d.isFinite, s.position >= d - 0.3 { s.playing = false }
-                s.updateNowPlaying()
+                if st == .failed { AudioPlayer.shared.failed = true; AudioPlayer.shared.buffering = false; AudioPlayer.shared.playing = false }
             }
         }
-        p.play()
+        if at > 1 { p.seek(to: CMTime(seconds: at, preferredTimescale: 600)) }
+        p.playImmediately(atRate: speed)
         playing = true
+        updateNowPlaying()
+        saveLast(force: true)
+    }
+
+    private func tick(_ s: Double) {
+        guard let p = player else { return }
+        position = s.isFinite ? s : 0
+        if let d = p.currentItem?.duration.seconds, d.isFinite, d > 0 { duration = d }
+        buffering = p.timeControlStatus == .waitingToPlayAtSpecifiedRate
+        updateNowPlaying()
+        saveLast()
+    }
+
+    private func ended() {
+        if repeatOne { seek(0); player?.playImmediately(atRate: speed); return }
+        if sleepAtEnd { cancelSleep(); finish(); return }
+        if hasNext { index += 1; load() } else { finish() }
+    }
+
+    /** انتهت قائمة التشغيل: نوقف ونبقي آخر مقطع ظاهرًا */
+    private func finish() {
+        player?.pause()
+        playing = false
+        saveLast(force: true, done: true)
         updateNowPlaying()
     }
 
-    func resume() { player?.play(); playing = player != nil; updateNowPlaying() }
-    func pause() { player?.pause(); playing = false; updateNowPlaying() }
+    func resume() {
+        if player == nil, current != nil { load(at: position); return }
+        player?.playImmediately(atRate: speed)
+        playing = player != nil
+        updateNowPlaying()
+    }
+
+    func pause() {
+        player?.pause()
+        playing = false
+        saveLast(force: true)
+        updateNowPlaying()
+    }
+
     func toggle() { playing ? pause() : resume() }
 
-    func skip(_ s: Double) { seek(max(0, position + s)) }
+    func next() { guard hasNext else { return }; index += 1; load() }
+
+    func previous() {
+        if position > 5 || !hasPrevious { seek(0); return }
+        index -= 1
+        load()
+    }
+
+    func skip(_ s: Double) {
+        let target = max(0, position + s)
+        seek(duration > 0 ? min(target, duration - 1) : target)
+    }
 
     func seek(_ t: Double) {
         player?.seek(to: CMTime(seconds: t, preferredTimescale: 600))
@@ -239,26 +347,108 @@ final class AudioPlayer: ObservableObject {
         updateNowPlaying()
     }
 
+    func setSpeed(_ v: Float) {
+        speed = v
+        Store.d.set(Double(v), forKey: "listen_speed")
+        if playing { player?.rate = v }
+        updateNowPlaying()
+    }
+
+    /** مؤقت النوم بالدقائق، أو ٠ لنهاية السورة، أو nil للإلغاء */
+    func setSleep(minutes: Int?) {
+        cancelSleep()
+        guard let m = minutes else { return }
+        if m == 0 { sleepAtEnd = true; return }
+        let at = Date().addingTimeInterval(Double(m) * 60)
+        sleepAt = at
+        sleepMinutes = m
+        sleepTask = Task { @MainActor in
+            try? await Task.sleep(nanoseconds: UInt64(Double(m) * 60 * 1_000_000_000))
+            if Task.isCancelled { return }
+            AudioPlayer.shared.pause()
+            AudioPlayer.shared.cancelSleep()
+        }
+    }
+
+    func cancelSleep() {
+        sleepTask?.cancel()
+        sleepTask = nil
+        sleepAt = nil
+        sleepAtEnd = false
+        sleepMinutes = nil
+    }
+
     func stop() {
-        if let o = timeObserver { player?.removeTimeObserver(o) }
-        timeObserver = nil
-        player?.pause()
-        player = nil
+        teardown()
         playing = false
         position = 0
         duration = 0
+        current = nil
+        queue = []
+        index = 0
+        cancelSleep()
         MPNowPlayingInfoCenter.default().nowPlayingInfo = nil
+        updateRemote()
+    }
+
+    private func teardown() {
+        if let o = timeObserver { player?.removeTimeObserver(o) }
+        timeObserver = nil
+        if let e = endObserver { NotificationCenter.default.removeObserver(e) }
+        endObserver = nil
+        statusObservation = nil
+        player?.pause()
+        player = nil
+    }
+
+    // MARK: الاستكمال
+
+    struct Last: Codable { var track: Track; var pos: Double; var queue: [Track]; var index: Int }
+
+    static var last: Last? {
+        guard let s = Store.d.string(forKey: "listen_last"), let d = s.data(using: .utf8) else { return nil }
+        return try? JSONDecoder().decode(Last.self, from: d)
+    }
+
+    func resumeLast() {
+        guard let l = Self.last else { return }
+        if current == l.track, player != nil { resume(); return }
+        play(queue: l.queue.isEmpty ? [l.track] : l.queue, start: l.index, at: l.pos)
+    }
+
+    private func saveLast(force: Bool = false, done: Bool = false) {
+        guard let t = current, !t.radio else { return }
+        let now = Date().timeIntervalSince1970
+        if !force && now - lastSave < 5 { return }
+        lastSave = now
+        let l = Last(track: t, pos: done ? 0 : position, queue: queue.count > 120 ? [t] : queue, index: queue.count > 120 ? 0 : index)
+        if let d = try? JSONEncoder().encode(l), let s = String(data: d, encoding: .utf8) { Store.d.set(s, forKey: "listen_last") }
+    }
+
+    private func updateRemote() {
+        let rc = MPRemoteCommandCenter.shared()
+        rc.nextTrackCommand.isEnabled = hasNext
+        rc.previousTrackCommand.isEnabled = current != nil
+        let live = current?.radio == true
+        rc.skipForwardCommand.isEnabled = !live
+        rc.skipBackwardCommand.isEnabled = !live
+        rc.changePlaybackPositionCommand.isEnabled = !live
     }
 
     private func updateNowPlaying() {
+        updateRemote()
         guard let it = current else { return }
-        MPNowPlayingInfoCenter.default().nowPlayingInfo = [
+        var info: [String: Any] = [
             MPMediaItemPropertyTitle: it.title,
-            MPMediaItemPropertyArtist: it.reciter.isEmpty ? "حول العالم" : it.reciter,
-            MPMediaItemPropertyPlaybackDuration: duration,
-            MPNowPlayingInfoPropertyElapsedPlaybackTime: position,
-            MPNowPlayingInfoPropertyPlaybackRate: playing ? 1.0 : 0.0,
+            MPMediaItemPropertyArtist: it.reciter.isEmpty ? "القرآن حول العالم" : it.reciter,
+            MPNowPlayingInfoPropertyPlaybackRate: playing ? Double(speed) : 0.0,
+            MPNowPlayingInfoPropertyIsLiveStream: it.radio,
         ]
+        if !it.radio {
+            info[MPMediaItemPropertyPlaybackDuration] = duration
+            info[MPNowPlayingInfoPropertyElapsedPlaybackTime] = position
+        }
+        MPNowPlayingInfoCenter.default().nowPlayingInfo = info
     }
 }
 

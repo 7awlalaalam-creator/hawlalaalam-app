@@ -285,11 +285,24 @@ struct SettingsView: View {
     private var generalSection: some View {
         VStack(spacing: 10) {
             section("عام").frame(maxWidth: .infinity, alignment: .leading)
+            NavigationLink(value: Screen.backup) {
+                HStack(spacing: 12) {
+                    Image(systemName: "icloud.and.arrow.up").foregroundColor(Palette.goldDeep)
+                        .frame(width: 42, height: 42).background(Circle().fill(Palette.chip))
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text("النسخ والمزامنة").font(AppFont.ui(15, 700)).foregroundColor(Palette.ink)
+                        Text(CloudSync.enabled ? "المزامنة مع iCloud مفعّلة" : "iCloud وملف نسخة احتياطية").font(AppFont.ui(12)).foregroundColor(Palette.muted)
+                    }
+                    Spacer()
+                    Image(systemName: "chevron.left").foregroundColor(Palette.muted)
+                }
+                .padding(12).card()
+            }
             Button { Share.present([state.shareAppText]) } label: {
                 Pill(title: "شارك التطبيق مع من تحب", systemImage: "square.and.arrow.up", primary: true, height: 54)
             }
             HStack(spacing: 10) {
-                NavigationLink(value: Screen.web(Links.contact, "أرسل ملاحظة")) { Pill(title: "أرسل ملاحظة", systemImage: "envelope", height: 50) }
+                Button { Browser.open(Links.contact) } label: { Pill(title: "أرسل ملاحظة", systemImage: "envelope", height: 50) }
                 Button { state.showTour = true } label: { Pill(title: "جولة في المميزات", systemImage: "sparkles", height: 50) }
             }
             Text("✦  الإصدار " + ar(WebConfig.version) + "  ✦").font(AppFont.ui(13, 500)).foregroundColor(Palette.muted)
@@ -304,7 +317,7 @@ struct SettingsView: View {
                     Toast.show(on ? "تم: زيارات هذا الجوال لن تُحسب في الإحصاءات" : "عادت زيارات هذا الجوال تُحسب في الإحصاءات")
                 }
                 .onLongPressGesture { showDiag = true }
-            NavigationLink(value: Screen.web(Links.privacy, "سياسة الخصوصية")) {
+            Button { Browser.open(Links.privacy) } label: {
                 Text("سياسة الخصوصية").font(AppFont.ui(13, 700)).foregroundColor(Palette.goldDeep)
             }
             Text("صدقة جارية لمحمد بن مفرح الشهري رحمه الله، ولموتى المسلمين").font(AppFont.ui(12)).foregroundColor(Palette.muted)
