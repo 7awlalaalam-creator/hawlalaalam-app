@@ -357,11 +357,16 @@ struct FamilyGroupView: View {
 
     private func content(_ g: FamilyGroup) -> some View {
         let mine = g.parts.filter { $0.mine }
+        let round: Int = g.round ?? 1
+        let kicker: String = round > 1 ? "ختمة جماعية · الختمة " + ar(round) : "ختمة جماعية"
+        let deadline: String = g.deadlineText.map { " · نختم قبل " + $0 } ?? ""
+        let byLine: String = "أنشأها " + g.owner + deadline
+        let invite: String = "انضم إلى «" + g.name + "» واحجز جزءًا نختم به القرآن معًا 🤍\n" + FamilyAPI.inviteURL(g.id).absoluteString
         return VStack(alignment: .leading, spacing: 14) {
             VStack(alignment: .leading, spacing: 6) {
-                Text("ختمة جماعية" + ((g.round ?? 1) > 1 ? " · الختمة " + ar(g.round ?? 1) : "")).font(AppFont.ui(13, 700)).foregroundColor(Palette.gold)
+                Text(kicker).font(AppFont.ui(13, 700)).foregroundColor(Palette.gold)
                 Text(g.name).font(AppFont.ui(21, 700)).foregroundColor(.white)
-                Text("أنشأها " + g.owner + (g.deadlineText.map { " · نختم قبل " + $0 } ?? "")).font(AppFont.ui(13)).foregroundColor(Palette.onDarkMuted)
+                Text(byLine).font(AppFont.ui(13)).foregroundColor(Palette.onDarkMuted)
                 HStack {
                     Text("أُنجز " + ar(g.doneCount) + " من ٣٠ جزءًا")
                     Spacer()
@@ -423,17 +428,7 @@ struct FamilyGroupView: View {
                     Text("متاح " + ar(30 - g.takenCount)).font(AppFont.ui(12)).foregroundColor(Palette.muted)
                 }
                 LazyVGrid(columns: columns, spacing: 6) {
-                    ForEach(g.parts, id: \.n) { p in
-                        Button { tapPart(p) } label: {
-                            Text(ar(p.n)).font(AppFont.ui(15, 700))
-                                .foregroundColor(p.done ? Palette.dark : Palette.ink)
-                                .frame(maxWidth: .infinity, minHeight: 46)
-                                .background(RoundedRectangle(cornerRadius: 10).fill(p.done ? Palette.gold : (p.by != nil ? Palette.chip : Palette.card)))
-                                .overlay(RoundedRectangle(cornerRadius: 10).stroke(p.mine ? Palette.goldDeep : Palette.line, lineWidth: p.mine ? 2 : 1))
-                        }
-                        .buttonStyle(.plain)
-                        .accessibilityLabel("الجزء " + ar(p.n) + "، " + (p.done ? "مقروء" : (p.by != nil ? "محجوز لـ" + (p.by ?? "") : "متاح")))
-                    }
+                    ForEach(g.parts, id: \.n) { p in partCell(p) }
                 }
                 HStack(spacing: 12) {
                     legend(Palette.gold, "مقروء")
@@ -465,7 +460,7 @@ struct FamilyGroupView: View {
                 .padding(.horizontal, 14).padding(.bottom, 8).card()
             }
 
-            Button { Share.present(["انضم إلى «" + g.name + "» واحجز جزءًا نختم به القرآن معًا 🤍\n" + FamilyAPI.inviteURL(g.id).absoluteString]) } label: {
+            Button { Share.present([invite]) } label: {
                 Pill(title: "ادعُ أهلك برابط", systemImage: "square.and.arrow.up", primary: true, height: 50)
             }
             .buttonStyle(.plain)
@@ -485,6 +480,24 @@ struct FamilyGroupView: View {
             }
         }
         .padding(16)
+    }
+
+    private func partCell(_ p: FamilyPart) -> some View {
+        let fill: Color = p.done ? Palette.gold : (p.by != nil ? Palette.chip : Palette.card)
+        let ink: Color = p.done ? Palette.dark : Palette.ink
+        let border: Color = p.mine ? Palette.goldDeep : Palette.line
+        let width: CGFloat = p.mine ? 2 : 1
+        let status: String = p.done ? "مقروء" : (p.by != nil ? "محجوز لـ" + (p.by ?? "") : "متاح")
+        let label: String = "الجزء " + ar(p.n) + "، " + status
+        return Button { tapPart(p) } label: {
+            Text(ar(p.n)).font(AppFont.ui(15, 700))
+                .foregroundColor(ink)
+                .frame(maxWidth: .infinity, minHeight: 46)
+                .background(RoundedRectangle(cornerRadius: 10).fill(fill))
+                .overlay(RoundedRectangle(cornerRadius: 10).stroke(border, lineWidth: width))
+        }
+        .buttonStyle(.plain)
+        .accessibilityLabel(label)
     }
 
     private func legend(_ c: Color, _ t: String) -> some View {
