@@ -31,5 +31,9 @@ jobs:
           for x in b.get("data", []):
               d = det.get(x["relationships"]["buildBetaDetail"]["data"]["id"], {})
               print(f"::notice title=testflight::build {x['attributes']['version']} external={d.get('externalBuildState')} internal={d.get('internalBuildState')}")
+          c = requests.get(f"{B}/certificates?limit=50", headers=H).json()
+          for x in c.get("data", []):
+              a = x["attributes"]
+              print(f"::notice title=cert::{a.get('certificateType')} | {a.get('displayName')} | {a.get('name')} | exp {a.get('expirationDate','')[:10]} | {x['id']}")
           if "errors" in v: print("::error::" + str(v["errors"])[:300])
           PY
