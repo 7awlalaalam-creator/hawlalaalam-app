@@ -51,13 +51,13 @@ targets:
       - target: HawlWidgets
         embed: true
         codeSign: true
-      # تطبيق الساعة جاهز (الهدف HawlWatch) ويُضاف هنا في نسخة مستقلة بعد نسخة الإصلاحات، بطلب صاحب التطبيق:
-      # - target: HawlWatch
-      #   embed: true
-      #   codeSign: true
-      #   copy:
-      #     destination: productsDirectory
-      #     subpath: "$(CONTENTS_FOLDER_PATH)/Watch"
+      # تطبيق الساعة: يُثبَّت تلقائيًا على Apple Watch مع تطبيق الآيفون
+      - target: HawlWatch
+        embed: true
+        codeSign: true
+        copy:
+          destination: productsDirectory
+          subpath: "$(CONTENTS_FOLDER_PATH)/Watch"
       - package: Firebase
         product: FirebaseMessaging
     entitlements:
