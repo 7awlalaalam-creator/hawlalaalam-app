@@ -58,6 +58,10 @@ final class LocationService: NSObject, ObservableObject, CLLocationManagerDelega
         }
     }
 
+    func preciseForQibla(_ on: Bool) {
+        manager.desiredAccuracy = on ? kCLLocationAccuracyNearestTenMeters : kCLLocationAccuracyKilometer
+    }
+
     func stopHeading() { manager.stopUpdatingHeading(); heading = nil }
 
     var headingAvailable: Bool { CLLocationManager.headingAvailable() }

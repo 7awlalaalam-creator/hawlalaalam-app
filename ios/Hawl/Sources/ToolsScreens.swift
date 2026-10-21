@@ -246,9 +246,11 @@ struct QiblaView: View {
         .navigationBarTitleDisplayMode(.inline)
         .onAppear {
             location.startHeading()
-            if !state.hasLocation && location.authorized { location.requestLocation() }
+            // قرب مكة يتغير اتجاه القبلة درجات مع بضعة كيلومترات: نأخذ موقعًا حاليًا دقيقًا في كل مرة
+            location.preciseForQibla(true)
+            if location.authorized { location.requestLocation() }
         }
-        .onDisappear { location.stopHeading() }
+        .onDisappear { location.stopHeading(); location.preciseForQibla(false) }
     }
 
     private func offset(_ qibla: Double) -> Double? {
