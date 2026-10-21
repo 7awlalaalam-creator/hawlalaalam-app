@@ -46,6 +46,7 @@ enum Khatma {
     /** عدد أيام القراءة بين يومين (شاملة الطرفين) */
     static func readingDays(_ mask: Int, _ from: Int, _ to: Int) -> Int {
         guard to >= from else { return 0 }
+        let to = min(to, from + 3650)                       // حماية من تاريخ تالف بعيد جدًا
         var n = 0
         for day in from...to where (mask & (1 << dow(day))) == 0 { n += 1 }
         return n
@@ -53,16 +54,17 @@ enum Khatma {
 
     /** اليوم الذي تكتمل فيه كمية من الأيام القرائية بدءًا من يوم معيّن */
     static func dayAfterReadingDays(_ mask0: Int, _ from: Int, _ count: Int) -> Int {
-        let mask = mask0 == 0b11111110 ? 0 : mask0          // حماية: لا يجوز أن تكون كل الأيام راحة
+        let mask = (mask0 & 0b11111110) == 0b11111110 ? 0 : mask0   // حماية: لا يجوز أن تكون كل الأيام راحة
         var day = from
         var n = 0
-        while true {
+        while day < from + 3650 {
             if (mask & (1 << dow(day))) == 0 {
                 n += 1
                 if n >= max(1, count) { return day }
             }
             day += 1
         }
+        return day
     }
 
     // MARK: الحالة

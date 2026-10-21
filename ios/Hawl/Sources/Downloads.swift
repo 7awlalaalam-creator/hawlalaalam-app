@@ -119,8 +119,16 @@ final class AudioDownloads: NSObject, ObservableObject, URLSessionDownloadDelega
     }
 
     func retry(_ it: Item) {
-        delete(it.url)
-        start(url: it.url, title: it.title, reciter: it.reciter)
+        // نلغي المهمة القديمة أولًا ثم نبدأ من جديد (لو بدأنا قبل الإلغاء لأُلغيت المهمة الجديدة)
+        session.getAllTasks { tasks in
+            for t in tasks where t.originalRequest?.url?.absoluteString == it.url { t.cancel() }
+            DispatchQueue.main.async {
+                if let old = self.item(it.url) { try? FileManager.default.removeItem(at: self.fileURL(old)) }
+                self.items.removeAll { $0.url == it.url }
+                self.save()
+                self.start(url: it.url, title: it.title, reciter: it.reciter)
+            }
+        }
     }
 
     var totalBytes: Int64 { items.filter { $0.status == .done }.reduce(0) { $0 + $1.size } }

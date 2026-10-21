@@ -114,7 +114,8 @@ enum Backup {
         guard let o = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
               (o["app"] as? String) == "hawlalaalam", let prefs = o["prefs"] as? [String: Any] else { throw Invalid() }
         for (k0, v0) in prefs {
-            guard let (k, v) = normalize(k0, v0), keep(k) else { continue }
+            // قيمة فارغة (null) من ملف أندرويد أو ملف معدَّل يدويًا تُسقط التطبيق إن حُفظت كما هي
+            guard let (k, v1) = normalize(k0, v0), keep(k), let v = clean(v1) else { continue }
             Store.d.set(v, forKey: k)
         }
         if let w = o["web"] as? [String: Any], !w.isEmpty,

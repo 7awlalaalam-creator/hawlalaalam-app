@@ -30,7 +30,8 @@ struct Moshaf: Codable, Hashable, Identifiable {
         server = (try? c.decode(String.self, forKey: .server)) ?? ""
         surahTotal = (try? c.decode(FlexInt.self, forKey: .surah_total).v) ?? 0
         let list = (try? c.decode(String.self, forKey: .surah_list)) ?? ""
-        surahs = list.split(separator: ",").compactMap { Int($0.trimmingCharacters(in: .whitespaces)) }.filter { (1...114).contains($0) }
+        var seen = Set<Int>()   // رقم مكرر في القائمة يُسقط القائمة الكسولة في SwiftUI
+        surahs = list.split(separator: ",").compactMap { Int($0.trimmingCharacters(in: .whitespaces)) }.filter { (1...114).contains($0) }.filter { seen.insert($0).inserted }
     }
 
     func encode(to e: Encoder) throws {
@@ -360,7 +361,7 @@ struct ListenView: View {
                     .frame(maxWidth: .infinity)
             } else {
                 LazyVStack(spacing: 0) {
-                    ForEach(Array(list.enumerated()), id: \.element.id) { i, r in
+                    ForEach(Array(list.enumerated()), id: \.offset) { i, r in
                         if i > 0 { Rectangle().fill(Palette.divider).frame(height: 1) }
                         reciterRow(r)
                     }
@@ -411,7 +412,7 @@ struct ListenView: View {
             let q = normalizeArabic(query.trimmingCharacters(in: .whitespaces))
             let list = q.isEmpty ? catalog.radios : catalog.radios.filter { normalizeArabic($0.name).contains(q) }
             LazyVStack(spacing: 0) {
-                ForEach(Array(list.enumerated()), id: \.element.id) { i, r in
+                ForEach(Array(list.enumerated()), id: \.offset) { i, r in
                     if i > 0 { Rectangle().fill(Palette.divider).frame(height: 1) }
                     let on = player.current?.url == r.url
                     Button {
@@ -579,7 +580,7 @@ struct ReciterView: View {
                 .buttonStyle(.plain)
 
                 LazyVStack(spacing: 0) {
-                    ForEach(Array(tracks.enumerated()), id: \.element.url) { i, t in
+                    ForEach(Array(tracks.enumerated()), id: \.offset) { i, t in
                         if i > 0 { Rectangle().fill(Palette.divider).frame(height: 1) }
                         surahRow(t, index: i, all: tracks)
                     }

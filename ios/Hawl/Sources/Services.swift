@@ -130,7 +130,7 @@ enum Reminders {
 
     /** أذكار الصباح والمساء مرتبطة بالصلاة (افتراضيًا عند توفر الموقع)، والورد إن اختار القارئ صلاة */
     static func byPrayer(_ kind: String) -> Bool {
-        if kind == wird { return wirdPrayer >= 0 && Geo.has }
+        if kind == wird { return Prayer.names.indices.contains(wirdPrayer) && Geo.has }
         return (kind == azkarAM || kind == azkarPM) && Store.bool("azkar_by_prayer", true) && Geo.has
     }
 

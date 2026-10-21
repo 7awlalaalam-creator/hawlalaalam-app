@@ -12,7 +12,7 @@ import WebKit
 final class SpeechService {
     static let shared = SpeechService()
 
-    private let engine = AVAudioEngine()
+    private var engine = AVAudioEngine()
     private var request: SFSpeechAudioBufferRecognitionRequest?
     private var task: SFSpeechRecognitionTask?
     private weak var web: WKWebView?
@@ -84,8 +84,12 @@ final class SpeechService {
             req.shouldReportPartialResults = true
             if rec.supportsOnDeviceRecognition { req.requiresOnDeviceRecognition = true }
             if #available(iOS 16.0, *) { req.addsPunctuation = false }
+            // محرّك جديد في كل مرة: القديم قد يحتفظ بصيغة صوت سابقة (مثل سماعات بلوتوث) فيُسقط التطبيق
+            if engine.isRunning { engine.stop() }
+            engine.inputNode.removeTap(onBus: 0)
+            engine = AVAudioEngine()
             let input = engine.inputNode
-            let format = input.outputFormat(forBus: 0)
+            let format = input.inputFormat(forBus: 0)
             guard format.sampleRate > 0, format.channelCount > 0 else {
                 active = false
                 state("error", "تعذّر الوصول إلى الميكروفون")
