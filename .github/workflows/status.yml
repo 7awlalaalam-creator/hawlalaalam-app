@@ -3,7 +3,7 @@ name: حالة المراجعة في أبل
 on:
   workflow_dispatch:
 permissions:
-  contents: read
+  contents: write
 jobs:
   status:
     runs-on: ubuntu-latest
@@ -35,5 +35,24 @@ jobs:
           for x in c.get("data", []):
               a = x["attributes"]
               print(f"::notice title=cert::{a.get('certificateType')} | {a.get('displayName')} | {a.get('name')} | exp {a.get('expirationDate','')[:10]} | {x['id']}")
+          # بلاغات التعطّل من TestFlight (تُحفظ في فرع ci-crash للمراجعة)
+          os.makedirs("crash", exist_ok=True)
+          cs = requests.get(f"{B}/apps/{app}/betaFeedbackCrashSubmissions?limit=10&sort=-createdDate", headers=H).json()
+          if "errors" in cs: print("::warning::crash " + str(cs["errors"])[:300])
+          for x in cs.get("data", []):
+              a = x["attributes"]
+              print(f"::notice title=crash::{a.get('createdDate')} {a.get('deviceModel')} iOS {a.get('osVersion')} build {a.get('buildBundleId','')} comment={a.get('comment')}")
+              open(f"crash/{x['id']}.json", "w").write(__import__('json').dumps(a, ensure_ascii=False, indent=1))
+              lg = requests.get(f"{B}/betaFeedbackCrashSubmissions/{x['id']}/crashLog", headers=H).json()
+              t = (lg.get("data") or {}).get("attributes", {}).get("logText")
+              if t: open(f"crash/{x['id']}.crash", "w").write(t)
+              elif "errors" in lg: print("::warning::log " + str(lg["errors"])[:200])
           if "errors" in v: print("::error::" + str(v["errors"])[:300])
           PY
+      - name: نشر بلاغات التعطّل في فرع ci-crash
+        if: always()
+        run: |
+          [ -d crash ] && ls crash | grep -q . || exit 0
+          git config --global user.name "ci"; git config --global user.email "ci@users.noreply.github.com"
+          cd crash && git init -q && git checkout -q -b ci-crash && git add . && git commit -qm "crash logs"
+          git push -qf "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git" ci-crash
