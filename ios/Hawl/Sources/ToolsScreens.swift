@@ -267,7 +267,7 @@ struct QiblaView: View {
     /** البوصلة: قرص بالدرجات يدور مع الجوال، والكعبة على حافته في اتجاه القبلة، وإبرة من المركز إليها.
         السهم الثابت أعلى القرص هو اتجاه الجوال: إذا وقعت الكعبة تحته فأنت باتجاه القبلة. */
     private func dial(qibla: Double) -> some View {
-        let heading = location.heading ?? 0
+        let heading = location.heading == nil ? 0 : location.headingTurn   // متصل دون قفز عند الشمال
         let lowAccuracy = location.heading != nil && (location.headingAccuracy < 0 || location.headingAccuracy > 25)
         let isAligned = (offset(qibla).map { abs($0) <= 4 }) ?? false
         let R: CGFloat = 150

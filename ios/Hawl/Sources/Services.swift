@@ -14,6 +14,8 @@ final class LocationService: NSObject, ObservableObject, CLLocationManagerDelega
 
     private let manager = CLLocationManager()
     @Published var heading: Double?
+    /** نفس الاتجاه دون قفز من ٣٥٩ إلى ٠ (لتدوير القرص بسلاسة دون لفّة كاملة) */
+    @Published var headingTurn: Double = 0
     @Published var headingAccuracy: Double = -1
     @Published var busy = false
     @Published var denied = false
@@ -56,7 +58,7 @@ final class LocationService: NSObject, ObservableObject, CLLocationManagerDelega
         }
     }
 
-    func stopHeading() { manager.stopUpdatingHeading() }
+    func stopHeading() { manager.stopUpdatingHeading(); heading = nil }
 
     var headingAvailable: Bool { CLLocationManager.headingAvailable() }
 
@@ -88,6 +90,12 @@ final class LocationService: NSObject, ObservableObject, CLLocationManagerDelega
         let v = h.trueHeading >= 0 ? h.trueHeading : h.magneticHeading
         let acc = h.headingAccuracy
         Task { @MainActor in
+            if let old = self.heading {
+                let d = (v - old + 540).truncatingRemainder(dividingBy: 360) - 180
+                self.headingTurn += d
+            } else {
+                self.headingTurn = v
+            }
             self.heading = v
             self.headingAccuracy = acc
         }
