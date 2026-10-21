@@ -212,14 +212,20 @@ struct QiblaView: View {
 
     var body: some View {
         ScrollView {
-            VStack(spacing: 18) {
+            VStack(spacing: 16) {
                 if let b = bearing {
-                    // فاصل «—» بدل «·» لأن النقطة تُقرأ صفرًا عربيًا بجوار الأرقام
-                    Text((state.city.isEmpty ? "موقعك الحالي" : state.city) + " — تبعد " + ar(Int(distanceKm.rounded())) + " كم عن مكة المكرمة")
-                        .font(AppFont.ui(14)).foregroundColor(Palette.muted).multilineTextAlignment(.center)
+                    Text(state.city.isEmpty ? "موقعك الحالي" : state.city)
+                        .font(AppFont.ui(16, 700)).foregroundColor(Palette.ink)
                     dial(qibla: b)
-                    statusText(qibla: b)
-                    Text("اتجاه القبلة " + ar(Int(b.rounded())) + "° من الشمال").font(AppFont.ui(14)).foregroundColor(Palette.muted)
+                    hint(qibla: b)
+                    HStack(spacing: 0) {
+                        stat(icon: "safari", title: "اتجاه القبلة من الشمال", value: ar(Int(b.rounded())) + "°")
+                        Rectangle().fill(Palette.line).frame(width: 1, height: 44)
+                        stat(icon: "mappin.and.ellipse", title: "البُعد عن الكعبة", value: ar(Int(distanceKm.rounded())) + " كم")
+                    }
+                    .padding(.vertical, 12)
+                    .background(RoundedRectangle(cornerRadius: 18).fill(Palette.card))
+                    .overlay(RoundedRectangle(cornerRadius: 18).stroke(Palette.line))
                 } else {
                     Text(location.denied ? "نحتاج إذن الموقع لتحديد اتجاه القبلة" : "حدّد موقعك لمعرفة اتجاه القبلة")
                         .font(AppFont.ui(16, 500)).foregroundColor(Palette.muted)
@@ -230,9 +236,9 @@ struct QiblaView: View {
                 }
                 Text("ضع الجوال مسطحًا بعيدًا عن المعادن والمغناطيس. إذا كانت القراءة غير مستقرة، حرّك الجوال في الهواء على شكل الرقم 8 لمعايرة البوصلة.")
                     .font(AppFont.ui(13)).foregroundColor(Palette.muted).multilineTextAlignment(.center)
-                    .padding(.top, 8)
+                    .padding(.top, 4)
             }
-            .padding(24)
+            .padding(20)
             .frame(maxWidth: .infinity)
         }
         .background(Palette.page.ignoresSafeArea())
@@ -250,44 +256,74 @@ struct QiblaView: View {
         return (qibla - h + 540).truncatingRemainder(dividingBy: 360) - 180
     }
 
-    /** البوصلة: قرص يدور مع الجوال (ش ق ج غ) وسهم القبلة الذهبي */
+    private func stat(icon: String, title: String, value: String) -> some View {
+        VStack(spacing: 4) {
+            Label(title, systemImage: icon).font(AppFont.ui(12)).foregroundColor(Palette.muted)
+            Text(value).font(AppFont.ui(22, 800)).foregroundColor(Palette.ink)
+        }
+        .frame(maxWidth: .infinity)
+    }
+
+    /** البوصلة: قرص بالدرجات يدور مع الجوال، والكعبة على حافته في اتجاه القبلة، وإبرة من المركز إليها.
+        السهم الثابت أعلى القرص هو اتجاه الجوال: إذا وقعت الكعبة تحته فأنت باتجاه القبلة. */
     private func dial(qibla: Double) -> some View {
         let heading = location.heading ?? 0
         let lowAccuracy = location.heading != nil && (location.headingAccuracy < 0 || location.headingAccuracy > 25)
         let isAligned = (offset(qibla).map { abs($0) <= 4 }) ?? false
+        let R: CGFloat = 150
         return ZStack {
-            Circle().fill(Palette.card)
-            Circle().stroke(isAligned ? Palette.gold : Palette.line, lineWidth: isAligned ? 4 : 2)
+            Circle().fill(isAligned ? Palette.gold.opacity(0.9) : Palette.primary)
+            Circle().fill(Palette.card).padding(9)
             ZStack {
+                // التدريج: خط كل ٥°، وأطول كل ١٥° مع رقمه
                 ForEach(0..<72, id: \.self) { i in
-                    Rectangle().fill(i % 18 == 0 ? Palette.goldDeep : Palette.line)
-                        .frame(width: i % 6 == 0 ? 2 : 1, height: i % 6 == 0 ? 12 : 6)
-                        .offset(y: -122)
+                    Rectangle().fill(i % 3 == 0 ? Palette.ink : Palette.line)
+                        .frame(width: i % 3 == 0 ? 2 : 1, height: i % 3 == 0 ? 11 : 6)
+                        .offset(y: -(R - 22))
                         .rotationEffect(.degrees(Double(i) * 5))
                 }
+                ForEach(Array(stride(from: 15, to: 360, by: 15)), id: \.self) { d in
+                    if d % 90 != 0 {
+                        Text(ar(d)).font(AppFont.ui(10, 500)).foregroundColor(Palette.muted)
+                            .rotationEffect(.degrees(heading - Double(d)))
+                            .offset(y: -(R - 40))
+                            .rotationEffect(.degrees(Double(d)))
+                    }
+                }
                 ForEach(Array(["ش", "ق", "ج", "غ"].enumerated()), id: \.offset) { i, l in
-                    Text(l).font(AppFont.ui(15, 700)).foregroundColor(i == 0 ? Palette.goldDeep : Palette.muted)
-                        .rotationEffect(.degrees(-Double(i) * 90 + heading))
-                        .offset(y: -100)
+                    Text(l).font(AppFont.ui(18, 800)).foregroundColor(i == 0 ? Color(red: 0.7, green: 0.25, blue: 0.18) : Palette.ink)
+                        .rotationEffect(.degrees(heading - Double(i) * 90))
+                        .offset(y: -(R - 40))
                         .rotationEffect(.degrees(Double(i) * 90))
                 }
-                // سهم القبلة
-                VStack(spacing: 0) {
-                    Image(systemName: "location.north.fill").font(.system(size: 34)).foregroundColor(Palette.gold)
-                    Rectangle().fill(Palette.gold).frame(width: 3, height: 52)
-                    Spacer()
+                // قوس من الشمال إلى القبلة
+                Circle().trim(from: 0, to: qibla / 360)
+                    .stroke(Palette.gold.opacity(0.7), style: StrokeStyle(lineWidth: 3, lineCap: .round))
+                    .rotationEffect(.degrees(-90))
+                    .padding(17)
+                // الإبرة والكعبة على الحافة
+                ZStack {
+                    Capsule().fill(Palette.ink).frame(width: 6, height: R - 58).offset(y: -(R - 58) / 2)
+                    KaabaMark().frame(width: 30, height: 30)
+                        .rotationEffect(.degrees(heading - qibla))   // تبقى قائمة على الشاشة
+                        .offset(y: -(R - 30))
                 }
-                .frame(height: 220)
                 .rotationEffect(.degrees(qibla))
             }
             .rotationEffect(.degrees(-heading))
-            Image(systemName: "building.columns.fill").font(.system(size: 30)).foregroundColor(Palette.ink)
+            // سهم ثابت = مقدمة الجوال
+            Image(systemName: "arrowtriangle.down.fill").font(.system(size: 20))
+                .foregroundColor(isAligned ? .white : Palette.goldDeep)
+                .offset(y: -R + 4)
+            Circle().fill(Palette.ink).frame(width: 18, height: 18)
+            Circle().fill(Palette.card).frame(width: 7, height: 7)
             if lowAccuracy {
-                Text("البوصلة تحتاج معايرة").font(AppFont.ui(12, 700)).foregroundColor(Palette.goldDeep).offset(y: 52)
+                Text("البوصلة تحتاج معايرة").font(AppFont.ui(12, 700)).foregroundColor(Palette.goldDeep).offset(y: 46)
             }
         }
-        .frame(width: 270, height: 270)
+        .frame(width: R * 2, height: R * 2)
         .animation(.easeOut(duration: 0.25), value: heading)
+        .accessibilityElement(children: .ignore)
         .accessibilityLabel("بوصلة القبلة")
         .onChange(of: isAligned) { now in
             if now && !aligned { UINotificationFeedbackGenerator().notificationOccurred(.success) }
@@ -295,17 +331,45 @@ struct QiblaView: View {
         }
     }
 
-    @ViewBuilder private func statusText(qibla: Double) -> some View {
+    /** الإرشاد تحت البوصلة: أي اتجاه يحرّك المستخدم جواله */
+    @ViewBuilder private func hint(qibla: Double) -> some View {
+        let box: (String, String?, Color) -> AnyView = { text, icon, color in
+            AnyView(HStack(spacing: 10) {
+                if let icon { Image(systemName: icon).font(.system(size: 20, weight: .bold)) }
+                Text(text).font(AppFont.ui(18, 700))
+            }
+            .foregroundColor(color)
+            .frame(maxWidth: .infinity).frame(minHeight: 54)
+            .background(RoundedRectangle(cornerRadius: 16).fill(Palette.card))
+            .overlay(RoundedRectangle(cornerRadius: 16).stroke(color == Palette.goldDeep ? Palette.gold : Palette.line, lineWidth: 1.5)))
+        }
         if !location.headingAvailable {
-            Text("جوالك لا يحتوي على بوصلة").font(AppFont.ui(20, 700)).foregroundColor(Palette.ink)
+            box("جوالك لا يحتوي على بوصلة", nil, Palette.ink)
         } else if let off = offset(qibla) {
             if abs(off) <= 4 {
-                Text("✓ أنت باتجاه القبلة").font(AppFont.ui(20, 700)).foregroundColor(Palette.goldDeep)
+                box("أنت باتجاه القبلة", "checkmark.circle.fill", Palette.goldDeep)
+            } else if off > 0 {
+                box("حرّك الجوال نحو اليمين", "arrow.right", Palette.ink)
             } else {
-                Text(off > 0 ? "استدر نحو اليمين ↻" : "استدر نحو اليسار ↺").font(AppFont.ui(20, 700)).foregroundColor(Palette.ink)
+                box("حرّك الجوال نحو اليسار", "arrow.left", Palette.ink)
             }
         } else {
-            Text("جارٍ قراءة البوصلة…").font(AppFont.ui(17, 500)).foregroundColor(Palette.muted)
+            box("جارٍ قراءة البوصلة…", nil, Palette.muted)
+        }
+    }
+}
+
+/** رمز الكعبة: مكعب أسود بحزام ذهبي (رسم بسيط دون صور) */
+struct KaabaMark: View {
+    var body: some View {
+        GeometryReader { g in
+            let s = min(g.size.width, g.size.height)
+            ZStack(alignment: .top) {
+                RoundedRectangle(cornerRadius: s * 0.12).fill(Color(white: 0.08))
+                Rectangle().fill(Color(red: 0.85, green: 0.69, blue: 0.36)).frame(height: s * 0.13).padding(.top, s * 0.22)
+            }
+            .overlay(RoundedRectangle(cornerRadius: s * 0.12).stroke(Color.white.opacity(0.9), lineWidth: 1.5))
+            .frame(width: s, height: s)
         }
     }
 }
