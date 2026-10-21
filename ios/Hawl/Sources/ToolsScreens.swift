@@ -303,10 +303,10 @@ struct QiblaView: View {
                     .padding(17)
                 // الإبرة والكعبة على الحافة
                 ZStack {
-                    Capsule().fill(Palette.ink).frame(width: 6, height: R - 58).offset(y: -(R - 58) / 2)
+                    Capsule().fill(Palette.ink).frame(width: 6, height: R - 92).offset(y: -(R - 92) / 2)
                     KaabaMark().frame(width: 30, height: 30)
                         .rotationEffect(.degrees(heading - qibla))   // تبقى قائمة على الشاشة
-                        .offset(y: -(R - 30))
+                        .offset(y: -(R - 72))   // داخل حلقة الحروف حتى لا تغطيها
                 }
                 .rotationEffect(.degrees(qibla))
             }
