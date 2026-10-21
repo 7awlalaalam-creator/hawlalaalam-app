@@ -73,6 +73,7 @@ jobs:
           xcrun simctl bootstatus "$UDID" -b
           xcrun simctl status_bar "$UDID" override --time "9:41" --batteryLevel 100 --cellularBars 4 || true
           xcrun simctl install "$UDID" "$APP"
+          xcrun simctl privacy "$UDID" grant location com.hawlalaalam.quran || true
           mkdir -p shots
           # بيانات تجريبية: جدة، تخطّي الترحيب والجولة
           ARGS=(-welcomed '<true/>' -tour_v '<integer>99</integer>' -lat '<real>21.5433</real>' -lng '<real>39.1728</real>' -city 'جدة' -country 'SA' -live_prayer '<true/>')

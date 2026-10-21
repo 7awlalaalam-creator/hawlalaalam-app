@@ -322,6 +322,8 @@ struct QiblaView: View {
             }
         }
         .frame(width: R * 2, height: R * 2)
+        // القرص خريطة لا نص: لا يُعكس في الواجهة العربية، وإلا ظهر الشرق يسارًا وانعكس اتجاه الكعبة
+        .environment(\.layoutDirection, .leftToRight)
         .animation(.easeOut(duration: 0.25), value: heading)
         .accessibilityElement(children: .ignore)
         .accessibilityLabel("بوصلة القبلة")
