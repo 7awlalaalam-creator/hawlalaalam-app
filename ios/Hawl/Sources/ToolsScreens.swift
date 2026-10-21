@@ -298,11 +298,6 @@ struct QiblaView: View {
                         .offset(y: -(R - 40))
                         .rotationEffect(.degrees(Double(i) * 90))
                 }
-                // قوس من الشمال إلى القبلة
-                Circle().trim(from: 0, to: qibla / 360)
-                    .stroke(Palette.gold.opacity(0.7), style: StrokeStyle(lineWidth: 3, lineCap: .round))
-                    .rotationEffect(.degrees(-90))
-                    .padding(17)
                 // الإبرة والكعبة على الحافة
                 ZStack {
                     Capsule().fill(Palette.ink).frame(width: 6, height: R - 92).offset(y: -(R - 92) / 2)
@@ -352,6 +347,8 @@ struct QiblaView: View {
         } else if let off = offset(qibla) {
             if abs(off) <= 4 {
                 box("أنت باتجاه القبلة", "checkmark.circle.fill", Palette.goldDeep)
+            } else if abs(off) > 150 {
+                box("القبلة خلفك، استدر", "arrow.uturn.down", Palette.ink)
             } else if off > 0 {
                 box("حرّك الجوال نحو اليمين", "arrow.right", Palette.ink)
             } else {
