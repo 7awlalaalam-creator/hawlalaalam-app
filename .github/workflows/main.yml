@@ -16,6 +16,10 @@ on:
         description: 'نسخة تجريبية لك فقط (رابط تحميل لا يظهر للمستخدمين في البحث عن تحديث)'
         type: boolean
         default: false
+      trial:
+        description: 'نسخة تجربة تُثبَّت بجانب نسخة المتجر (اسم وحزمة مختلفان)'
+        type: boolean
+        default: false
 permissions:
   contents: write
 jobs:
@@ -29,6 +33,13 @@ jobs:
           unzip -o -q "$Z" -d /tmp/p
           R=$(dirname "$(find /tmp/p -name settings.gradle.kts | head -1)")
           cp -r "$R"/. .
+      - name: نسخة التجربة (تُثبَّت بجانب نسخة المتجر)
+        if: inputs.trial == true
+        run: |
+          sed -i 's|applicationId = "com.hawlalaalam.quran"|applicationId = "com.hawlalaalam.quran"\n        applicationIdSuffix = ".trial"|' app/build.gradle.kts
+          sed -i 's|<string name="app_name">[^<]*</string>|<string name="app_name">القرآن · تجربة</string>|' app/src/main/res/values*/strings.xml
+          grep -n "applicationIdSuffix" app/build.gradle.kts
+          grep -n "app_name" app/src/main/res/values*/strings.xml
       - uses: actions/setup-java@v4
         with:
           distribution: temurin
@@ -65,7 +76,7 @@ jobs:
           name: hawlalaalam-app
           path: out/
       - name: نشر إصدار للتحميل
-        if: env.KEYSTORE_FILE != '' && inputs.publish == true
+        if: env.KEYSTORE_FILE != '' && inputs.publish == true && inputs.trial != true
         uses: softprops/action-gh-release@v2
         with:
           tag_name: v2.0.${{ github.run_number }}
@@ -94,11 +105,11 @@ jobs:
 
       # نسخة تجريبية: «إصدار تجريبي» على GitHub؛ زر «البحث عن تحديث» يقرأ آخر إصدار رسمي فقط فلا يراها أحد
       - name: نسخة تجريبية للتحميل
-        if: env.KEYSTORE_FILE != '' && inputs.beta == true && inputs.publish != true
+        if: env.KEYSTORE_FILE != '' && (inputs.beta == true || inputs.trial == true) && inputs.publish != true
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: beta-2.0.${{ github.run_number }}
-          name: تجريبي — القرآن حول العالم 2.0.${{ github.run_number }}
+          tag_name: ${{ inputs.trial && 'trial' || 'beta' }}-2.0.${{ github.run_number }}
+          name: ${{ inputs.trial && 'تجربة (بجانب نسخة المتجر)' || 'تجريبي' }} — القرآن حول العالم 2.0.${{ github.run_number }}
           prerelease: true
           make_latest: false
           body: نسخة تجريبية للاختبار فقط، ليست للنشر.
