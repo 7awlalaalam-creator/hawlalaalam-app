@@ -99,6 +99,7 @@ jobs:
             route "tafsir?s=2&a=152" "$mode-12-tafsir"
             route "family" "$mode-13-family"
             route "backup" "$mode-14-backup"
+            route "qibla" "$mode-15-qibla"
           done
           # النشاط الحي «الصلاة القادمة»: نفتح التطبيق ثم الإعدادات فتظهر الجزيرة الديناميكية
           xcrun simctl ui "$UDID" appearance light
