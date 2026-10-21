@@ -30,12 +30,20 @@ final class AudioDownloads: NSObject, ObservableObject, URLSessionDownloadDelega
     /** يستدعيه النظام بعد انتهاء التحميلات والتطبيق في الخلفية */
     var backgroundCompletion: (() -> Void)?
 
-    private lazy var session: URLSession = {
+    /** الجلسة الخلفية تُنشأ خارج الخيط الرئيسي: إنشاؤها ينتظر خدمة التحميل في النظام، وقد يطول ذلك
+        (مثلًا بعد إعادة تشغيل الجوال وهو مقفل) فيُغلق النظام التطبيق لأنه تأخر أكثر من ١٠ ثوانٍ في الفتح */
+    private var _session: URLSession?
+    private let sessionLock = NSLock()
+    private var session: URLSession {
+        sessionLock.lock(); defer { sessionLock.unlock() }
+        if let s = _session { return s }
         let cfg = URLSessionConfiguration.background(withIdentifier: Self.sessionID)
         cfg.sessionSendsLaunchEvents = true
         cfg.isDiscretionary = false
-        return URLSession(configuration: cfg, delegate: self, delegateQueue: OperationQueue.main)
-    }()
+        let s = URLSession(configuration: cfg, delegate: self, delegateQueue: OperationQueue.main)
+        _session = s
+        return s
+    }
 
     private override init() {
         super.init()
@@ -43,14 +51,16 @@ final class AudioDownloads: NSObject, ObservableObject, URLSessionDownloadDelega
            let list = try? JSONDecoder().decode([Item].self, from: data) {
             items = list
         }
-        // تحميلات انقطعت مع إغلاق التطبيق: نطابقها مع الجلسة
-        session.getAllTasks { tasks in
-            let live = Set(tasks.compactMap { $0.originalRequest?.url?.absoluteString })
-            DispatchQueue.main.async {
-                for i in self.items.indices where self.items[i].status == .running && !live.contains(self.items[i].url) {
-                    self.items[i].status = FileManager.default.fileExists(atPath: self.fileURL(self.items[i]).path) ? .done : .failed
+        // تحميلات انقطعت مع إغلاق التطبيق: نطابقها مع الجلسة (في الخلفية، دون تأخير فتح التطبيق)
+        DispatchQueue.global(qos: .utility).async {
+            self.session.getAllTasks { tasks in
+                let live = Set(tasks.compactMap { $0.originalRequest?.url?.absoluteString })
+                DispatchQueue.main.async {
+                    for i in self.items.indices where self.items[i].status == .running && !live.contains(self.items[i].url) {
+                        self.items[i].status = FileManager.default.fileExists(atPath: self.fileURL(self.items[i]).path) ? .done : .failed
+                    }
+                    self.save()
                 }
-                self.save()
             }
         }
     }
