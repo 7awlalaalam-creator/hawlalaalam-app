@@ -31,6 +31,8 @@ struct JourneyView: View {
                     stat(ar(hifzTotal), "آية\nفي حفظك")
                 }
 
+                PrayerLogJourney()
+
                 VStack(alignment: .leading, spacing: 10) {
                     Text("آخر ٣٠ يومًا").font(AppFont.ui(15, 700)).foregroundColor(Palette.ink)
                     LazyVGrid(columns: cols, spacing: 6) {

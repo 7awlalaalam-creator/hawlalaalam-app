@@ -17,6 +17,7 @@ struct TodayView: View {
                 mainCard
                     .padding(.horizontal, 10)
                     .padding(.top, -46)
+                if state.hasLocation { PrayerLogCard().padding(.top, 14) }
                 if let h = hifzCard { h.padding(.top, 14) }
                 if let ctx = ramadanCard ?? azkarPrompt { ctx.padding(.top, 14) }
                 verseCard.padding(.top, 14)

@@ -174,14 +174,14 @@ enum Notifications {
     static let wirdCategory = "WIRD", verseCategory = "VERSE", remindCategory = "REMIND"
 
     static let actAzkar = "AZKAR", actShare = "SHARE", actSnooze = "SNOOZE", actOpenPage = "OPEN_PAGE"
-    static let actCard = "CARD", actText = "TEXT", actTafsir = "TAFSIR", actStart = "START", actMorning = "MORNING"
+    static let actCard = "CARD", actText = "TEXT", actTafsir = "TAFSIR", actStart = "START", actMorning = "MORNING", actPrayed = "PRAYED"
 
     static func registerCategories() {
         func a(_ id: String, _ title: String, fg: Bool = true) -> UNNotificationAction {
             UNNotificationAction(identifier: id, title: title, options: fg ? [.foreground] : [])
         }
         UNUserNotificationCenter.current().setNotificationCategories([
-            UNNotificationCategory(identifier: adhanCategory, actions: [a(actAzkar, "أذكار بعد الصلاة"), a(actShare, "شارك الأجر")],
+            UNNotificationCategory(identifier: adhanCategory, actions: [a(actPrayed, "✓ صلّيت", fg: false), a(actAzkar, "أذكار بعد الصلاة"), a(actShare, "شارك الأجر")],
                                    intentIdentifiers: [], options: []),
             UNNotificationCategory(identifier: sunriseCategory, actions: [a(actMorning, "أذكار الصباح"), a(actShare, "شارك الأجر")],
                                    intentIdentifiers: [], options: []),
@@ -325,7 +325,10 @@ enum Notifications {
         let c = content("صلاة " + name, body, kind: "الأذان")
         c.categoryIdentifier = adhanCategory
         c.threadIdentifier = "adhan"
-        c.userInfo = ["route": "prayer", "share": "\(f.0)\n— \(f.1)\n\n\(Links.homeString)"]
+        // لزر «✓ صلّيت»: رقم الصلاة في متابعة الصلوات (٠ الفجر … ٤ العشاء) ويومها
+        let logIndex = Prayer.alerts.firstIndex(of: k) ?? -1
+        c.userInfo = ["route": "prayer", "share": "\(f.0)\n— \(f.1)\n\n\(Links.homeString)",
+                      "pl_i": logIndex, "pl_d": PrayerLog.day(at)]
         return UNNotificationRequest(identifier: "adhan-\(Int(at.timeIntervalSince1970))-\(k)", content: c, trigger: once(at))
     }
 
@@ -620,6 +623,12 @@ final class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCent
         Task { @MainActor in
             let s = AppState.shared
             switch action {
+            case Notifications.actPrayed:
+                if let i = info["pl_i"] as? Int, let d = info["pl_d"] as? Int, i >= 0,
+                   PrayerLog.mask(d) & (1 << i) == 0 {
+                    PrayerLog.toggle(day: d, prayer: i)
+                    s.touch()
+                }
             case Notifications.actAzkar:
                 s.tab = .today
                 s.showPrayerAzkar = true
