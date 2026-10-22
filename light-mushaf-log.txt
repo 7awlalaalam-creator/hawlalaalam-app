@@ -1,0 +1,80 @@
+10-22 17:19:45.702   524   905 I AppsFilter: interaction: PackageSetting{7c0d619 com.hawlalaalam.quran/10192} -> PackageSetting{48b7d0a com.android.phone.auto_generated_rro_vendor__/10081} BLOCKED
+10-22 17:19:45.702   524   905 I AppsFilter: interaction: PackageSetting{7c0d619 com.hawlalaalam.quran/10192} -> PackageSetting{f39797b com.google.mainline.adservices/10136} BLOCKED
+10-22 17:19:45.702   524   905 I AppsFilter: interaction: PackageSetting{7c0d619 com.hawlalaalam.quran/10192} -> PackageSetting{e9e6398 com.android.imsserviceentitlement/10117} BLOCKED
+10-22 17:19:45.703   524   905 I AppsFilter: interaction: PackageSetting{7c0d619 com.hawlalaalam.quran/10192} -> PackageSetting{b58e7f1 com.google.android.healthconnect.controller/10172} BLOCKED
+10-22 17:19:45.703   524   905 I AppsFilter: interaction: PackageSetting{7c0d619 com.hawlalaalam.quran/10192} -> PackageSetting{f5c3257 com.android.internal.emulation.pixel_2_xl/10016} BLOCKED
+10-22 17:19:45.703   524   905 I AppsFilter: interaction: PackageSetting{7c0d619 com.hawlalaalam.quran/10192} -> PackageSetting{7e22144 com.android.internal.emulation.pixel_3_xl/10056} BLOCKED
+10-22 17:19:45.703   524   905 I AppsFilter: interaction: PackageSetting{7c0d619 com.hawlalaalam.quran/10192} -> PackageSetting{3122d com.android.internal.emulation.pixel_4_xl/10047} BLOCKED
+10-22 17:19:45.703   524   905 I AppsFilter: interaction: PackageSetting{7c0d619 com.hawlalaalam.quran/10192} -> PackageSetting{ca6a362 com.android.internal.emulation.pixel_fold/10006} BLOCKED
+10-22 17:19:45.703   524   905 I AppsFilter: interaction: PackageSetting{7c0d619 com.hawlalaalam.quran/10192} -> PackageSetting{8879cf3 com.android.bookmarkprovider/10114} BLOCKED
+10-22 17:19:45.703   524   905 I AppsFilter: interaction: PackageSetting{7c0d619 com.hawlalaalam.quran/10192} -> PackageSetting{a820db0 com.google.android.overlay.pixelconfigcommon/10014} BLOCKED
+10-22 17:19:45.703   524   905 I AppsFilter: interaction: PackageSetting{7c0d619 com.hawlalaalam.quran/10192} -> PackageSetting{faba429 com.android.systemui.accessibility.accessibilitymenu.auto_generated_rro_product__/10050} BLOCKED
+10-22 17:19:45.703   524   905 I AppsFilter: interaction: PackageSetting{7c0d619 com.hawlalaalam.quran/10192} -> PackageSetting{8cf93ae com.android.systemui.emulation.pixel_3a/10013} BLOCKED
+10-22 17:19:45.703   524   905 I AppsFilter: interaction: PackageSetting{7c0d619 com.hawlalaalam.quran/10192} -> PackageSetting{5f5154f com.android.systemui.emulation.pixel_4a/10000} BLOCKED
+10-22 17:19:45.703   524   905 I AppsFilter: interaction: PackageSetting{7c0d619 com.hawlalaalam.quran/10192} -> PackageSetting{ff254dc com.android.systemui.emulation.pixel_6a/10042} BLOCKED
+10-22 17:19:45.703   524   905 I AppsFilter: interaction: PackageSetting{7c0d619 com.hawlalaalam.quran/10192} -> PackageSetting{e3159e5 com.android.systemui.emulation.pixel_7a/10017} BLOCKED
+10-22 17:19:45.703   524   905 I AppsFilter: interaction: PackageSetting{7c0d619 com.hawlalaalam.quran/10192} -> PackageSetting{c81975 com.google.android.settings.intelligence/10118} BLOCKED
+10-22 17:19:45.703   524   905 I AppsFilter: interaction: PackageSetting{7c0d619 com.hawlalaalam.quran/10192} -> PackageSetting{f79fd27 com.google.android.projection.gearhead/10123} BLOCKED
+10-22 17:19:45.703   524   905 I AppsFilter: interaction: PackageSetting{7c0d619 com.hawlalaalam.quran/10192} -> PackageSetting{317b76b com.google.android.uwb.resources/10181} BLOCKED
+10-22 17:19:45.703   524   905 I AppsFilter: interaction: PackageSetting{7c0d619 com.hawlalaalam.quran/10192} -> PackageSetting{1aef410 com.android.cts.ctsshim/10191} BLOCKED
+10-22 17:19:45.703   524   905 I AppsFilter: interaction: PackageSetting{7c0d619 com.hawlalaalam.quran/10192} -> PackageSetting{2bde2c8 com.google.android.wifi.resources/10184} BLOCKED
+10-22 17:19:45.703   524   905 I AppsFilter: interaction: PackageSetting{7c0d619 com.hawlalaalam.quran/10192} -> PackageSetting{4a2af61 com.google.android.wifi.dialog/10185} BLOCKED
+10-22 17:19:45.703   524   905 I AppsFilter: interaction: PackageSetting{7c0d619 com.hawlalaalam.quran/10192} -> PackageSetting{ba6a86 com.google.android.apps.wallpaper/10160} BLOCKED
+10-22 17:19:45.703   524   905 I AppsFilter: interaction: PackageSetting{7c0d619 com.hawlalaalam.quran/10192} -> PackageSetting{5785f47 com.google.android.odad/10122} BLOCKED
+10-22 17:19:45.703   524   905 I AppsFilter: interaction: PackageSetting{7c0d619 com.hawlalaalam.quran/10192} -> PackageSetting{9326374 com.android.settings.auto_generated_rro_product__/10028} BLOCKED
+10-22 17:19:45.703   524   905 I AppsFilter: interaction: PackageSetting{7c0d619 com.hawlalaalam.quran/10192} -> PackageSetting{479e09d com.android.internal.systemui.navbar.gestural/10051} BLOCKED
+10-22 17:19:45.703   524   905 I AppsFilter: interaction: PackageSetting{7c0d619 com.hawlalaalam.quran/10192} -> PackageSetting{dc7315a com.google.android.apps.youtube.music/10156} BLOCKED
+10-22 17:19:45.703   524   905 I AppsFilter: interaction: PackageSetting{7c0d619 com.hawlalaalam.quran/10192} -> PackageSetting{c2a912 com.android.bluetoothmidiservice/10108} BLOCKED
+10-22 17:19:45.703   524   905 I AppsFilter: interaction: PackageSetting{7c0d619 com.hawlalaalam.quran/10192} -> PackageSetting{851a8e3 com.android.storagemanager.auto_generated_rro_product__/10026} BLOCKED
+10-22 17:19:45.703   524   905 I AppsFilter: interaction: PackageSetting{7c0d619 com.hawlalaalam.quran/10192} -> PackageSetting{ecc42e0 com.google.android.cellbroadcastreceiver/10180} BLOCKED
+10-22 17:19:45.703   524   905 I AppsFilter: interaction: PackageSetting{7c0d619 com.hawlalaalam.quran/10192} -> PackageSetting{298e999 com.android.phone.auto_generated_rro_product__/10061} BLOCKED
+10-22 17:19:45.703   524   905 I AppsFilter: interaction: PackageSetting{7c0d619 com.hawlalaalam.quran/10192} -> PackageSetting{79e445e android.auto_generated_rro_product__/10069} BLOCKED
+10-22 17:19:45.703   524   905 I AppsFilter: interaction: PackageSetting{7c0d619 com.hawlalaalam.quran/10192} -> PackageSetting{5ebf03f com.android.internal.systemui.navbar.gestural_narrow_back/10052} BLOCKED
+10-22 17:19:45.703   524   905 I AppsFilter: interaction: PackageSetting{7c0d619 com.hawlalaalam.quran/10192} -> PackageSetting{862ad0c com.google.android.inputmethod.latin/10140} BLOCKED
+10-22 17:19:45.704   524   905 I AppsFilter: interaction: PackageSetting{7c0d619 com.hawlalaalam.quran/10192} -> PackageSetting{6058655 android.auto_generated_rro_vendor__/10075} BLOCKED
+10-22 17:19:45.704   524   905 I AppsFilter: interaction: PackageSetting{7c0d619 com.hawlalaalam.quran/10192} -> PackageSetting{a06486a com.google.android.apps.restore/10119} BLOCKED
+10-22 17:19:45.716   524   553 E PackageManager: java.util.concurrent.TimeoutException: [Optimistic Bind] Didn't bind to resolver in time!
+10-22 17:19:45.837   524   555 I ActivityManager: Start proc 6022:com.google.android.webview:sandboxed_process0:org.chromium.content.app.SandboxedProcessService0:0/u0i1 for  {com.hawlalaalam.quran/org.chromium.content.app.SandboxedProcessService0:0}
+10-22 17:19:45.922  6022  6022 I cr_WebViewApkApp: Launched version=113.0.5672.136 minSdkVersion=29 isBundle=false processName=com.google.android.webview:sandboxed_process0:org.chromium.content.app.SandboxedProcessService0:0
+10-22 17:19:45.930  5923  6036 E chromium: [ERROR:simple_file_enumerator.cc(21)] opendir /data/user/0/com.hawlalaalam.quran/cache/WebView/Default/HTTP Cache/Code Cache/wasm: No such file or directory (2)
+10-22 17:19:45.930  5923  6036 E chromium: [ERROR:simple_index_file.cc(614)] Could not reconstruct index from disk
+10-22 17:19:45.930  5923  6037 E chromium: [ERROR:simple_file_enumerator.cc(21)] opendir /data/user/0/com.hawlalaalam.quran/cache/WebView/Default/HTTP Cache/Code Cache/js: No such file or directory (2)
+10-22 17:19:45.931  5923  6037 E chromium: [ERROR:simple_index_file.cc(614)] Could not reconstruct index from disk
+10-22 17:19:45.984   524  2287 D ConnectivityService: requestNetwork for uid/pid:10192/5923 activeRequest: null callbackRequest: 142 [NetworkRequest [ REQUEST id=143, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED&NOT_VCN_MANAGED Uid: 10192 RequestorUid: 10192 RequestorPkg: com.hawlalaalam.quran UnderlyingNetworks: Null] ]] callback flags: 0 order: 2147483647
+10-22 17:19:45.989   524   760 D WifiNetworkFactory: got request NetworkRequest [ REQUEST id=143, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED&NOT_VCN_MANAGED Uid: 10192 RequestorUid: 10192 RequestorPkg: com.hawlalaalam.quran UnderlyingNetworks: Null] ]
+10-22 17:19:45.989   524   760 D UntrustedWifiNetworkFactory: got request NetworkRequest [ REQUEST id=143, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED&NOT_VCN_MANAGED Uid: 10192 RequestorUid: 10192 RequestorPkg: com.hawlalaalam.quran UnderlyingNetworks: Null] ]
+10-22 17:19:45.989   524   760 D OemPaidWifiNetworkFactory: got request NetworkRequest [ REQUEST id=143, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED&NOT_VCN_MANAGED Uid: 10192 RequestorUid: 10192 RequestorPkg: com.hawlalaalam.quran UnderlyingNetworks: Null] ]
+10-22 17:19:45.989   524   760 D MultiInternetWifiNetworkFactory: got request NetworkRequest [ REQUEST id=143, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED&NOT_VCN_MANAGED Uid: 10192 RequestorUid: 10192 RequestorPkg: com.hawlalaalam.quran UnderlyingNetworks: Null] ]
+10-22 17:19:46.088   524   540 D ConnectivityService: requestNetwork for uid/pid:10192/5923 activeRequest: null callbackRequest: 145 [NetworkRequest [ REQUEST id=146, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED&NOT_VCN_MANAGED Uid: 10192 RequestorUid: 10192 RequestorPkg: com.hawlalaalam.quran UnderlyingNetworks: Null] ]] callback flags: 0 order: 2147483647
+10-22 17:19:46.091   524   760 D WifiNetworkFactory: got request NetworkRequest [ REQUEST id=146, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED&NOT_VCN_MANAGED Uid: 10192 RequestorUid: 10192 RequestorPkg: com.hawlalaalam.quran UnderlyingNetworks: Null] ]
+10-22 17:19:46.091   524   760 D UntrustedWifiNetworkFactory: got request NetworkRequest [ REQUEST id=146, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED&NOT_VCN_MANAGED Uid: 10192 RequestorUid: 10192 RequestorPkg: com.hawlalaalam.quran UnderlyingNetworks: Null] ]
+10-22 17:19:46.092   524   760 D OemPaidWifiNetworkFactory: got request NetworkRequest [ REQUEST id=146, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED&NOT_VCN_MANAGED Uid: 10192 RequestorUid: 10192 RequestorPkg: com.hawlalaalam.quran UnderlyingNetworks: Null] ]
+10-22 17:19:46.092   524   760 D MultiInternetWifiNetworkFactory: got request NetworkRequest [ REQUEST id=146, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED&NOT_VCN_MANAGED Uid: 10192 RequestorUid: 10192 RequestorPkg: com.hawlalaalam.quran UnderlyingNetworks: Null] ]
+10-22 17:19:46.244   524  2287 D CoreBackPreview: Window{447185b u0 com.hawlalaalam.quran/com.hawlalaalam.quran.MainActivity}: Setting back callback OnBackInvokedCallbackInfo{mCallback=android.window.IOnBackInvokedCallback$Stub$Proxy@43616e6, mPriority=-1, mIsAnimationCallback=false}
+10-22 17:19:46.244   524   905 D CoreBackPreview: Window{447185b u0 com.hawlalaalam.quran/com.hawlalaalam.quran.MainActivity}: Setting back callback OnBackInvokedCallbackInfo{mCallback=android.window.IOnBackInvokedCallback$Stub$Proxy@1e60427, mPriority=0, mIsAnimationCallback=false}
+10-22 17:19:47.054  6032  6161 W ConfigFileUtils: Failed to read asset ChimeraModuleSetList.pb: java.io.FileNotFoundException: ChimeraModuleSetList.pb
+10-22 17:19:47.100   524   543 W ziparchive: Unable to open '/data/app/~~WTLGFAMgS5m_dQkC_2HBSw==/com.hawlalaalam.quran-GjIDVDVkuYCgYmM_2Ydz8A==/base.dm': No such file or directory
+10-22 17:19:47.102   524   543 I ActivityTaskManager: Displayed com.hawlalaalam.quran/.MainActivity for user 0: +2s662ms
+10-22 17:19:47.165   524   540 W InputManager-JNI: Input channel object '82a37e0 Splash Screen com.hawlalaalam.quran (client)' was disposed without first being removed with the input manager!
+10-22 17:19:47.374   524   540 I ImeTracker: com.hawlalaalam.quran:5cb22d39: onRequestHide at ORIGIN_SERVER_HIDE_INPUT reason HIDE_UNSPECIFIED_WINDOW
+10-22 17:19:47.375   524   540 I ImeTracker: com.hawlalaalam.quran:5cb22d39: onCancelled at PHASE_SERVER_SHOULD_HIDE
+10-22 17:19:47.400  1542  1542 I GoogleInputMethodService: GoogleInputMethodService.onStartInput():1877 onStartInput(EditorInfo{inputType=0x0(NULL) imeOptions=0x0 privateImeOptions=null actionName=UNSPECIFIED actionLabel=null actionId=0 initialSelStart=-1 initialSelEnd=-1 initialCapsMode=0x0 hintText=null label=null packageName=com.hawlalaalam.quran fieldId=0 fieldName=null extras=null}, false)
+10-22 17:19:47.841  5959  6016 W AsyncOperation: OperationException[Status{statusCode=Stale snapshot for com.google.android.gms.trustlet_onbody(change count changed - expected 1  but was 0), resolution=null}]
+10-22 17:19:48.408   524   578 I AppsFilter: interaction: PackageSetting{7c0d619 com.hawlalaalam.quran/10192} -> PackageSetting{8c82b2 com.google.android.contacts/10154} BLOCKED
+10-22 17:19:50.810  5959  6019 W GmsPipelineLogger: java.lang.NullPointerException
+10-22 17:19:51.241  6032  6146 E ChimeraUPLUtils: Failed to invoke updateComplete: android.os.DeadObjectException
+10-22 17:19:51.920  5959  6133 W .gms.persistent: Verification of org.chromium.net.ExperimentalBidirectionalStream$Builder org.chromium.net.impl.CronetUrlRequestContext.newBidirectionalStreamBuilder(java.lang.String, org.chromium.net.BidirectionalStream$Callback, java.util.concurrent.Executor) took 120.082ms (49.97 bytecodes/s) (1624B approximate peak alloc)
+10-22 17:19:51.976  5923  6341 D ProfileInstaller: Installing profile for com.hawlalaalam.quran
+10-22 17:19:52.569  6032  6159 E ChimeraUPLUtils: Failed to invoke updateComplete: android.os.DeadObjectException
+10-22 17:19:52.836  6032  6144 E ChimeraUPLUtils: Failed to invoke updateComplete: android.os.DeadObjectException
+10-22 17:19:53.185  6032  6158 W Conscrypt: Could not set socket write timeout: java.net.SocketException: Socket closed
+10-22 17:19:53.233  6032  6158 W Conscrypt: Could not set socket write timeout: java.net.SocketException: Socket closed
+10-22 17:19:53.298  5959  6080 I SemanticLocation: java.io.FileNotFoundException: /data/user/0/com.google.android.gms/files/model_bundle_metadata.pb: open failed: ENOENT (No such file or directory)
+10-22 17:19:53.298  5959  6080 I SemanticLocation: Caused by: android.system.ErrnoException: open failed: ENOENT (No such file or directory)
+10-22 17:19:54.171  5959  6251 I SemanticLocation: java.io.FileNotFoundException: /data/user/0/com.google.android.gms/files/model_bundle_metadata.pb: open failed: ENOENT (No such file or directory)
+10-22 17:19:54.171  5959  6251 I SemanticLocation: Caused by: android.system.ErrnoException: open failed: ENOENT (No such file or directory)
+10-22 17:19:55.198  5959  6274 W GLSUser : [AppCertManager] Exception while requesting key: 
+10-22 17:19:55.198  5959  6274 W GLSUser : java.util.concurrent.ExecutionException: avvw: Parse Proto Exception.
+10-22 17:19:55.198  5959  6274 W GLSUser : Caused by: avvw: Parse Proto Exception.
+10-22 17:19:55.341  5959  6251 W Conscrypt: Could not set socket write timeout: java.net.SocketException: Socket closed
+10-22 17:19:55.551  5959  6251 W Conscrypt: Could not set socket write timeout: java.net.SocketException: Socket closed
