@@ -323,7 +323,7 @@ final class AudioPlayer: ObservableObject {
         buffering = true
         position = at
         duration = 0
-        timeObserver = p.addPeriodicTimeObserver(forInterval: CMTime(seconds: 0.5, preferredTimescale: 600), queue: .main) { tm in
+        timeObserver = p.addPeriodicTimeObserver(forInterval: CMTime(seconds: 1, preferredTimescale: 600), queue: .main) { tm in
             Task { @MainActor in AudioPlayer.shared.tick(tm.seconds) }
         }
         endObserver = NotificationCenter.default.addObserver(forName: .AVPlayerItemDidPlayToEndTime, object: item, queue: .main) { _ in
@@ -356,9 +356,12 @@ final class AudioPlayer: ObservableObject {
     private func tick(_ s: Double) {
         guard let p = player else { return }
         position = s.isFinite ? s : 0
-        if let d = p.currentItem?.duration.seconds, d.isFinite, d > 0 { duration = d }
-        buffering = p.timeControlStatus == .waitingToPlayAtSpecifiedRate
-        updateNowPlaying()
+        var changed = false
+        if let d = p.currentItem?.duration.seconds, d.isFinite, d > 0, d != duration { duration = d; changed = true }
+        let b = p.timeControlStatus == .waitingToPlayAtSpecifiedRate
+        if b != buffering { buffering = b; changed = true }
+        // معلومات «يُشغَّل الآن» تُحدَّث عند التغيّر فقط: النظام يحسب الوقت المنقضي بنفسه من سرعة التشغيل
+        if changed { updateNowPlaying() }
         saveLast()
     }
 

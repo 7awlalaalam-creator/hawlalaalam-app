@@ -338,8 +338,10 @@ struct FamilyGroupView: View {
         .task {
             await refresh()
             while !Task.isCancelled {
-                try? await Task.sleep(nanoseconds: 20_000_000_000)
+                try? await Task.sleep(nanoseconds: 60_000_000_000)
                 if Task.isCancelled { break }
+                // في الخلفية (والتلاوة تعمل مثلًا) لا نتصل بالخادم
+                if UIApplication.shared.applicationState != .active { continue }
                 await refresh(quiet: true)
             }
         }

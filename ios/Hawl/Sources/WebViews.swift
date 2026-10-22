@@ -160,6 +160,9 @@ final class HawlBridge: NSObject, WKScriptMessageHandler {
             // التسميع: بدء التعرّف على التلاوة أو إيقافه
             if (o["op"] as? String) == "start" { SpeechService.shared.start(web: web, lang: o["lang"] as? String ?? "ar-SA") }
             else { SpeechService.shared.stop() }
+        case "awake":
+            // لمسة أو تمرير تلقائي في صفحة المصحف: نمدّد بقاء الشاشة مضاءة
+            Task { @MainActor in ScreenAwake.poke() }
         case "hifz":
             // حالة الحفظ من صفحة المصحف: لبطاقة «مراجعة الحفظ» في «اليوم»
             Store.d.set(o["total"] as? Int ?? 0, forKey: "hifz_total")
@@ -574,15 +577,44 @@ struct WebScreen: View {
     }
 }
 
-/** إبقاء الشاشة مضاءة أثناء القراءة والاستماع (من الإعدادات، مفعّل افتراضيًا) */
+/**
+ * إبقاء الشاشة مضاءة أثناء القراءة (من الإعدادات، مفعّل افتراضيًا)، لكنها تنطفئ بعد ١٠ دقائق دون لمس
+ * توفيرًا للبطارية. تمدّدها اللمسات في الصفحة والتمرير التلقائي (رسالة «awake» من الصفحة). نفس Ui.keepAwake في أندرويد.
+ */
+@MainActor enum ScreenAwake {
+    private static var holders = 0
+    private static var force = false
+    private static var work: DispatchWorkItem?
+
+    static func begin(force f: Bool = false) { holders += 1; force = force || f; poke() }
+    static func end() {
+        holders = max(0, holders - 1)
+        if holders == 0 { force = false; work?.cancel(); UIApplication.shared.isIdleTimerDisabled = false }
+    }
+    /** لمسة أو نشاط: نمدّد ١٠ دقائق */
+    static func poke() {
+        guard holders > 0, force || Store.bool("keep_screen", true) else { return }
+        UIApplication.shared.isIdleTimerDisabled = true
+        work?.cancel()
+        let w = DispatchWorkItem { UIApplication.shared.isIdleTimerDisabled = false }
+        work = w
+        DispatchQueue.main.asyncAfter(deadline: .now() + 600, execute: w)
+    }
+    /** في الخلفية لا معنى لإبقاء الشاشة */
+    static func background() { work?.cancel(); UIApplication.shared.isIdleTimerDisabled = false }
+}
+
 struct KeepScreenOn: ViewModifier {
+    var force = false
     func body(content: Content) -> some View {
         content
-            .onAppear { UIApplication.shared.isIdleTimerDisabled = Store.bool("keep_screen", true) }
-            .onDisappear { UIApplication.shared.isIdleTimerDisabled = false }
+            .onAppear { ScreenAwake.begin(force: force) }
+            .onDisappear { ScreenAwake.end() }
+            // لمسة في الشاشة (الأذكار والمسبحة): نمدّد بقاء الشاشة مضاءة
+            .simultaneousGesture(TapGesture().onEnded { ScreenAwake.poke() })
     }
 }
 
 extension View {
-    func keepScreenOn() -> some View { modifier(KeepScreenOn()) }
+    func keepScreenOn(force: Bool = false) -> some View { modifier(KeepScreenOn(force: force)) }
 }

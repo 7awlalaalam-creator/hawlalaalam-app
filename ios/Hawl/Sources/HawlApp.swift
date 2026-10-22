@@ -45,8 +45,8 @@ struct HawlApp: App {
                 .onOpenURL { url in state.open(url) }
         }
         .onChange(of: phase) { p in
-            if p == .active { becameActive() }
-            if p == .background { Background.schedule(); SpeechService.shared.stopIfActive(); CloudSync.push() }
+            if p == .active { becameActive(); ScreenAwake.poke() }
+            if p == .background { ScreenAwake.background(); Background.schedule(); SpeechService.shared.stopIfActive(); CloudSync.push() }
         }
     }
 
@@ -54,7 +54,7 @@ struct HawlApp: App {
         WatchSync.shared.start()
         CloudSync.start()                            // نسحب ما في iCloud أولًا، ولا يُرفع شيء إلا إذا تغيّرت بيانات هذا الجهاز
         Task { await state.refreshVerse() }
-        state.changed()                              // نجدد التنبيهات القادمة ونحدّث الويدجت كلما فُتح التطبيق
+        state.foreground()                           // نجدد التنبيهات القادمة ونحدّث الويدجت (مرة كل ٣٠ دقيقة على الأكثر)
         Announce.checkSoon()
         LocationService.shared.refreshIfStale()      // state.changed() أعلاه يحدّث نشاط الصلاة الحيّ أيضًا
         if let s = AppDelegate.pendingShortcut, let u = URL(string: s) {

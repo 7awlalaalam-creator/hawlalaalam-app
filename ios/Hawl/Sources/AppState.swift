@@ -74,7 +74,7 @@ final class AppState: ObservableObject {
         lastPage = d.integer(forKey: "last_page")
         verse = Self.cachedVerse()
         Khatma.didChange = {
-            Task { @MainActor in AppState.shared.changed() }
+            Task { @MainActor in AppState.shared.khatmaChanged() }
         }
         if !d.bool(forKey: "welcomed") { showWelcome = true }
         else if d.integer(forKey: "tour_v") < FeaturesView.tourVersion { showTour = true }
@@ -110,6 +110,28 @@ final class AppState: ObservableObject {
         CloudSync.schedulePush()
         WatchSync.shared.send()                      // الساعة: الموقع والورد وآية اليوم
     }
+
+    /** صفحة جديدة في الختمة: نحدّث ما يتعلق بها فقط (أخف على البطارية من changed()) */
+    func khatmaChanged() {
+        rev += 1
+        Notifications.reschedule()                   // تذكير الورد يعتمد على تقدّم اليوم
+        WidgetCenter.shared.reloadTimelines(ofKind: "KhatmaWidget")
+        CloudSync.schedulePush()
+        WatchSync.shared.send()
+    }
+
+    /** عند فتح التطبيق: التحديث الكامل مرة كل ٣٠ دقيقة على الأكثر، وإلا إعادة رسم فقط */
+    func foreground() {
+        let now = Date().timeIntervalSince1970
+        if now - lastFullRefresh > 1800 {
+            lastFullRefresh = now
+            changed()
+        } else {
+            rev += 1
+            LiveActivities.refresh()
+        }
+    }
+    private var lastFullRefresh: TimeInterval = 0
 
     /** بعد استعادة نسخة احتياطية أو مزامنة من iCloud: نقرأ الإعدادات من جديد */
     func reloadFromStore() {

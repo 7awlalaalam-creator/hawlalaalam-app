@@ -44,9 +44,14 @@ enum Push {
     }
 
     /** الاشتراك بالموضوع حسب مفتاح «أخبار وتنبيهات حول العالم» في الإعدادات */
+    private static var lastSynced: Bool?
     static func sync() {
         guard PushConfig.ready, FirebaseApp.app() != nil, Messaging.messaging().apnsToken != nil else { return }
-        if Store.bool("news_on", true) {
+        // نفس الحالة المرسلة سابقًا في هذا التشغيل: لا اتصال بالشبكة
+        let on = Store.bool("news_on", true)
+        if lastSynced == on { return }
+        lastSynced = on
+        if on {
             Messaging.messaging().subscribe(toTopic: topic)
         } else {
             Messaging.messaging().unsubscribe(fromTopic: topic)

@@ -41,8 +41,13 @@ final class WatchSync: NSObject, WCSessionDelegate {
             c["v_text"] = v.text
             c["v_ref"] = v.ref
         }
+        // نفس البيانات المرسلة سابقًا: لا نرسلها (كل إرسال يجعل الساعة تعيد رسم ودجتاتها)
+        let sig = (c.keys.sorted().map { "\($0)=\(c[$0] ?? "")" }).joined(separator: "|")
+        guard sig != lastSig else { return }
+        lastSig = sig
         try? s.updateApplicationContext(c)
     }
+    private var lastSig = ""
 
     func session(_ session: WCSession, activationDidCompleteWith state: WCSessionActivationState, error: Error?) {
         DispatchQueue.main.async { self.send() }

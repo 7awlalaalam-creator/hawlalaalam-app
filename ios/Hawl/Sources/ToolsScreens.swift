@@ -187,6 +187,7 @@ struct PrayerTimesView: View {
 
 struct QiblaView: View {
     @EnvironmentObject var state: AppState
+    @Environment(\.scenePhase) private var phase
     @ObservedObject private var location = LocationService.shared
     @State private var aligned = false
 
@@ -242,6 +243,7 @@ struct QiblaView: View {
             .frame(maxWidth: .infinity)
         }
         .background(Palette.page.ignoresSafeArea())
+        .keepScreenOn(force: true)
         .navigationTitle("اتجاه القبلة")
         .navigationBarTitleDisplayMode(.inline)
         .onAppear {
@@ -251,6 +253,11 @@ struct QiblaView: View {
             if location.authorized { location.requestLocation() }
         }
         .onDisappear { location.stopHeading(); location.preciseForQibla(false) }
+        // في الخلفية لا تبقى البوصلة تعمل (قد يبقى التطبيق حيًا بسبب التلاوة)
+        .onChange(of: phase) { p in
+            if p == .background { location.stopHeading() }
+            if p == .active { location.startHeading() }
+        }
     }
 
     private func offset(_ qibla: Double) -> Double? {
@@ -459,8 +466,7 @@ struct TasbeehView: View {
                 Button("تصفير") { count = 0 }.font(AppFont.ui(14, 700)).foregroundColor(Palette.goldDeep)
             }
         }
-        .onAppear { UIApplication.shared.isIdleTimerDisabled = true }
-        .onDisappear { UIApplication.shared.isIdleTimerDisabled = false }
+        .keepScreenOn(force: true)                           // مضاءة، وتنطفئ بعد ١٠ دقائق دون تسبيح
     }
 
     private func tap() {
