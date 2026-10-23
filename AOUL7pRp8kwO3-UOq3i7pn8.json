@@ -1,0 +1,22 @@
+{
+ "createdDate": "2026-10-22T11:30:45.211Z",
+ "comment": "تعطل",
+ "email": null,
+ "deviceModel": "iPhone18_2",
+ "osVersion": "27.0.1",
+ "locale": "ar-SA",
+ "timeZone": "Asia/Riyadh",
+ "architecture": "arm64e",
+ "connectionType": "MOBILE_DATA",
+ "pairedAppleWatch": null,
+ "appUptimeInMilliseconds": null,
+ "diskBytesAvailable": 68128051200,
+ "diskBytesTotal": 255360323584,
+ "batteryPercentage": 85,
+ "screenWidthInPoints": 440,
+ "screenHeightInPoints": 956,
+ "appPlatform": "IOS",
+ "devicePlatform": "IOS",
+ "deviceFamily": "IPHONE",
+ "buildBundleId": "com.hawlalaalam.quran"
+}
