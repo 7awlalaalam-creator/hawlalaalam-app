@@ -41,6 +41,9 @@ struct ToolsView: View {
                     NavigationLink(value: Screen.mood(nil)) { ToolTile(title: "آية لحالك", systemImage: "heart") }
                     NavigationLink(value: Screen.dedicate) { ToolTile(title: "صدقة جارية", systemImage: "heart.circle") }
                     NavigationLink(value: Screen.notifications) { ToolTile(title: "التنبيهات", systemImage: "bell") }
+                    Button {
+                        if let u = URL(string: "https://apps.apple.com/app/id6823910862?action=write-review") { UIApplication.shared.open(u) }
+                    } label: { ToolTile(title: "قيّم التطبيق", systemImage: "star") }
                     NavigationLink(value: Screen.settings) { ToolTile(title: "الإعدادات", systemImage: "gearshape") }
                 }
                 dedicateCard.padding(.top, 12)
