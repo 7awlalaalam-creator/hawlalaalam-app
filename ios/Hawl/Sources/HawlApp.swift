@@ -143,6 +143,12 @@ struct ScreenView: View {
         case .family(let id): FamilyListView(openID: id)
         case .reciter(let id): ReciterView(id: id)
         case .backup: BackupView()
+        case .news: NewsView()
+        case .articles: ArticlesView()
+        case .article(let id, let url): ArticleView(id: id, url: url)
+        case .hadith: HadithView()
+        case .hadithBook(let k, let b): HadithView(key: k, bookID: b)
+        case .hadithDetail(let k, let n): HadithDetailView(key: k, num: n)
         }
     }
 }

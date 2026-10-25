@@ -12,6 +12,7 @@ struct ToolsView: View {
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 8) {
+                if let n = latestNews { NavigationLink(value: Screen.news) { newsCard(n) } }
                 NavigationLink(value: Screen.journey) { streakCard }
                     .accessibilityHint("افتح «رحلتي»")
                 section("القرآن")
@@ -23,6 +24,7 @@ struct ToolsView: View {
                     Button { state.openMushaf(page: nil, extra: "hifz=1") } label: { ToolTile(title: "الحفظ", systemImage: "puzzlepiece") }
                     Button { state.openMushaf(page: nil, extra: "find=1") } label: { ToolTile(title: "بحث بالمعنى", systemImage: "text.magnifyingglass") }
                     NavigationLink(value: Screen.family(nil)) { ToolTile(title: "ختمة العائلة", systemImage: "person.3") }
+                    NavigationLink(value: Screen.articles) { ToolTile(title: "المقالات", systemImage: "doc.text") }
                 }
                 section("الصلاة والذكر")
                 LazyVGrid(columns: columns, spacing: 8) {
@@ -31,6 +33,7 @@ struct ToolsView: View {
                     NavigationLink(value: Screen.azkar(nil)) { ToolTile(title: "الأذكار", systemImage: "sun.and.horizon") }
                     NavigationLink(value: Screen.tasbeeh) { ToolTile(title: "المسبحة", systemImage: "circle.grid.cross") }
                     NavigationLink(value: Screen.prayerAzkar) { ToolTile(title: "أذكار الصلاة", systemImage: "moon.stars") }
+                    NavigationLink(value: Screen.hadith) { ToolTile(title: "الأحاديث", systemImage: "books.vertical") }
                     Button { Browser.open(Links.home) } label: { ToolTile(title: "الموقع", systemImage: "safari") }
                 }
                 section("لقلبك والتطبيق")
@@ -52,7 +55,43 @@ struct ToolsView: View {
                 NavigationLink(value: Screen.settings) { Image(systemName: "gearshape") }
                     .accessibilityLabel("الإعدادات")
             }
+            ToolbarItem(placement: .navigationBarLeading) {
+                NavigationLink(value: Screen.news) {
+                    Image(systemName: "bell")
+                        .overlay(alignment: .topTrailing) {
+                            if unread > 0 {
+                                Text(ar(min(unread, 9))).font(.system(size: 10, weight: .bold)).foregroundColor(.white)
+                                    .frame(minWidth: 16, minHeight: 16).background(Circle().fill(Color(hex: 0xB3412F)))
+                                    .offset(x: 8, y: -8)
+                            }
+                        }
+                }
+                .accessibilityLabel("أخبار التطبيق" + (unread > 0 ? "، \(ar(unread)) جديد" : ""))
+            }
         }
+    }
+
+    /** عدد الأخبار الجديدة وآخر خبر لم يُقرأ (يتحدّث مع state.newsChanged) */
+    private var unread: Int { _ = state.newsChanged; return News.unread() }
+    private var latestNews: NewsItem? {
+        _ = state.newsChanged
+        guard let n = News.items().first, n.at > Store.d.double(forKey: News.readKey) else { return nil }
+        return n
+    }
+
+    private func newsCard(_ n: NewsItem) -> some View {
+        HStack(spacing: 12) {
+            Image(systemName: n.article > 0 ? "doc.text" : "bell").font(.system(size: 20)).foregroundColor(Palette.gold)
+            VStack(alignment: .leading, spacing: 2) {
+                Text("جديد في أخبار التطبيق").font(AppFont.ui(12, 700)).foregroundColor(Palette.gold)
+                Text(n.article > 0 ? "مقال جديد: " + (n.body.isEmpty ? n.title : n.body) : n.title)
+                    .font(AppFont.ui(15, 700)).foregroundColor(.white).lineLimit(1)
+            }
+            Spacer()
+            Image(systemName: "chevron.left").foregroundColor(Palette.onDarkMuted)
+        }
+        .padding(14)
+        .background(PatternBackground().clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous)))
     }
 
     private func section(_ t: String) -> some View {

@@ -35,6 +35,18 @@ targets:
       # الأذكار دون إنترنت (نفس ملف أندرويد ونصوص صفحة الموقع)
       - path: ../app/src/main/assets/azkar.json
         buildPhase: resources
+      # الأحاديث الصحيحة دون إنترنت (نفس ملفات أندرويد)
+      - path: ../app/src/main/assets/hadith/hadith-bukhari.deflate
+        buildPhase: resources
+      - path: ../app/src/main/assets/hadith/hadith-muslim.deflate
+        buildPhase: resources
+      - path: ../app/src/main/assets/hadith/hadith-daily.json
+        buildPhase: resources
+      # صوت تنبيه الأذان: التكبير بصوت أذان المسجد الحرام، والأذان (أول ٢٩ ثانية: حدّ آيفون لصوت الإشعار)
+      - path: Hawl/Sounds/adhan_takbeer.caf
+        buildPhase: resources
+      - path: Hawl/Sounds/adhan_full.caf
+        buildPhase: resources
       - path: ../app/src/main/res/font/tajawal_regular.ttf
         buildPhase: resources
       - path: ../app/src/main/res/font/tajawal_medium.ttf

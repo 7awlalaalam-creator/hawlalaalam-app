@@ -23,6 +23,12 @@ enum Screen: Hashable {
     case family(String?)
     case reciter(Int)
     case backup
+    case news
+    case articles
+    case article(Int, String)
+    case hadith
+    case hadithBook(String, Int)
+    case hadithDetail(String, Int)
 }
 
 /** حالة التطبيق: التنقّل، وآية اليوم، ومرآة للإعدادات المحفوظة في Store (المشتركة مع الويدجت) */
@@ -44,6 +50,8 @@ final class AppState: ObservableObject {
     /** فتح «أذكار بعد الصلاة» من إشعار الأذان */
     @Published var showPrayerAzkar = false
     @Published var showWelcome = false
+    /** يتغيّر حين يصل خبر جديد أو تُفتح «أخبار التطبيق» (لعدّاد الجرس) */
+    @Published var newsChanged = 0
     @Published var showTour = false
     /** صفحة الاستماع: طلب تحميل رابط معيّن */
     @Published var listenRequest: URL?
@@ -230,6 +238,10 @@ final class AppState: ObservableObject {
         case "tafsir":
             if let s = item("s").flatMap(Int.init), let a = item("a").flatMap(Int.init), Quran.valid(s, a) { show(.tafsir(s, a)) }
         case "backup": show(.backup)
+        case "news": show(.news)
+        case "articles": show(.articles)
+        case "article": if let id = item("id").flatMap(Int.init) { show(.article(id, item("u") ?? "")) }
+        case "hadith": show(.hadith)
         case "tools": tab = .tools
         case "downloads": show(.downloads)
         case "dedicate": show(.dedicate)

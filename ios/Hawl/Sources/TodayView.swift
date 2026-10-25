@@ -1,4 +1,5 @@
 import SwiftUI
+import StoreKit
 
 /**
  * شاشة «اليوم» — مرتّبة بلا تشتيت (نفس HomeActivity):
@@ -9,6 +10,8 @@ struct TodayView: View {
     @EnvironmentObject var state: AppState
     @ObservedObject private var location = LocationService.shared
     @Environment(\.colorScheme) private var scheme
+    @Environment(\.requestReview) private var requestReview
+    @Environment(\.scenePhase) private var phase
 
     var body: some View {
         ScrollView {
@@ -30,6 +33,8 @@ struct TodayView: View {
         .background(Palette.page.ignoresSafeArea())
         .toolbar(.hidden, for: .navigationBar)
         .task { await state.refreshVerse() }
+        .onAppear { if RatePrompt.due() { requestReview() } }          // نافذة تقييم App Store بعد قراءة ورد اليوم
+        .onChange(of: phase) { p in if p == .active && RatePrompt.due() { requestReview() } }
     }
 
     // MARK: الترويسة
@@ -455,5 +460,27 @@ struct VerseShareCard: View {
         .frame(width: 360)
         .background(PatternBackground(color: Color(hex: 0x123640)))
         .overlay(RoundedRectangle(cornerRadius: 14).stroke(Palette.gold.opacity(0.6), lineWidth: 1.5).padding(12))
+    }
+}
+
+
+/**
+ * نافذة التقييم الرسمية من App Store في لحظة مريحة: بعد قراءة ورد اليوم، ومع سلسلة ٣ أيام على الأقل،
+ * وبعد ٧ أيام من أول استخدام، ومرة كل ٤ أشهر على الأكثر (والنظام نفسه يحدّها بثلاث مرات في السنة).
+ */
+enum RatePrompt {
+    private static var askedThisRun = false
+
+    static func due() -> Bool {
+        if askedThisRun { return false }
+        let now = Date().timeIntervalSince1970
+        var first = Store.d.double(forKey: "first_open_at")
+        if first == 0 { first = now; Store.d.set(now, forKey: "first_open_at") }
+        guard now - first >= 7 * 86400,
+              now - Store.d.double(forKey: "rate_asked_at") >= 120 * 86400,
+              Reading.readOn(Date()), Reading.streak >= 3 else { return false }
+        askedThisRun = true
+        Store.d.set(now, forKey: "rate_asked_at")
+        return true
     }
 }

@@ -1,5 +1,6 @@
 import SwiftUI
 import UserNotifications
+import AVFoundation
 
 /** الإعدادات والتنبيهات بتصميم هوية الموقع (نفس SettingsActivity؛ notificationsOnly = «الأدوات» ← «التنبيهات») */
 struct SettingsView: View {
@@ -21,6 +22,8 @@ struct SettingsView: View {
         (Reminders.azkarPM, "أذكار المساء", "اختم نهارك بذكر الله"),
         (Reminders.kahf, "سورة الكهف", "كل جمعة، نورٌ لك ما بين الجمعتين"),
     ]
+
+    @State private var soundNow = AdhanSound.current
 
     var body: some View {
         ScrollView {
@@ -128,6 +131,19 @@ struct SettingsView: View {
             VStack(spacing: 0) {
                 row("تنبيه الأذان", "عند دخول كل صلاة مع فضلها، حسب طريقة الحساب أدناه", isOn: adhanBinding)
                 if state.flag("adhan_on") { adhanHealth }
+                divider
+                NavigationLink { AdhanSoundPicker() } label: {
+                    HStack {
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text("صوت تنبيه الأذان").font(AppFont.ui(15, 500)).foregroundColor(Palette.ink)
+                            Text(AdhanSound.name(soundNow)).font(AppFont.ui(12)).foregroundColor(Palette.muted)
+                        }
+                        Spacer()
+                        Text("تغيير ›").font(AppFont.ui(13)).foregroundColor(Palette.muted)
+                    }
+                    .frame(minHeight: 56)
+                }
+                .onAppear { soundNow = AdhanSound.current }
                 divider
                 if LiveActivities.supported {
                     row("الصلاة القادمة على شاشة القفل", "عدّاد هادئ في الجزيرة الديناميكية وشاشة القفل حتى دخول الوقت",
@@ -422,5 +438,102 @@ private struct MethodPicker: View {
         }
         .navigationTitle("طريقة حساب المواقيت")
         .navigationBarTitleDisplayMode(.inline)
+    }
+}
+
+
+/** صوت تنبيه الأذان: استماع قبل الاختيار، وأذان الفجر كاملًا */
+struct AdhanSoundPicker: View {
+    @State private var pick = AdhanSound.current
+    @AppStorage("adhan_fajr_full", store: Store.d) private var fajrFull = true
+    @State private var player: AVAudioPlayer?
+
+    var body: some View {
+        ScrollView {
+            VStack(alignment: .leading, spacing: 14) {
+                VStack(spacing: 6) {
+                    Text("الله أكبر، الله أكبر").font(AppFont.amiri(30)).foregroundColor(.white)
+                    Text("بصوت أذان المسجد الحرام").font(AppFont.ui(13)).foregroundColor(Palette.onDarkMuted)
+                }
+                .frame(maxWidth: .infinity).padding(.vertical, 22)
+                .background(PatternBackground().clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous)))
+
+                Text("الصوت عند دخول الوقت").font(AppFont.ui(14, 700)).foregroundColor(Palette.muted)
+                VStack(spacing: 0) {
+                    ForEach(Array(AdhanSound.options.enumerated()), id: \.element) { i, s in
+                        if i > 0 { Rectangle().fill(Palette.divider).frame(height: 1) }
+                        HStack(spacing: 12) {
+                            Button { select(s) } label: {
+                                HStack(spacing: 12) {
+                                    Image(systemName: pick == s ? "largecircle.fill.circle" : "circle")
+                                        .font(.system(size: 22)).foregroundColor(pick == s ? Palette.goldDeep : Palette.muted)
+                                    VStack(alignment: .leading, spacing: 2) {
+                                        Text(AdhanSound.name(s)).font(AppFont.ui(16, 700)).foregroundColor(Palette.ink)
+                                        Text(sub(s)).font(AppFont.ui(12)).foregroundColor(Palette.muted)
+                                    }
+                                    Spacer()
+                                }
+                                .frame(minHeight: 56).contentShape(Rectangle())
+                            }
+                            .buttonStyle(.plain)
+                            .accessibilityAddTraits(pick == s ? .isSelected : [])
+                            if s == AdhanSound.takbeer || s == AdhanSound.full {
+                                Button { play(s) } label: {
+                                    Image(systemName: "play.fill").foregroundColor(Palette.goldDeep)
+                                        .frame(width: 44, height: 44).background(Circle().fill(Palette.chip))
+                                }
+                                .buttonStyle(.plain)
+                                .accessibilityLabel("استماع: " + AdhanSound.name(s))
+                            }
+                        }
+                    }
+                }
+                .padding(.horizontal, 14)
+                .card()
+
+                if AdhanSound.available(AdhanSound.full) && AdhanSound.available(AdhanSound.takbeer) {
+                    Toggle(isOn: $fajrFull) {
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text("أذان الفجر كاملًا دائمًا").font(AppFont.ui(15, 700)).foregroundColor(Palette.ink)
+                            Text("حتى لو اخترت التكبير فقط").font(AppFont.ui(12)).foregroundColor(Palette.muted)
+                        }
+                    }
+                    .tint(Palette.goldDeep)
+                    .padding(14)
+                    .card()
+                    .onChange(of: fajrFull) { _ in Notifications.reschedule() }
+                }
+                Text("يعمل الصوت حتى والتطبيق مغلق. في آيفون يقتصر صوت الإشعار على ٣٠ ثانية، فيُسمع أول الأذان.")
+                    .font(AppFont.ui(12)).foregroundColor(Palette.muted).fixedSize(horizontal: false, vertical: true)
+            }
+            .padding(16)
+        }
+        .background(Palette.page.ignoresSafeArea())
+        .navigationTitle("صوت تنبيه الأذان")
+        .navigationBarTitleDisplayMode(.inline)
+        .onDisappear { player?.stop() }
+    }
+
+    private func sub(_ s: String) -> String {
+        switch s {
+        case AdhanSound.takbeer: return "«الله أكبر، الله أكبر» · نحو ١٢ ثانية"
+        case AdhanSound.full: return "أذان المسجد الحرام"
+        case AdhanSound.silent: return "إشعار بلا صوت"
+        default: return "نغمة التنبيه في جوالك"
+        }
+    }
+
+    private func select(_ s: String) {
+        pick = s
+        Store.d.set(s, forKey: "adhan_sound")
+        Notifications.reschedule()
+    }
+
+    private func play(_ s: String) {
+        player?.stop()
+        guard let u = Bundle.main.url(forResource: "adhan_" + s, withExtension: "caf") else { return }
+        try? AVAudioSession.sharedInstance().setCategory(.playback)
+        player = try? AVAudioPlayer(contentsOf: u)
+        player?.play()
     }
 }

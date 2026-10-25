@@ -78,7 +78,21 @@ enum Push {
         if id == Store.string("notice_seen") { return !msg.isEmpty && msg == Store.string("push_last_msg") }
         Store.d.set(id, forKey: "notice_seen")
         Store.d.set(msg, forKey: "push_last_msg")
+        // «أخبار التطبيق»: يبقى ٢٤ ساعة
+        News.add(id: id, title: "\(info["title"] ?? (aps(info)?["title"] ?? ""))", body: "\(info["body"] ?? (aps(info)?["body"] ?? ""))",
+                 url: "\(info["url"] ?? "")", article: article(info))
         return true
+    }
+
+    /** نص الإشعار الظاهر (من apns.alert) حين لا يحمله data */
+    private static func aps(_ info: [AnyHashable: Any]) -> [String: Any]? {
+        (info["aps"] as? [String: Any])?["alert"] as? [String: Any]
+    }
+
+    /** رقم المقالة إن كان الإشعار «مقال جديد» */
+    static func article(_ info: [AnyHashable: Any]) -> Int {
+        if let n = Int("\(info["aid"] ?? "")"), n > 0 { return n }
+        return News.articleID("\(info["url"] ?? "")")
     }
 
     /** الرابط يُفتح داخل التطبيق فقط إن كان من موقعنا */
@@ -102,7 +116,9 @@ enum Push {
         c.body = body
         c.subtitle = "أخبار حول العالم"
         c.sound = .default
-        if let u = link(info) { c.userInfo = ["url": u.absoluteString] } else { c.userInfo = ["route": "today"] }
+        let aid = article(info)
+        if aid > 0 { c.userInfo = ["article": aid, "url": "\(info["url"] ?? "")"] }
+        else if let u = link(info) { c.userInfo = ["url": u.absoluteString] } else { c.userInfo = ["route": "today"] }
         let id = "\(info["id"] ?? UUID().uuidString)"
         try? await UNUserNotificationCenter.current().add(UNNotificationRequest(identifier: "news-" + id, content: c, trigger: nil))
     }

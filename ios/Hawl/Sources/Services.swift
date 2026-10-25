@@ -323,6 +323,7 @@ enum Notifications {
         body += "\n\n" + f.0 + "\n— " + f.1
         if !city.isEmpty { body += "\n\nحسب التوقيت المحلي لـ" + city }
         let c = content("صلاة " + name, body, kind: "الأذان")
+        c.sound = AdhanSound.notificationSound(for: k)
         c.categoryIdentifier = adhanCategory
         c.threadIdentifier = "adhan"
         // لزر «✓ صلّيت»: رقم الصلاة في متابعة الصلوات (٠ الفجر … ٤ العشاء) ويومها
@@ -504,6 +505,9 @@ enum Announce {
         if id == Store.string("notice_seen") { return }
         if expires > 0 && Date().timeIntervalSince1970 > expires { return }
         Store.d.set(id, forKey: "notice_seen")
+        let a0 = (o["aid"] as? Int) ?? Int("\(o["aid"] ?? "")") ?? 0
+        let aid = a0 > 0 ? a0 : News.articleID(link)
+        News.add(id: id, title: title, body: body, url: link, article: aid)      // «أخبار التطبيق»: ٢٤ ساعة
         guard Store.bool("news_on", true) else { return }
         let c = UNMutableNotificationContent()
         c.title = title.isEmpty ? "حول العالم" : title
@@ -511,7 +515,8 @@ enum Announce {
         c.subtitle = "أخبار حول العالم"
         c.sound = .default
         // الرابط من نطاق الموقع فقط يُفتح داخل التطبيق؛ غير ذلك يفتح «اليوم»
-        if let u = URL(string: link), Links.isOurs(u) { c.userInfo = ["url": link] } else { c.userInfo = ["route": "today"] }
+        if aid > 0 { c.userInfo = ["article": aid, "url": link] }
+        else if let u = URL(string: link), Links.isOurs(u) { c.userInfo = ["url": link] } else { c.userInfo = ["route": "today"] }
         try? await UNUserNotificationCenter.current().add(UNNotificationRequest(identifier: "news-" + id, content: c, trigger: nil))
     }
 }
@@ -617,6 +622,8 @@ final class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCent
         let route = info["route"] as? String
         let page = info["page"] as? Int
         let url = Push.isPush(info) ? Push.link(info) : (info["url"] as? String).flatMap(URL.init(string:))
+        let aid = Push.isPush(info) ? Push.article(info) : (info["article"] as? Int ?? 0)
+        let rawURL = "\(info["url"] ?? "")"
         let share = info["share"] as? String
         let card = (info["card"] as? String).flatMap(URL.init(string:))
         let tafsir = (info["tafsir"] as? String).flatMap(URL.init(string:))
@@ -646,6 +653,7 @@ final class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCent
                 s.open(Links.azkar, title: "الأذكار")
             default:
                 if let p = page { s.openMushaf(page: p) }
+                else if aid > 0 { s.show(.article(aid, rawURL)) }        // مقال جديد: يُفتح في شاشة المقالات
                 else if let u = url { s.open(u) }
                 else if route == "prayer" { s.show(.prayerTimes) }
                 else { s.tab = .today }
@@ -665,4 +673,49 @@ final class SceneDelegate: NSObject, UIWindowSceneDelegate {
             completionHandler(true)
         }
     }
+}
+
+
+// MARK: - صوت تنبيه الأذان (نفس Adhan.sound في أندرويد)
+// نغمة الجوال، أو «الله أكبر، الله أكبر» بصوت أذان المسجد الحرام، أو الأذان، أو صامت.
+// ملفات الصوت في الحزمة: adhan_takbeer.caf و adhan_full.caf (آيفون يشغّل ٣٠ ثانية على الأكثر من صوت الإشعار)؛
+// ما دام الملف غير موجود لا يظهر خياره، ويعمل التنبيه بنغمة الجوال.
+
+enum AdhanSound {
+    static let standard = "default", takbeer = "takbeer", full = "full", silent = "silent"
+
+    static func file(_ s: String) -> String { "adhan_" + s + ".caf" }
+
+    static func available(_ s: String) -> Bool {
+        s == standard || s == silent || Bundle.main.url(forResource: "adhan_" + s, withExtension: "caf") != nil
+    }
+
+    static var current: String {
+        let saved = Store.string("adhan_sound")
+        let s = saved.isEmpty ? (available(takbeer) ? takbeer : standard) : saved
+        return available(s) ? s : standard
+    }
+
+    static var fajrFull: Bool { Store.bool("adhan_fajr_full", true) }
+
+    static func notificationSound(for prayer: Int) -> UNNotificationSound? {
+        var s = current
+        if prayer == Prayer.fajr && s == takbeer && fajrFull && available(full) { s = full }
+        switch s {
+        case silent: return nil
+        case takbeer, full: return UNNotificationSound(named: UNNotificationSoundName(file(s)))
+        default: return .default
+        }
+    }
+
+    static func name(_ s: String) -> String {
+        switch s {
+        case takbeer: return "التكبير فقط"
+        case full: return "الأذان كاملًا"
+        case silent: return "صامت"
+        default: return "نغمة الجوال"
+        }
+    }
+
+    static var options: [String] { [takbeer, full, standard, silent].filter(available) }
 }
