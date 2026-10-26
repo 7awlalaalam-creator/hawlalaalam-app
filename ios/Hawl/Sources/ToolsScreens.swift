@@ -25,6 +25,7 @@ struct ToolsView: View {
                     Button { state.openMushaf(page: nil, extra: "find=1") } label: { ToolTile(title: L("بحث بالمعنى"), systemImage: "text.magnifyingglass") }
                     NavigationLink(value: Screen.family(nil)) { ToolTile(title: L("ختمة العائلة"), systemImage: "person.3") }
                     NavigationLink(value: Screen.articles) { ToolTile(title: L("المقالات"), systemImage: "doc.text") }
+                    NavigationLink(value: Screen.web(Links.site("quran-kids-ar.html"), L("القرآن للأطفال"))) { ToolTile(title: L("القرآن للأطفال"), systemImage: "figure.and.child.holdinghands") }
                 }
                 section(L("الصلاة والذكر"))
                 LazyVGrid(columns: columns, spacing: 8) {
