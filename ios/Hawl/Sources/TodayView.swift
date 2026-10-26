@@ -383,7 +383,11 @@ struct TodayView: View {
                     // مشاركة سريعة، أو تصميم البطاقة في الموقع (تغيير الخلفية وإضافة التفسير)
                     Menu {
                         Button { shareImage(v) } label: { Label(L("شارك الصورة الآن"), systemImage: "square.and.arrow.up") }
-                        Button { state.open(v.cardURL) } label: { Label(L("صمّم البطاقة: الخلفية والتفسير"), systemImage: "paintbrush") }
+                        Button {
+                            // صفحة التصميم في الموقع مباشرة (state.open يحوّل رابط البطاقة إلى المشاركة السريعة)،
+                            // وبعد إغلاق القائمة حتى لا تتعارض نافذتان
+                            DispatchQueue.main.asyncAfter(deadline: .now() + 0.35) { Browser.open(v.cardURL) }
+                        } label: { Label(L("صمّم البطاقة: الخلفية والتفسير"), systemImage: "paintbrush") }
                     } label: {
                         Pill(title: L("صورة"), systemImage: "photo", primary: true, height: 44)
                     }
