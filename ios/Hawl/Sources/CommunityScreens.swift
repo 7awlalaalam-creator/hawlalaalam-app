@@ -104,7 +104,7 @@ enum Stats {
             if await post(["action": "join", "ref": ref]) { Store.d.set(true, forKey: "st_ref_joined") }
         }
         let pending = min(604, Store.int("st_pending", 0))
-        let khatmas = min(3, Store.int("st_khatma_pending", 0))
+        let khatmas = min(1, Store.int("st_khatma_pending", 0))
         if pending > 0 || khatmas > 0 {
             var body: [String: Any] = ["action": "add", "pages": pending]
             if map { body["cc"] = country }
