@@ -34,16 +34,21 @@ struct ToolsView: View {
                     NavigationLink(value: Screen.tasbeeh) { ToolTile(title: "المسبحة", systemImage: "circle.grid.cross") }
                     NavigationLink(value: Screen.prayerAzkar) { ToolTile(title: "أذكار الصلاة", systemImage: "moon.stars") }
                     NavigationLink(value: Screen.hadith) { ToolTile(title: "الأحاديث", systemImage: "books.vertical") }
+                    NavigationLink(value: Screen.mosque) { ToolTile(title: "وضع المسجد", systemImage: "speaker.slash") }
+                    NavigationLink(value: Screen.adhanCheck) { ToolTile(title: "فحص الأذان", systemImage: "bell.badge") }
                     Button { Browser.open(Links.home) } label: { ToolTile(title: "الموقع", systemImage: "safari") }
                 }
                 section("لقلبك والتطبيق")
                 LazyVGrid(columns: columns, spacing: 8) {
                     NavigationLink(value: Screen.mood(nil)) { ToolTile(title: "آية لحالك", systemImage: "heart") }
                     NavigationLink(value: Screen.dedicate) { ToolTile(title: "صدقة جارية", systemImage: "heart.circle") }
+                    NavigationLink(value: Screen.impact) { ToolTile(title: "أثرك", systemImage: "flame") }
+                    NavigationLink(value: Screen.worldMap) { ToolTile(title: "حول العالم", systemImage: "globe.asia.australia") }
                     NavigationLink(value: Screen.notifications) { ToolTile(title: "التنبيهات", systemImage: "bell") }
                     Button {
                         if let u = URL(string: "https://apps.apple.com/app/id6823910862?action=write-review") { UIApplication.shared.open(u) }
                     } label: { ToolTile(title: "قيّم التطبيق", systemImage: "star") }
+                    NavigationLink(value: Screen.privacy) { ToolTile(title: "خصوصيتك", systemImage: "checkmark.shield") }
                     NavigationLink(value: Screen.settings) { ToolTile(title: "الإعدادات", systemImage: "gearshape") }
                 }
                 dedicateCard.padding(.top, 12)

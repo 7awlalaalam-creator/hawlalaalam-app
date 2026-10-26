@@ -56,6 +56,7 @@ struct HawlApp: App {
         Task { await state.refreshVerse() }
         state.foreground()                           // نجدد التنبيهات القادمة ونحدّث الويدجت (مرة كل ٣٠ دقيقة على الأكثر)
         Announce.checkSoon()
+        Stats.syncSoon()                 // لا يرسل شيئًا إلا بموافقة «الخريطة» أو رمز دعوة
         LocationService.shared.refreshIfStale()      // state.changed() أعلاه يحدّث نشاط الصلاة الحيّ أيضًا
         if let s = AppDelegate.pendingShortcut, let u = URL(string: s) {
             AppDelegate.pendingShortcut = nil
@@ -149,6 +150,11 @@ struct ScreenView: View {
         case .hadith: HadithView()
         case .hadithBook(let k, let b): HadithView(key: k, bookID: b)
         case .hadithDetail(let k, let n): HadithDetailView(key: k, num: n)
+        case .mosque: MosqueView()
+        case .privacy: PrivacyView()
+        case .adhanCheck: AdhanCheckView()
+        case .impact: ImpactView()
+        case .worldMap: WorldMapView()
         }
     }
 }

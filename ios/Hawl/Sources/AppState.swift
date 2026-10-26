@@ -29,6 +29,11 @@ enum Screen: Hashable {
     case hadith
     case hadithBook(String, Int)
     case hadithDetail(String, Int)
+    case mosque
+    case privacy
+    case adhanCheck
+    case impact
+    case worldMap
 }
 
 /** حالة التطبيق: التنقّل، وآية اليوم، ومرآة للإعدادات المحفوظة في Store (المشتركة مع الويدجت) */
@@ -242,6 +247,11 @@ final class AppState: ObservableObject {
         case "articles": show(.articles)
         case "article": if let id = item("id").flatMap(Int.init) { show(.article(id, item("u") ?? "")) }
         case "hadith": show(.hadith)
+        case "mosque": show(.mosque)
+        case "privacy": show(.privacy)
+        case "adhancheck": show(.adhanCheck)
+        case "impact": show(.impact)
+        case "world": show(.worldMap)
         case "tools": tab = .tools
         case "downloads": show(.downloads)
         case "dedicate": show(.dedicate)

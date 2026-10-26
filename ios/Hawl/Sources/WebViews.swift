@@ -317,11 +317,10 @@ struct MushafWebView: UIViewRepresentable {
             currentPage = p
             AppState.shared.recordMushaf(page: p)
             dwellTask?.cancel()
-            guard Khatma.active else { return }
             dwellTask = Task { @MainActor [weak self] in
                 try? await Task.sleep(nanoseconds: UInt64(Khatma.dwell * 1_000_000_000))
                 guard !Task.isCancelled, let self = self, self.currentPage == p else { return }
-                Khatma.onPage(p)
+                countPage(p)
             }
         }
 
@@ -445,11 +444,11 @@ struct WebPage: UIViewRepresentable {
             Reading.record(u, title: title)
             dwellTask?.cancel()
             let p = Khatma.pageOf(u)
-            guard p > 0, Khatma.active else { return }
+            guard p > 0 else { return }
             dwellTask = Task { @MainActor [weak web] in
                 try? await Task.sleep(nanoseconds: UInt64(Khatma.dwell * 1_000_000_000))
                 guard !Task.isCancelled, let cur = web?.url, Khatma.pageOf(cur) == p else { return }
-                Khatma.onPage(p)
+                countPage(p)
             }
         }
 
@@ -617,4 +616,13 @@ struct KeepScreenOn: ViewModifier {
 
 extension View {
     func keepScreenOn(force: Bool = false) -> some View { modifier(KeepScreenOn(force: force)) }
+}
+
+/** صفحة مكث عليها القارئ: عدّاد اليوم (لأثرك وخريطة القرآن) ثم الختمة إن كانت نشطة */
+@MainActor func countPage(_ p: Int) {
+    Stats.onPage(p)
+    guard Khatma.active else { return }
+    let before = Khatma.completed
+    Khatma.onPage(p)
+    if Khatma.completed > before { Stats.onKhatma() }
 }

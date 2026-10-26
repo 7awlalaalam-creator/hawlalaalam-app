@@ -244,6 +244,10 @@ enum Notifications {
                     timed.append(Item(req: sunrise(at: t[Prayer.sunrise]), at: t[Prayer.sunrise]))
                 }
             }
+            // «وضع المسجد»: تذكير هادئ قبل الإقامة
+            if Mosque.on && Geo.has {
+                for (req, at) in Mosque.requests(day: day, times: t, now: now) { timed.append(Item(req: req, at: at)) }
+            }
             // تذكير الصيام المسنون (عند العشاء)
             if Store.bool("fasting_on", true) && Geo.has && t[Prayer.isha] > now, let fast = Fadl.fastAfter(day) {
                 timed.append(Item(req: fasting(fast, at: t[Prayer.isha]), at: t[Prayer.isha]))
@@ -533,6 +537,8 @@ enum Background {
             let work = Task {
                 _ = await AppState.fetchVerse()
                 await Announce.check()
+                await Stats.sync()
+                await AdhanCheck.weeklyIfDue()
                 await MainActor.run {
                     Notifications.reschedule()
                     WidgetCenter.shared.reloadAllTimelines()
@@ -656,6 +662,8 @@ final class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCent
                 else if aid > 0 { s.show(.article(aid, rawURL)) }        // مقال جديد: يُفتح في شاشة المقالات
                 else if let u = url { s.open(u) }
                 else if route == "prayer" { s.show(.prayerTimes) }
+                else if route == "adhancheck" { s.show(.adhanCheck) }
+                else if content.threadIdentifier == "mosque" { s.show(.mosque) }
                 else { s.tab = .today }
             }
             completionHandler()
