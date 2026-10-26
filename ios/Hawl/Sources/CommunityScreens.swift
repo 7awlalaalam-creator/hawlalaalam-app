@@ -254,6 +254,9 @@ enum AdhanCheck {
 
 // MARK: - الشاشات
 
+/** الصفر بالأرقام العربية نقطة صغيرة يخطئها القارئ: شرطة بدلها */
+private func num(_ n: Int) -> String { n <= 0 ? "—" : ar(n) }
+
 private struct DarkHero<Content: View>: View {
     @ViewBuilder var content: Content
     var body: some View {
@@ -480,16 +483,16 @@ struct ImpactView: View {
             VStack(alignment: .leading, spacing: 12) {
                 DarkHero {
                     Text("صفحات قرأها من دعوتهم للتطبيق").font(AppFont.ui(13, 700)).foregroundColor(Palette.gold)
-                    Text(data.isEmpty && loading ? "…" : ar(n("pages"))).font(AppFont.ui(52, 700)).foregroundColor(Palette.goldLight)
+                    Text(data.isEmpty && loading ? "…" : num(n("pages"))).font(AppFont.ui(52, 700)).foregroundColor(Palette.goldLight)
                     Text(n("joined") == 0 ? "شارك رابطك، وكل صفحة يقرؤونها تُكتب في أثرك" : "منها " + ar(n("today")) + " اليوم")
                         .font(AppFont.ui(14)).foregroundColor(Palette.onDarkMuted).multilineTextAlignment(.center)
                     Text("«مَن دَلَّ على خيرٍ فله مِثلُ أجرِ فاعِلِه»").font(AppFont.ui(18)).foregroundColor(Palette.onDarkSoft).padding(.top, 10)
                     Text("رواه مسلم").font(AppFont.ui(11)).foregroundColor(Palette.onDarkMuted)
                 }
                 HStack(spacing: 8) {
-                    cell(ar(n("joined")), "سجّلوا رمزك")
-                    cell(ar(n("khatmas")), "ختمات أتمّوها")
-                    cell(ar(n("days")), "يومًا من الأثر")
+                    cell(num(n("joined")), "سجّلوا رمزك")
+                    cell(num(n("khatmas")), "ختمات أتمّوها")
+                    cell(num(n("days")), "يومًا من الأثر")
                 }
                 VStack(alignment: .leading, spacing: 10) {
                     Text("رمز دعوتك").font(AppFont.ui(14, 700)).foregroundColor(Palette.ink)
@@ -519,7 +522,7 @@ struct ImpactView: View {
                         Text("هل دعاك أحد للتطبيق؟").font(AppFont.ui(14, 700)).foregroundColor(Palette.ink)
                         Text("اكتب رمزه ليُكتب له أثر قراءتك").font(AppFont.ui(12)).foregroundColor(Palette.muted)
                         HStack(spacing: 8) {
-                            TextField("مثل K7Q2MA", text: $input)
+                            TextField("K7Q2MA", text: $input)
                                 .textInputAutocapitalization(.characters).autocorrectionDisabled()
                                 .font(AppFont.ui(16, 700))
                                 .environment(\.layoutDirection, .leftToRight)
@@ -609,7 +612,7 @@ struct WorldMapView: View {
                 let total = (data["total"] as? Int) ?? 0
                 let countries = (data["countries"] as? Int) ?? 0
                 Text("صفحات قرأها المشاركون اليوم").font(AppFont.ui(13)).foregroundColor(Palette.onDarkMuted)
-                Text(data.isEmpty ? (failed ? "—" : "…") : ar(total)).font(AppFont.ui(44, 700)).foregroundColor(Palette.goldLight)
+                Text(data.isEmpty ? (failed ? "—" : "…") : num(total)).font(AppFont.ui(44, 700)).foregroundColor(Palette.goldLight)
                 Text(countries > 0 ? "في " + ar(countries) + (countries <= 10 ? " دول" : " دولة")
                      : failed ? "تعذّر الاتصال الآن" : "تضيء الخريطة كلما قرأ المشاركون")
                     .font(AppFont.ui(12)).foregroundColor(Palette.onDarkMuted)
@@ -657,7 +660,7 @@ struct WorldMapView: View {
                     if v { Task { await load() } }
                 }
                 if mapOn {
-                    Text("قرأت اليوم " + ar(Stats.today) + " صفحة").font(AppFont.ui(12, 700)).foregroundColor(Palette.gold)
+                    Text(Stats.today == 0 ? "لم تقرأ اليوم بعد: اقرأ ولو صفحة لتضيء بها دولتك" : "قرأت اليوم " + ar(Stats.today) + " صفحة").font(AppFont.ui(12, 700)).foregroundColor(Palette.gold)
                         .frame(maxWidth: .infinity, alignment: .leading)
                 }
             }
