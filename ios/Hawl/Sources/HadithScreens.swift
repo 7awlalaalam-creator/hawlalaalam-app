@@ -135,6 +135,12 @@ enum Hadith {
 }
 
 struct HadithView: View {
+    static func meta(_ c: HadithCollection, _ i: Int) -> String {
+        let who: String = c.narrator[i].isEmpty ? "" : L("عن ") + c.narrator[i] + " · "
+        let book: String = c.key == Hadith.muslim ? L("مسلم ") : L("البخاري ")
+        return who + book + ar(c.num[i])
+    }
+
     var key: String = Hadith.bukhari
     var bookID: Int? = nil
     @State private var tab = 0                 // ٠ البخاري، ١ مسلم، ٢ المفضلة
@@ -238,7 +244,9 @@ struct HadithView: View {
                 Text(i.map { c!.matn[$0] } ?? "…").font(AppFont.amiri(21)).foregroundColor(.white)
                     .multilineTextAlignment(.center).lineSpacing(6)
                 if let i = i, let c = c {
-                    Text((c.narrator[i].isEmpty ? "" : L("عن ") + c.narrator[i] + " · ") + Hadith.title(d.0) + " " + ar(c.num[i]))
+                    let who: String = c.narrator[i].isEmpty ? "" : L("عن ") + c.narrator[i] + " · "
+                    let src: String = Hadith.title(d.0) + " " + ar(c.num[i])
+                    Text(who + src)
                         .font(AppFont.ui(12)).foregroundColor(Palette.onDarkMuted).multilineTextAlignment(.center)
                 }
             }
@@ -286,7 +294,7 @@ struct HadithView: View {
             VStack(alignment: .leading, spacing: 6) {
                 Text(c.matn[i]).font(AppFont.amiri(18)).foregroundColor(Palette.ink).lineLimit(4).lineSpacing(4)
                     .multilineTextAlignment(.leading)
-                Text((c.narrator[i].isEmpty ? "" : L("عن ") + c.narrator[i] + " · ") + (c.key == Hadith.muslim ? L("مسلم ") : L("البخاري ")) + ar(c.num[i]))
+                Text(Self.meta(c, i))
                     .font(AppFont.ui(12, 700)).foregroundColor(Palette.goldDeep)
             }
             .padding(14)
