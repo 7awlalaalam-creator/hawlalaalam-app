@@ -1,0 +1,53 @@
+name: أرقام App Store وTestFlight
+# قراءة فقط: عدد المختبرين وحالاتهم في TestFlight، وآخر البناءات. لا يعدّل شيئًا ولا يطبع أي بريد أو اسم.
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  stats:
+    runs-on: ubuntu-latest
+    env:
+      ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
+      ASC_ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
+      ASC_KEY_P8: ${{ secrets.ASC_KEY_P8 }}
+    steps:
+      - name: الأرقام
+        run: |
+          pip install -q pyjwt cryptography requests
+          python3 - <<'PY'
+          import os, time, jwt, requests, collections
+          def tok():
+              return jwt.encode({"iss": os.environ["ASC_ISSUER_ID"], "iat": int(time.time()), "exp": int(time.time()) + 900, "aud": "appstoreconnect-v1"},
+                                os.environ["ASC_KEY_P8"], algorithm="ES256", headers={"kid": os.environ["ASC_KEY_ID"], "typ": "JWT"})
+          B = "https://api.appstoreconnect.apple.com"
+          def get(path):
+              r = requests.get(B + path, headers={"Authorization": "Bearer " + tok()})
+              if r.status_code >= 400: print(f"::warning::{path} -> {r.status_code} {r.text[:300]}"); return {}
+              return r.json()
+          APP = "6823910862"
+          def allpages(path):
+              out = []; d = get(path)
+              while True:
+                  out += d.get("data", []); nxt = d.get("links", {}).get("next")
+                  if not nxt: break
+                  d = get(nxt.replace(B, ""))
+              return out
+          testers = allpages(f"/v1/betaTesters?filter[apps]={APP}&limit=200&fields[betaTesters]=state,inviteType")
+          st = collections.Counter(t["attributes"].get("state") for t in testers)
+          inv = collections.Counter(t["attributes"].get("inviteType") for t in testers)
+          print(f"::notice title=TestFlight testers::total={len(testers)} states={dict(st)} invite={dict(inv)}")
+          for g in allpages(f"/v1/betaGroups?filter[app]={APP}&limit=50"):
+              a = g["attributes"]; n = len(allpages(f"/v1/betaGroups/{g['id']}/betaTesters?limit=200&fields[betaTesters]=state"))
+              print(f"::notice title=group {a.get('name')}::testers={n} internal={a.get('isInternalGroup')} publicLink={a.get('publicLinkEnabled')} limit={a.get('publicLinkLimit')}")
+          m = get(f"/v1/apps/{APP}/metrics/betaTesterUsages?period=P365D&limit=50")
+          tot = collections.Counter()
+          for d in m.get("data", []):
+              for p in d.get("dataPoints", []):
+                  for k, v in (p.get("values") or {}).items(): tot[k] += v or 0
+          print(f"::notice title=TestFlight usage (365d)::{dict(tot)}")
+          bs = get(f"/v1/builds?filter[app]={APP}&sort=-uploadedDate&limit=5").get("data", [])
+          print("::notice title=builds::" + " | ".join(f"{b['attributes']['version']}:{b['attributes']['processingState']}" for b in bs))
+          vs = get(f"/v1/apps/{APP}/appStoreVersions?limit=5").get("data", [])
+          print("::notice title=App Store versions::" + " | ".join(f"{v['attributes']['versionString']}:{v['attributes']['appStoreState']}" for v in vs))
+          PY
