@@ -148,16 +148,16 @@ enum Reminders {
 
     /** «بعد العشاء» أو «٩:٠٠ م» */
     static var wirdLabel: String {
-        if byPrayer(wird) { return "بعد " + Prayer.names[wirdPrayer] }
+        if byPrayer(wird) { return L("بعد ") + Prayer.names[wirdPrayer] }
         return formatTime(hour: hour(wird), minute: minute(wird))
     }
 
     /** وصف وقت التذكير لشريحة الإعدادات */
     static func timeLabel(_ kind: String) -> String {
         if kind == wird { return wirdLabel }
-        if byPrayer(kind) { return kind == azkarAM ? "بعد الفجر بربع ساعة" : "بعد العصر بربع ساعة" }
+        if byPrayer(kind) { return kind == azkarAM ? L("بعد الفجر بربع ساعة") : L("بعد العصر بربع ساعة") }
         let t = formatTime(hour: hour(kind), minute: minute(kind))
-        return kind == kahf ? "الجمعة " + t : t
+        return kind == kahf ? L("الجمعة ") + t : t
     }
 }
 
@@ -181,16 +181,16 @@ enum Notifications {
             UNNotificationAction(identifier: id, title: title, options: fg ? [.foreground] : [])
         }
         UNUserNotificationCenter.current().setNotificationCategories([
-            UNNotificationCategory(identifier: adhanCategory, actions: [a(actPrayed, "✓ صلّيت", fg: false), a(actAzkar, "أذكار بعد الصلاة"), a(actShare, "شارك الأجر")],
+            UNNotificationCategory(identifier: adhanCategory, actions: [a(actPrayed, L("✓ صلّيت"), fg: false), a(actAzkar, L("أذكار بعد الصلاة")), a(actShare, L("شارك الأجر"))],
                                    intentIdentifiers: [], options: []),
-            UNNotificationCategory(identifier: sunriseCategory, actions: [a(actMorning, "أذكار الصباح"), a(actShare, "شارك الأجر")],
+            UNNotificationCategory(identifier: sunriseCategory, actions: [a(actMorning, L("أذكار الصباح")), a(actShare, L("شارك الأجر"))],
                                    intentIdentifiers: [], options: []),
-            UNNotificationCategory(identifier: fastCategory, actions: [a(actShare, "ذكّر من تحب")], intentIdentifiers: [], options: []),
-            UNNotificationCategory(identifier: wirdCategory, actions: [a(actOpenPage, "أكمل القراءة"), a(actSnooze, "ذكّرني بعد ساعة", fg: false)],
+            UNNotificationCategory(identifier: fastCategory, actions: [a(actShare, L("ذكّر من تحب"))], intentIdentifiers: [], options: []),
+            UNNotificationCategory(identifier: wirdCategory, actions: [a(actOpenPage, L("أكمل القراءة")), a(actSnooze, L("ذكّرني بعد ساعة"), fg: false)],
                                    intentIdentifiers: [], options: []),
-            UNNotificationCategory(identifier: verseCategory, actions: [a(actCard, "شارك كصورة"), a(actText, "شارك نصًّا"), a(actTafsir, "التفسير")],
+            UNNotificationCategory(identifier: verseCategory, actions: [a(actCard, L("شارك كصورة")), a(actText, L("شارك نصًّا")), a(actTafsir, L("التفسير"))],
                                    intentIdentifiers: [], options: []),
-            UNNotificationCategory(identifier: remindCategory, actions: [a(actStart, "ابدأ الآن")], intentIdentifiers: [], options: []),
+            UNNotificationCategory(identifier: remindCategory, actions: [a(actStart, L("ابدأ الآن"))], intentIdentifiers: [], options: []),
         ])
     }
 
@@ -322,11 +322,11 @@ enum Notifications {
         let name = Prayer.displayName(k, on: at)
         let f = Fadl.of(k, on: at)
         let nx = Prayer.after(k, on: at)
-        let nextText = "التالية: " + nx.0 + " " + formatTime(nx.1)
-        var body: String = "حان الآن موعد صلاة " + name + " · " + nextText
+        let nextText = L("التالية: ") + nx.0 + " " + formatTime(nx.1)
+        var body: String = L("حان الآن موعد صلاة ") + name + " · " + nextText
         body += "\n\n" + f.0 + "\n— " + f.1
-        if !city.isEmpty { body += "\n\nحسب التوقيت المحلي لـ" + city }
-        let c = content("صلاة " + name, body, kind: "الأذان")
+        if !city.isEmpty { body += L("\n\nحسب التوقيت المحلي لـ") + city }
+        let c = content(L("صلاة ") + name, body, kind: L("الأذان"))
         c.sound = AdhanSound.notificationSound(for: k)
         c.categoryIdentifier = adhanCategory
         c.threadIdentifier = "adhan"
@@ -342,10 +342,10 @@ enum Notifications {
         let f = Fadl.of(Prayer.sunrise, on: at)
         let duha = formatTime(at.addingTimeInterval(15 * 60))
         let nx = Prayer.after(Prayer.sunrise, on: at)
-        var body: String = "أذكار الصباح بانتظارك، ووقت الضحى بعد ارتفاع الشمس\n\n" + f.0 + "\n— " + f.1
-        body += "\n\nيبدأ وقت الضحى بعد ارتفاع الشمس، نحو " + duha
-        body += "\nالتالية: " + nx.0 + " " + formatTime(nx.1)
-        let c = content("الشروق · انتهى وقت الفجر", body, kind: "الأذان")
+        var body: String = L("أذكار الصباح بانتظارك، ووقت الضحى بعد ارتفاع الشمس\n\n") + f.0 + "\n— " + f.1
+        body += L("\n\nيبدأ وقت الضحى بعد ارتفاع الشمس، نحو ") + duha
+        body += L("\nالتالية: ") + nx.0 + " " + formatTime(nx.1)
+        let c = content(L("الشروق · انتهى وقت الفجر"), body, kind: L("الأذان"))
         c.categoryIdentifier = sunriseCategory
         c.threadIdentifier = "adhan"
         c.userInfo = ["url": Links.azkar.absoluteString, "share": "\(f.0)\n— \(f.1)\n\n\(Links.homeString)"]
@@ -355,7 +355,7 @@ enum Notifications {
     /** ليلة يوم الصيام المسنون (عند العشاء) */
     private static func fasting(_ fast: Fadl.Fast, at: Date) -> UNNotificationRequest {
         let body: String = "غدًا \(fast.title)، ولا تنسَ نية الصيام والسحور فإن فيه بركة.\n\n\(fast.text)\n— \(fast.source)\n\n(حسب تقويم أم القرى)"
-        let c = content("غدًا " + fast.title, body, kind: "الصيام")
+        let c = content(L("غدًا ") + fast.title, body, kind: L("الصيام"))
         c.categoryIdentifier = fastCategory
         c.userInfo = ["url": Links.homeString,
                       "share": "غدًا \(fast.title)\n\(fast.text)\n— \(fast.source)\n\n\(Links.homeString)"]
@@ -364,8 +364,8 @@ enum Notifications {
 
     /** عند أذان المغرب في رمضان */
     private static func iftar(at: Date) -> UNNotificationRequest {
-        let c = content("حان وقت الإفطار",
-                        "«ذَهَبَ الظَّمَأُ، وَابْتَلَّتِ الْعُرُوقُ، وَثَبَتَ الأَجْرُ إِنْ شَاءَ اللَّهُ»\nتقبّل الله صيامكم", kind: "رمضان")
+        let c = content(L("حان وقت الإفطار"),
+                        L("«ذَهَبَ الظَّمَأُ، وَابْتَلَّتِ الْعُرُوقُ، وَثَبَتَ الأَجْرُ إِنْ شَاءَ اللَّهُ»\nتقبّل الله صيامكم"), kind: L("رمضان"))
         c.userInfo = ["url": Ramadan.tadabburURL(at).absoluteString]
         return UNNotificationRequest(identifier: "iftar-\(Int(at.timeIntervalSince1970))", content: c, trigger: once(at))
     }
@@ -373,7 +373,7 @@ enum Notifications {
     // MARK: آية اليوم
 
     private static func verse(at: Date, today: Bool) -> UNNotificationRequest {
-        let c = content("آية اليوم", "آية اليوم بانتظارك، افتح وتدبّر", kind: "آية اليوم")
+        let c = content(L("آية اليوم"), L("آية اليوم بانتظارك، افتح وتدبّر"), kind: L("آية اليوم"))
         c.userInfo = ["route": "today"]
         if today, AppState.verseFresh, let v = AppState.cachedVerse() {
             c.body = v.text + " · " + v.ref
@@ -433,18 +433,18 @@ enum Notifications {
             let open = max(r.0, Khatma.nextPage)
             if today {
                 let surah = Khatma.surahName(open)
-                let title = followUp ? "تذكير لطيف بوردك" : "وردك اليوم" + (surah.isEmpty ? "" : ": سورة " + surah)
+                let title = followUp ? L("تذكير لطيف بوردك") : L("وردك اليوم") + (surah.isEmpty ? "" : L(": سورة ") + surah)
                 let text: String
-                if followUp { text = "بقي " + pagesText(left) + " من وردك، ولو قليلًا قبل النوم" }
-                else if left < target { text = "بقي لك " + pagesText(left) + " من " + pagesText(target) }
+                if followUp { text = L("بقي ") + pagesText(left) + L(" من وردك، ولو قليلًا قبل النوم") }
+                else if left < target { text = L("بقي لك ") + pagesText(left) + L(" من ") + pagesText(target) }
                 else { text = "صفحة \(ar(r.0)) إلى \(ar(r.1)) · \(pagesText(target))" }
-                c = content(title, "\(text)\n\(Khatma.whereIs(open)) · الختم المتوقع \(Khatma.endDateText)", kind: "الختمة")
+                c = content(title, "\(text)\n\(Khatma.whereIs(open)) · الختم المتوقع \(Khatma.endDateText)", kind: L("الختمة"))
             } else {
-                c = content("وردك اليوم", "نحو " + pagesText(Khatma.pace) + " · أكمل ختمتك من حيث توقفت", kind: "الختمة")
+                c = content(L("وردك اليوم"), L("نحو ") + pagesText(Khatma.pace) + L(" · أكمل ختمتك من حيث توقفت"), kind: L("الختمة"))
             }
             c.userInfo = ["page": open]
         } else {
-            c = content("وردك اليومي", "قليلٌ دائم، وأثرٌ في القلب. أكمل من حيث توقفت", kind: "الختمة")
+            c = content(L("وردك اليومي"), L("قليلٌ دائم، وأثرٌ في القلب. أكمل من حيث توقفت"), kind: L("الختمة"))
             c.userInfo = ["page": Khatma.lastMushafPage()]
         }
         c.categoryIdentifier = wirdCategory
@@ -457,9 +457,9 @@ enum Notifications {
     private static func remind(_ kind: String, trigger: UNNotificationTrigger, id: String) -> UNNotificationRequest {
         let title: String, text: String, label: String, url: URL
         switch kind {
-        case Reminders.azkarAM: title = "أذكار الصباح"; text = "حصّن يومك بذكر الله"; label = "الأذكار"; url = Links.azkar
-        case Reminders.azkarPM: title = "أذكار المساء"; text = "اختم نهارك بذكر الله"; label = "الأذكار"; url = Links.azkar
-        default: title = "سورة الكهف"; text = "يوم الجمعة: نورٌ لك ما بين الجمعتين"; label = "الجمعة"; url = Links.kahf
+        case Reminders.azkarAM: title = L("أذكار الصباح"); text = L("حصّن يومك بذكر الله"); label = L("الأذكار"); url = Links.azkar
+        case Reminders.azkarPM: title = L("أذكار المساء"); text = L("اختم نهارك بذكر الله"); label = L("الأذكار"); url = Links.azkar
+        default: title = L("سورة الكهف"); text = L("يوم الجمعة: نورٌ لك ما بين الجمعتين"); label = L("الجمعة"); url = Links.kahf
         }
         let c = content(title, text, kind: label)
         c.categoryIdentifier = remindCategory
@@ -470,7 +470,7 @@ enum Notifications {
     /** «جرّب إشعار آية اليوم الآن» */
     static func testVerse() async {
         _ = await AppState.fetchVerse()
-        let c = content("آية اليوم", "آية اليوم بانتظارك، افتح وتدبّر", kind: "آية اليوم")
+        let c = content(L("آية اليوم"), L("آية اليوم بانتظارك، افتح وتدبّر"), kind: L("آية اليوم"))
         c.userInfo = ["route": "today"]
         if let v = AppState.cachedVerse() {
             c.body = v.text + " · " + v.ref
@@ -514,9 +514,9 @@ enum Announce {
         News.add(id: id, title: title, body: body, url: link, article: aid)      // «أخبار التطبيق»: ٢٤ ساعة
         guard Store.bool("news_on", true) else { return }
         let c = UNMutableNotificationContent()
-        c.title = title.isEmpty ? "حول العالم" : title
+        c.title = title.isEmpty ? L("حول العالم") : title
         c.body = body
-        c.subtitle = "أخبار حول العالم"
+        c.subtitle = L("أخبار حول العالم")
         c.sound = .default
         // الرابط من نطاق الموقع فقط يُفتح داخل التطبيق؛ غير ذلك يفتح «اليوم»
         if aid > 0 { c.userInfo = ["article": aid, "url": link] }
@@ -652,11 +652,11 @@ final class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCent
                 Store.d.set(Date().timeIntervalSince1970 + 3600, forKey: "wird_snooze_at")
                 Notifications.reschedule()
             case Notifications.actCard:
-                if let u = card { s.open(u, title: "آية اليوم") }
+                if let u = card { s.open(u, title: L("آية اليوم")) }
             case Notifications.actTafsir:
-                if let u = tafsir { s.open(u, title: "التفسير") }
+                if let u = tafsir { s.open(u, title: L("التفسير")) }
             case Notifications.actMorning:
-                s.open(Links.azkar, title: "الأذكار")
+                s.open(Links.azkar, title: L("الأذكار"))
             default:
                 if let p = page { s.openMushaf(page: p) }
                 else if aid > 0 { s.show(.article(aid, rawURL)) }        // مقال جديد: يُفتح في شاشة المقالات
@@ -718,10 +718,10 @@ enum AdhanSound {
 
     static func name(_ s: String) -> String {
         switch s {
-        case takbeer: return "التكبير فقط"
-        case full: return "الأذان كاملًا"
-        case silent: return "صامت"
-        default: return "نغمة الجوال"
+        case takbeer: return L("التكبير فقط")
+        case full: return L("الأذان كاملًا")
+        case silent: return L("صامت")
+        default: return L("نغمة الجوال")
         }
     }
 

@@ -42,8 +42,8 @@ extension View {
 
     /** ويدجت شاشة القفل لا يُفرض عليه مظهر التطبيق: فرض «نهاري» كان يجعل النص داكنًا باهتًا على خلفية القفل */
     @ViewBuilder func widgetBase(accessory: Bool = false) -> some View {
-        let v = self.environment(\.layoutDirection, .rightToLeft)
-            .environment(\.locale, Locale(identifier: "ar"))
+        let v = self.environment(\.layoutDirection, Lang.dir)
+            .environment(\.locale, Lang.locale)
         if accessory { v } else { v.appTheme() }
     }
 }
@@ -139,9 +139,9 @@ struct PrayerWidgetView: View {
         Group {
             if !entry.located {
                 VStack(alignment: .leading, spacing: 6) {
-                    Label("مواقيت الصلاة", systemImage: "clock").font(AppFont.ui(13, 700)).foregroundColor(WColor.gold)
-                    Text("حدّد موقعك").font(AppFont.ui(18, 700)).foregroundColor(WColor.text)
-                    Text("اضغط لفتح الإعدادات وتحديد موقعك").font(AppFont.ui(12)).foregroundColor(WColor.muted)
+                    Label(L("مواقيت الصلاة"), systemImage: "clock").font(AppFont.ui(13, 700)).foregroundColor(WColor.gold)
+                    Text(L("حدّد موقعك")).font(AppFont.ui(18, 700)).foregroundColor(WColor.text)
+                    Text(L("اضغط لفتح الإعدادات وتحديد موقعك")).font(AppFont.ui(12)).foregroundColor(WColor.muted)
                 }
                 .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .leading)
                 .widgetURL(URL(string: "hawlapp://settings"))
@@ -151,7 +151,7 @@ struct PrayerWidgetView: View {
                     Text(name + " " + formatTime(entry.nextAt))
                 case .accessoryRectangular:
                     VStack(alignment: .leading, spacing: 0) {
-                        Label("الصلاة القادمة", systemImage: "clock")
+                        Label(L("الصلاة القادمة"), systemImage: "clock")
                             .font(AppFont.ui(12, 700)).lineLimit(1).widgetAccentable()
                         Text(name + " " + formatTime(entry.nextAt))
                             .font(AppFont.ui(19, 700)).lineLimit(1).minimumScaleFactor(0.7)
@@ -177,7 +177,7 @@ struct PrayerWidgetView: View {
 
     private var small: some View {
         VStack(alignment: .leading, spacing: 4) {
-            Label("الصلاة القادمة", systemImage: "clock").font(AppFont.ui(11, 700)).foregroundColor(WColor.gold)
+            Label(L("الصلاة القادمة"), systemImage: "clock").font(AppFont.ui(11, 700)).foregroundColor(WColor.gold)
             Text(name).font(AppFont.ui(22, 700)).foregroundColor(WColor.text)
             Text(formatTime(entry.nextAt)).font(AppFont.ui(14)).foregroundColor(WColor.muted)
             Spacer(minLength: 0)
@@ -199,7 +199,7 @@ struct PrayerWidgetView: View {
             HStack(alignment: .firstTextBaseline) {
                 Text(name + " " + formatTime(entry.nextAt)).font(AppFont.ui(20, 700)).foregroundColor(WColor.text)
                 Spacer()
-                Text("المتبقي ").font(AppFont.ui(11)).foregroundColor(WColor.muted)
+                Text(L("المتبقي ")).font(AppFont.ui(11)).foregroundColor(WColor.muted)
                 Text(Prayer.remaining(entry.nextAt.timeIntervalSince(entry.date), after: false))
                     .font(AppFont.ui(15, 700)).foregroundColor(WColor.gold)
             }
@@ -235,8 +235,8 @@ struct PrayerWidgetView: View {
 struct PrayerWidget: Widget {
     var body: some WidgetConfiguration {
         StaticConfiguration(kind: "PrayerWidget", provider: PrayerProvider()) { PrayerWidgetView(entry: $0) }
-            .configurationDisplayName("مواقيت الصلاة")
-            .description("الصلاة القادمة مع عدّاد، والتاريخ الهجري، وبطاقة ذكية تتغير مع وقتك: الضحى، ساعة الإجابة، الثلث الأخير، الصيام المسنون")
+            .configurationDisplayName(L("مواقيت الصلاة"))
+            .description(L("الصلاة القادمة مع عدّاد، والتاريخ الهجري، وبطاقة ذكية تتغير مع وقتك: الضحى، ساعة الإجابة، الثلث الأخير، الصيام المسنون"))
             .supportedFamilies([.systemSmall, .systemMedium, .systemLarge, .accessoryRectangular, .accessoryInline, .accessoryCircular])
     }
 }
@@ -250,7 +250,7 @@ struct VerseEntry: TimelineEntry {
 
 struct VerseProvider: TimelineProvider {
     func placeholder(in context: Context) -> VerseEntry {
-        VerseEntry(date: Date(), verse: VerseSource.Verse(surah: 2, ayah: 286, text: "لَا يُكَلِّفُ ٱللَّهُ نَفۡسًا إِلَّا وُسۡعَهَاۚ"))
+        VerseEntry(date: Date(), verse: VerseSource.Verse(surah: 2, ayah: 286, text: L("لَا يُكَلِّفُ ٱللَّهُ نَفۡسًا إِلَّا وُسۡعَهَاۚ")))
     }
 
     func getSnapshot(in context: Context, completion: @escaping (VerseEntry) -> Void) {
@@ -279,7 +279,7 @@ struct VerseWidgetView: View {
                 switch family {
                 case .accessoryRectangular:
                     VStack(alignment: .leading, spacing: 0) {
-                        Text("آية اليوم · " + Quran.surahName(v.surah) + " " + ar(v.ayah))
+                        Text(L("آية اليوم · ") + Quran.surahName(v.surah) + " " + ar(v.ayah))
                             .font(AppFont.ui(11, 700)).lineLimit(1).minimumScaleFactor(0.8).widgetAccentable()
                         Text(v.text)
                             .font(AppFont.quran(16)).lineLimit(2).minimumScaleFactor(0.6)
@@ -289,7 +289,7 @@ struct VerseWidgetView: View {
                 default:
                     VStack(spacing: 6) {
                         HStack {
-                            Label("آية اليوم", systemImage: "sparkle").font(AppFont.ui(12, 700)).foregroundColor(WColor.gold)
+                            Label(L("آية اليوم"), systemImage: "sparkle").font(AppFont.ui(12, 700)).foregroundColor(WColor.gold)
                             Spacer()
                             if family != .systemSmall {
                                 Text(hijriToday(entry.date)).font(AppFont.ui(11)).foregroundColor(WColor.muted).lineLimit(1)
@@ -311,7 +311,7 @@ struct VerseWidgetView: View {
                     }
                 }
             } else {
-                Text("افتح التطبيق لتحميل آية اليوم").font(AppFont.ui(13)).foregroundColor(WColor.muted)
+                Text(L("افتح التطبيق لتحميل آية اليوم")).font(AppFont.ui(13)).foregroundColor(WColor.muted)
             }
         }
         .widgetURL(URL(string: "hawlapp://today"))
@@ -331,8 +331,8 @@ struct VerseWidgetView: View {
 struct VerseWidget: Widget {
     var body: some WidgetConfiguration {
         StaticConfiguration(kind: "VerseWidget", provider: VerseProvider()) { VerseWidgetView(entry: $0) }
-            .configurationDisplayName("آية اليوم")
-            .description("آية اليوم من حول العالم، تتجدد يوميًا")
+            .configurationDisplayName(L("آية اليوم"))
+            .description(L("آية اليوم من حول العالم، تتجدد يوميًا"))
             .supportedFamilies([.systemSmall, .systemMedium, .systemLarge, .accessoryRectangular])
     }
 }
@@ -349,7 +349,7 @@ struct KhatmaEntry: TimelineEntry {
 
 struct KhatmaProvider: TimelineProvider {
     func placeholder(in context: Context) -> KhatmaEntry {
-        KhatmaEntry(date: Date(), running: true, percent: 42, line: "ورد اليوم: صفحة ٢٥٤ إلى ٢٧٣ · إبراهيم", page: 254)
+        KhatmaEntry(date: Date(), running: true, percent: 42, line: L("ورد اليوم: صفحة ٢٥٤ إلى ٢٧٣ · إبراهيم"), page: 254)
     }
 
     func getSnapshot(in context: Context, completion: @escaping (KhatmaEntry) -> Void) { completion(current()) }
@@ -363,7 +363,7 @@ struct KhatmaProvider: TimelineProvider {
         if Khatma.running {
             return KhatmaEntry(date: Date(), running: true, percent: Khatma.percent, line: Khatma.todayLine, page: Khatma.nextPage)
         }
-        return KhatmaEntry(date: Date(), running: false, percent: 0, line: "اضغط لتبدأ ختمتك", page: 1)
+        return KhatmaEntry(date: Date(), running: false, percent: 0, line: L("اضغط لتبدأ ختمتك"), page: 1)
     }
 }
 
@@ -374,13 +374,13 @@ struct KhatmaWidgetView: View {
     var body: some View {
         Group {
             if family == .accessoryCircular {
-                Gauge(value: Double(entry.percent), in: 0...100) { Text("ختمتي") } currentValueLabel: { Text(ar(entry.percent)) }
+                Gauge(value: Double(entry.percent), in: 0...100) { Text(L("ختمتي")) } currentValueLabel: { Text(ar(entry.percent)) }
                     .gaugeStyle(.accessoryCircularCapacity)
             } else {
                 VStack(alignment: .leading, spacing: 6) {
-                    Label("ختمتي", systemImage: "book.closed").font(AppFont.ui(12, 700)).foregroundColor(WColor.gold)
+                    Label(L("ختمتي"), systemImage: "book.closed").font(AppFont.ui(12, 700)).foregroundColor(WColor.gold)
                     if entry.running {
-                        Text(ar(entry.percent) + "٪").font(AppFont.ui(28, 700)).foregroundColor(WColor.text)
+                        Text(ar(entry.percent) + L("٪")).font(AppFont.ui(28, 700)).foregroundColor(WColor.text)
                         WBar(fraction: Double(entry.percent) / 100)
                     }
                     Spacer(minLength: 0)
@@ -398,8 +398,8 @@ struct KhatmaWidgetView: View {
 struct KhatmaWidget: Widget {
     var body: some WidgetConfiguration {
         StaticConfiguration(kind: "KhatmaWidget", provider: KhatmaProvider()) { KhatmaWidgetView(entry: $0) }
-            .configurationDisplayName("ختمتي")
-            .description("تقدّم ختمتك وورد اليوم")
+            .configurationDisplayName(L("ختمتي"))
+            .description(L("تقدّم ختمتك وورد اليوم"))
             .supportedFamilies([.systemSmall, .systemMedium, .accessoryCircular])
     }
 }
@@ -449,9 +449,9 @@ struct RamadanWidgetView: View {
     let entry: RamadanEntry
 
     private var timesLine: String {
-        var t: String = "الإمساك "
+        var t: String = L("الإمساك ")
         t += formatTime(entry.imsak)
-        t += " · الإفطار "
+        t += L(" · الإفطار ")
         t += formatTime(entry.iftarAt)
         if !entry.city.isEmpty { t += " · " + entry.city }
         return t
@@ -460,18 +460,18 @@ struct RamadanWidgetView: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 6) {
             if !entry.active {
-                Text("🌙 رمضان " + ar(entry.year)).font(AppFont.ui(13, 700)).foregroundColor(WColor.gold)
-                Text(entry.daysUntil > 0 ? "بعد " + ar(entry.daysUntil) + " يومًا" : "قريبًا").font(AppFont.ui(24, 700)).foregroundColor(WColor.text)
+                Text(L("🌙 رمضان ") + ar(entry.year)).font(AppFont.ui(13, 700)).foregroundColor(WColor.gold)
+                Text(entry.daysUntil > 0 ? L("بعد ") + ar(entry.daysUntil) + L(" يومًا") : L("قريبًا")).font(AppFont.ui(24, 700)).foregroundColor(WColor.text)
                 Spacer(minLength: 0)
-                Text("بلّغنا الله رمضان").font(AppFont.ui(12)).foregroundColor(WColor.muted)
+                Text(L("بلّغنا الله رمضان")).font(AppFont.ui(12)).foregroundColor(WColor.muted)
             } else if !entry.located {
-                Text("🌙 رمضان كريم").font(AppFont.ui(13, 700)).foregroundColor(WColor.gold)
-                Text("حدّد موقعك").font(AppFont.ui(22, 700)).foregroundColor(WColor.text)
+                Text(L("🌙 رمضان كريم")).font(AppFont.ui(13, 700)).foregroundColor(WColor.gold)
+                Text(L("حدّد موقعك")).font(AppFont.ui(22, 700)).foregroundColor(WColor.text)
                 Spacer(minLength: 0)
-                Text("لعرض الإمساك والإفطار").font(AppFont.ui(12)).foregroundColor(WColor.muted)
+                Text(L("لعرض الإمساك والإفطار")).font(AppFont.ui(12)).foregroundColor(WColor.muted)
             } else {
                 HStack {
-                    Text(entry.iftar ? "🌙 الإفطار بعد" : "🌙 الإمساك بعد").font(AppFont.ui(13, 700)).foregroundColor(WColor.gold)
+                    Text(entry.iftar ? L("🌙 الإفطار بعد") : L("🌙 الإمساك بعد")).font(AppFont.ui(13, 700)).foregroundColor(WColor.gold)
                     Spacer()
                     Text(Ramadan.ordinal(entry.day)).font(AppFont.ui(11)).foregroundColor(WColor.muted)
                 }
@@ -492,8 +492,8 @@ struct RamadanWidgetView: View {
 struct RamadanWidget: Widget {
     var body: some WidgetConfiguration {
         StaticConfiguration(kind: "RamadanWidget", provider: RamadanProvider()) { RamadanWidgetView(entry: $0) }
-            .configurationDisplayName("رمضان: الإفطار والإمساك")
-            .description("عدّاد الإفطار والإمساك في رمضان، وكم بقي على رمضان قبله")
+            .configurationDisplayName(L("رمضان: الإفطار والإمساك"))
+            .description(L("عدّاد الإفطار والإمساك في رمضان، وكم بقي على رمضان قبله"))
             .supportedFamilies([.systemSmall, .systemMedium])
     }
 }
@@ -517,7 +517,7 @@ private struct LiveTimer: View {
                 .foregroundColor(color)
                 .multilineTextAlignment(.center)
         } else {
-            Text("حان الآن").font(AppFont.ui(size * 0.8, 700)).foregroundColor(color)
+            Text(L("حان الآن")).font(AppFont.ui(size * 0.8, 700)).foregroundColor(color)
         }
     }
 }
@@ -542,19 +542,19 @@ struct PrayerLiveActivity: Widget {
             DynamicIsland {
                 DynamicIslandExpandedRegion(.leading) {
                     VStack(alignment: .leading, spacing: 2) {
-                        Text("الصلاة القادمة").font(AppFont.ui(11, 500)).foregroundColor(Color(hex: 0xA9BABF))
+                        Text(L("الصلاة القادمة")).font(AppFont.ui(11, 500)).foregroundColor(Color(hex: 0xA9BABF))
                         Text(ctx.state.current.name).font(AppFont.ui(20, 700)).foregroundColor(.white)
                     }
-                    .environment(\.layoutDirection, .rightToLeft)
+                    .environment(\.layoutDirection, Lang.dir)
                 }
                 DynamicIslandExpandedRegion(.trailing) {
                     LiveTimer(at: ctx.state.current.at, size: 24, color: Color(hex: 0xC9A876))
                         .frame(maxWidth: 110)
                 }
                 DynamicIslandExpandedRegion(.bottom) {
-                    Text("تدخل " + ctx.state.current.clock + (ctx.state.city.isEmpty ? "" : " · " + ctx.state.city))
+                    Text(L("تدخل ") + ctx.state.current.clock + (ctx.state.city.isEmpty ? "" : " · " + ctx.state.city))
                         .font(AppFont.ui(13)).foregroundColor(Color(hex: 0xEFE4CF))
-                        .environment(\.layoutDirection, .rightToLeft)
+                        .environment(\.layoutDirection, Lang.dir)
                 }
             } compactLeading: {
                 HStack(spacing: 4) {
@@ -580,7 +580,7 @@ struct PrayerLiveLockView: View {
         let cur = state.current
         HStack(spacing: 14) {
             VStack(alignment: .leading, spacing: 3) {
-                Text("الصلاة القادمة").font(AppFont.ui(12, 500)).foregroundColor(Color(hex: 0xC9A876))
+                Text(L("الصلاة القادمة")).font(AppFont.ui(12, 500)).foregroundColor(Color(hex: 0xC9A876))
                 Text(cur.name).font(AppFont.ui(26, 700)).foregroundColor(.white)
                 Text(cur.clock + (state.city.isEmpty ? "" : " · " + state.city))
                     .font(AppFont.ui(13)).foregroundColor(Color(hex: 0xA9BABF)).lineLimit(1)
@@ -591,8 +591,8 @@ struct PrayerLiveLockView: View {
         }
         .padding(.horizontal, 18)
         .padding(.vertical, 14)
-        .environment(\.layoutDirection, .rightToLeft)
-        .environment(\.locale, Locale(identifier: "ar"))
+        .environment(\.layoutDirection, Lang.dir)
+        .environment(\.locale, Lang.locale)
     }
 }
 #endif

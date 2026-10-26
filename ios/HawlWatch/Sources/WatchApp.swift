@@ -11,8 +11,8 @@ struct HawlWatchApp: App {
         WindowGroup {
             RootWatchView()
                 .environmentObject(data)
-                .environment(\.layoutDirection, .rightToLeft)
-                .environment(\.locale, Locale(identifier: "ar"))
+                .environment(\.layoutDirection, Lang.dir)
+                .environment(\.locale, Lang.locale)
                 .tint(WColor.gold)
         }
     }
@@ -82,7 +82,7 @@ struct PrayerPage: View {
             let list = WatchPrayer.upcoming(from: ctx.date, count: 5)
             ScrollView {
                 VStack(alignment: .leading, spacing: 4) {
-                    Text("الصلاة القادمة").font(.system(size: 13, weight: .bold)).foregroundColor(WColor.gold)
+                    Text(L("الصلاة القادمة")).font(.system(size: 13, weight: .bold)).foregroundColor(WColor.gold)
                     if let first = list.first {
                         Text(Prayer.displayName(first.0, on: first.1)).font(.system(size: 30, weight: .bold))
                         Countdown(to: first.1)
@@ -90,7 +90,7 @@ struct PrayerPage: View {
                             .font(.system(size: 13)).foregroundColor(WColor.muted)
                     }
                     if !Geo.has {
-                        Text("افتح التطبيق في جوالك لتحديد موقعك")
+                        Text(L("افتح التطبيق في جوالك لتحديد موقعك"))
                             .font(.system(size: 12)).foregroundColor(WColor.goldSoft).padding(.top, 4)
                     }
                     Divider().padding(.vertical, 4)
@@ -114,7 +114,7 @@ struct Countdown: View {
     var body: some View {
         TimelineView(.periodic(from: Date(), by: 1)) { ctx in
             let left = max(0, Int(to.timeIntervalSince(ctx.date)))
-            Text(left == 0 ? "حان الآن" : ar(String(format: "%d:%02d:%02d", left / 3600, (left % 3600) / 60, left % 60)))
+            Text(left == 0 ? L("حان الآن") : ar(String(format: "%d:%02d:%02d", left / 3600, (left % 3600) / 60, left % 60)))
                 .font(.system(size: 30, weight: .bold).monospacedDigit())
                 .foregroundColor(WColor.gold)
         }
@@ -129,7 +129,7 @@ struct WirdPage: View {
         let active = d.bool(forKey: "w_k_active")
         let done = d.integer(forKey: "w_k_done"), target = d.integer(forKey: "w_k_target")
         VStack(spacing: 6) {
-            Text("ورد اليوم").font(.system(size: 13, weight: .bold)).foregroundColor(WColor.gold)
+            Text(L("ورد اليوم")).font(.system(size: 13, weight: .bold)).foregroundColor(WColor.gold)
             if active && target > 0 {
                 ZStack {
                     Circle().stroke(WColor.card, lineWidth: 8)
@@ -138,16 +138,16 @@ struct WirdPage: View {
                         .rotationEffect(.degrees(-90))
                     VStack(spacing: 0) {
                         Text(ar(done) + "/" + ar(target)).font(.system(size: 26, weight: .bold))
-                        Text("صفحة").font(.system(size: 12)).foregroundColor(WColor.muted)
+                        Text(L("صفحة")).font(.system(size: 12)).foregroundColor(WColor.muted)
                     }
                 }
                 .frame(width: 110, height: 110)
                 Text(d.string(forKey: "w_k_line") ?? "").font(.system(size: 12)).foregroundColor(WColor.muted)
                     .multilineTextAlignment(.center).lineLimit(2)
             } else if active {
-                Text("يوم راحة من الورد").font(.system(size: 15))
+                Text(L("يوم راحة من الورد")).font(.system(size: 15))
             } else {
-                Text("ابدأ ختمة من التطبيق في جوالك ليظهر وردك هنا")
+                Text(L("ابدأ ختمة من التطبيق في جوالك ليظهر وردك هنا"))
                     .font(.system(size: 14)).foregroundColor(WColor.muted).multilineTextAlignment(.center)
             }
         }
@@ -164,9 +164,9 @@ struct TasbeehPage: View {
     var body: some View {
         VStack(spacing: 6) {
             HStack {
-                Text("التسبيح").font(.system(size: 13, weight: .bold)).foregroundColor(WColor.gold)
+                Text(L("التسبيح")).font(.system(size: 13, weight: .bold)).foregroundColor(WColor.gold)
                 Spacer()
-                Button(target == 33 ? "٣٣" : "١٠٠") { target = target == 33 ? 100 : 33 }
+                Button(target == 33 ? L("٣٣") : L("١٠٠")) { target = target == 33 ? 100 : 33 }
                     .font(.system(size: 12, weight: .bold)).buttonStyle(.bordered).frame(width: 52)
             }
             Button {
@@ -175,14 +175,14 @@ struct TasbeehPage: View {
             } label: {
                 VStack(spacing: 2) {
                     Text(ar(count)).font(.system(size: 44, weight: .bold).monospacedDigit())
-                    Text("من " + ar(target) + (count >= target ? " · " + ar(count / target) + " دورة" : ""))
+                    Text(L("من ") + ar(target) + (count >= target ? " · " + ar(count / target) + L(" دورة") : ""))
                         .font(.system(size: 12)).foregroundColor(WColor.muted)
                 }
                 .frame(maxWidth: .infinity, minHeight: 96)
             }
             .buttonStyle(.plain)
             .background(RoundedRectangle(cornerRadius: 18).fill(WColor.card))
-            Button("ابدأ من جديد") { count = 0 }
+            Button(L("ابدأ من جديد")) { count = 0 }
                 .font(.system(size: 13)).foregroundColor(WColor.goldSoft)
         }
     }
@@ -192,11 +192,11 @@ struct TasbeehPage: View {
 
 struct VersePage: View {
     private static let fallback: [(String, String)] = [
-        ("أَلَا بِذِكْرِ اللَّهِ تَطْمَئِنُّ الْقُلُوبُ", "سورة الرعد · الآية ٢٨"),
-        ("فَاذْكُرُونِي أَذْكُرْكُمْ وَاشْكُرُوا لِي وَلَا تَكْفُرُونِ", "سورة البقرة · الآية ١٥٢"),
-        ("فَإِنَّ مَعَ الْعُسْرِ يُسْرًا", "سورة الشرح · الآية ٥"),
-        ("وَهُوَ مَعَكُمْ أَيْنَ مَا كُنتُمْ", "سورة الحديد · الآية ٤"),
-        ("إِنَّ اللَّهَ مَعَ الصَّابِرِينَ", "سورة البقرة · الآية ١٥٣"),
+        (L("أَلَا بِذِكْرِ اللَّهِ تَطْمَئِنُّ الْقُلُوبُ"), L("سورة الرعد · الآية ٢٨")),
+        (L("فَاذْكُرُونِي أَذْكُرْكُمْ وَاشْكُرُوا لِي وَلَا تَكْفُرُونِ"), L("سورة البقرة · الآية ١٥٢")),
+        (L("فَإِنَّ مَعَ الْعُسْرِ يُسْرًا"), L("سورة الشرح · الآية ٥")),
+        (L("وَهُوَ مَعَكُمْ أَيْنَ مَا كُنتُمْ"), L("سورة الحديد · الآية ٤")),
+        (L("إِنَّ اللَّهَ مَعَ الصَّابِرِينَ"), L("سورة البقرة · الآية ١٥٣")),
     ]
 
     var body: some View {
@@ -206,7 +206,7 @@ struct VersePage: View {
         let ref = d.string(forKey: "w_v_text") == nil ? pick.1 : (d.string(forKey: "w_v_ref") ?? "")
         ScrollView {
             VStack(spacing: 8) {
-                Text("آية اليوم").font(.system(size: 13, weight: .bold)).foregroundColor(WColor.gold)
+                Text(L("آية اليوم")).font(.system(size: 13, weight: .bold)).foregroundColor(WColor.gold)
                 Text("﴿ " + text + " ﴾").font(.system(size: 18, weight: .medium))
                     .multilineTextAlignment(.center).lineSpacing(4)
                 Text(ref).font(.system(size: 12)).foregroundColor(WColor.muted)

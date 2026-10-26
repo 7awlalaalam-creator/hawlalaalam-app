@@ -14,42 +14,42 @@ struct ToolsView: View {
             VStack(alignment: .leading, spacing: 8) {
                 if let n = latestNews { NavigationLink(value: Screen.news) { newsCard(n) } }
                 NavigationLink(value: Screen.journey) { streakCard }
-                    .accessibilityHint("افتح «رحلتي»")
-                section("القرآن")
+                    .accessibilityHint(L("افتح «رحلتي»"))
+                section(L("القرآن"))
                 LazyVGrid(columns: columns, spacing: 8) {
-                    NavigationLink(value: Screen.index) { ToolTile(title: "الفهرس", systemImage: "list.bullet") }
-                    NavigationLink(value: Screen.khatma) { ToolTile(title: "ختمتي", systemImage: "book.closed") }
-                    NavigationLink(value: Screen.downloads) { ToolTile(title: "المحمّلة", systemImage: "headphones") }
-                    Button { Browser.open(Links.languages) } label: { ToolTile(title: "الترجمات", systemImage: "globe") }
-                    Button { state.openMushaf(page: nil, extra: "hifz=1") } label: { ToolTile(title: "الحفظ", systemImage: "puzzlepiece") }
-                    Button { state.openMushaf(page: nil, extra: "find=1") } label: { ToolTile(title: "بحث بالمعنى", systemImage: "text.magnifyingglass") }
-                    NavigationLink(value: Screen.family(nil)) { ToolTile(title: "ختمة العائلة", systemImage: "person.3") }
-                    NavigationLink(value: Screen.articles) { ToolTile(title: "المقالات", systemImage: "doc.text") }
+                    NavigationLink(value: Screen.index) { ToolTile(title: L("الفهرس"), systemImage: "list.bullet") }
+                    NavigationLink(value: Screen.khatma) { ToolTile(title: L("ختمتي"), systemImage: "book.closed") }
+                    NavigationLink(value: Screen.downloads) { ToolTile(title: L("المحمّلة"), systemImage: "headphones") }
+                    Button { Browser.open(Links.languages) } label: { ToolTile(title: L("الترجمات"), systemImage: "globe") }
+                    Button { state.openMushaf(page: nil, extra: "hifz=1") } label: { ToolTile(title: L("الحفظ"), systemImage: "puzzlepiece") }
+                    Button { state.openMushaf(page: nil, extra: "find=1") } label: { ToolTile(title: L("بحث بالمعنى"), systemImage: "text.magnifyingglass") }
+                    NavigationLink(value: Screen.family(nil)) { ToolTile(title: L("ختمة العائلة"), systemImage: "person.3") }
+                    NavigationLink(value: Screen.articles) { ToolTile(title: L("المقالات"), systemImage: "doc.text") }
                 }
-                section("الصلاة والذكر")
+                section(L("الصلاة والذكر"))
                 LazyVGrid(columns: columns, spacing: 8) {
-                    NavigationLink(value: Screen.prayerTimes) { ToolTile(title: "المواقيت", systemImage: "clock") }
-                    NavigationLink(value: Screen.qibla) { ToolTile(title: "القبلة", systemImage: "location.north.circle") }
-                    NavigationLink(value: Screen.azkar(nil)) { ToolTile(title: "الأذكار", systemImage: "sun.and.horizon") }
-                    NavigationLink(value: Screen.tasbeeh) { ToolTile(title: "المسبحة", systemImage: "circle.grid.cross") }
-                    NavigationLink(value: Screen.prayerAzkar) { ToolTile(title: "أذكار الصلاة", systemImage: "moon.stars") }
-                    NavigationLink(value: Screen.hadith) { ToolTile(title: "الأحاديث", systemImage: "books.vertical") }
-                    NavigationLink(value: Screen.mosque) { ToolTile(title: "وضع المسجد", systemImage: "speaker.slash") }
-                    NavigationLink(value: Screen.adhanCheck) { ToolTile(title: "فحص الأذان", systemImage: "bell.badge") }
-                    Button { Browser.open(Links.home) } label: { ToolTile(title: "الموقع", systemImage: "safari") }
+                    NavigationLink(value: Screen.prayerTimes) { ToolTile(title: L("المواقيت"), systemImage: "clock") }
+                    NavigationLink(value: Screen.qibla) { ToolTile(title: L("القبلة"), systemImage: "location.north.circle") }
+                    NavigationLink(value: Screen.azkar(nil)) { ToolTile(title: L("الأذكار"), systemImage: "sun.and.horizon") }
+                    NavigationLink(value: Screen.tasbeeh) { ToolTile(title: L("المسبحة"), systemImage: "circle.grid.cross") }
+                    NavigationLink(value: Screen.prayerAzkar) { ToolTile(title: L("أذكار الصلاة"), systemImage: "moon.stars") }
+                    NavigationLink(value: Screen.hadith) { ToolTile(title: L("الأحاديث"), systemImage: "books.vertical") }
+                    NavigationLink(value: Screen.mosque) { ToolTile(title: L("وضع المسجد"), systemImage: "speaker.slash") }
+                    NavigationLink(value: Screen.adhanCheck) { ToolTile(title: L("فحص الأذان"), systemImage: "bell.badge") }
+                    Button { Browser.open(Links.home) } label: { ToolTile(title: L("الموقع"), systemImage: "safari") }
                 }
-                section("لقلبك والتطبيق")
+                section(L("لقلبك والتطبيق"))
                 LazyVGrid(columns: columns, spacing: 8) {
-                    NavigationLink(value: Screen.mood(nil)) { ToolTile(title: "آية لحالك", systemImage: "heart") }
-                    NavigationLink(value: Screen.dedicate) { ToolTile(title: "صدقة جارية", systemImage: "heart.circle") }
-                    NavigationLink(value: Screen.impact) { ToolTile(title: "أثرك", systemImage: "flame") }
-                    NavigationLink(value: Screen.worldMap) { ToolTile(title: "حول العالم", systemImage: "globe.asia.australia") }
-                    NavigationLink(value: Screen.notifications) { ToolTile(title: "التنبيهات", systemImage: "bell") }
+                    NavigationLink(value: Screen.mood(nil)) { ToolTile(title: L("آية لحالك"), systemImage: "heart") }
+                    NavigationLink(value: Screen.dedicate) { ToolTile(title: L("صدقة جارية"), systemImage: "heart.circle") }
+                    NavigationLink(value: Screen.impact) { ToolTile(title: L("أثرك"), systemImage: "flame") }
+                    NavigationLink(value: Screen.worldMap) { ToolTile(title: L("حول العالم"), systemImage: "globe.asia.australia") }
+                    NavigationLink(value: Screen.notifications) { ToolTile(title: L("التنبيهات"), systemImage: "bell") }
                     Button {
                         if let u = URL(string: "https://apps.apple.com/app/id6823910862?action=write-review") { UIApplication.shared.open(u) }
-                    } label: { ToolTile(title: "قيّم التطبيق", systemImage: "star") }
-                    NavigationLink(value: Screen.privacy) { ToolTile(title: "خصوصيتك", systemImage: "checkmark.shield") }
-                    NavigationLink(value: Screen.settings) { ToolTile(title: "الإعدادات", systemImage: "gearshape") }
+                    } label: { ToolTile(title: L("قيّم التطبيق"), systemImage: "star") }
+                    NavigationLink(value: Screen.privacy) { ToolTile(title: L("خصوصيتك"), systemImage: "checkmark.shield") }
+                    NavigationLink(value: Screen.settings) { ToolTile(title: L("الإعدادات"), systemImage: "gearshape") }
                 }
                 dedicateCard.padding(.top, 12)
             }
@@ -57,11 +57,11 @@ struct ToolsView: View {
             .padding(16)
         }
         .background(Palette.page.ignoresSafeArea())
-        .navigationTitle("الأدوات")
+        .navigationTitle(L("الأدوات"))
         .toolbar {
             ToolbarItem(placement: .navigationBarTrailing) {
                 NavigationLink(value: Screen.settings) { Image(systemName: "gearshape") }
-                    .accessibilityLabel("الإعدادات")
+                    .accessibilityLabel(L("الإعدادات"))
             }
             ToolbarItem(placement: .navigationBarLeading) {
                 NavigationLink(value: Screen.news) {
@@ -74,7 +74,7 @@ struct ToolsView: View {
                             }
                         }
                 }
-                .accessibilityLabel("أخبار التطبيق" + (unread > 0 ? "، \(ar(unread)) جديد" : ""))
+                .accessibilityLabel(L("أخبار التطبيق") + (unread > 0 ? "، \(ar(unread)) جديد" : ""))
             }
         }
     }
@@ -91,8 +91,8 @@ struct ToolsView: View {
         HStack(spacing: 12) {
             Image(systemName: n.article > 0 ? "doc.text" : "bell").font(.system(size: 20)).foregroundColor(Palette.gold)
             VStack(alignment: .leading, spacing: 2) {
-                Text("جديد في أخبار التطبيق").font(AppFont.ui(12, 700)).foregroundColor(Palette.gold)
-                Text(n.article > 0 ? "مقال جديد: " + (n.body.isEmpty ? n.title : n.body) : n.title)
+                Text(L("جديد في أخبار التطبيق")).font(AppFont.ui(12, 700)).foregroundColor(Palette.gold)
+                Text(n.article > 0 ? L("مقال جديد: ") + (n.body.isEmpty ? n.title : n.body) : n.title)
                     .font(AppFont.ui(15, 700)).foregroundColor(.white).lineLimit(1)
             }
             Spacer()
@@ -109,15 +109,15 @@ struct ToolsView: View {
     private var streakCard: some View {
         _ = state.rev
         let n = Reading.streak
-        let title = n == 0 ? "ابدأ سلسلتك اليوم مع القرآن"
-            : n == 1 ? "يوم واحد مع القرآن" : n == 2 ? "يومان متتاليان مع القرآن"
-            : ar(n) + (n <= 10 ? " أيام متتالية مع القرآن" : " يومًا متتاليًا مع القرآن")
+        let title = n == 0 ? L("ابدأ سلسلتك اليوم مع القرآن")
+            : n == 1 ? L("يوم واحد مع القرآن") : n == 2 ? L("يومان متتاليان مع القرآن")
+            : ar(n) + (n <= 10 ? L(" أيام متتالية مع القرآن") : L(" يومًا متتاليًا مع القرآن"))
         let cal = Calendar.current
         let days: [Date] = (0..<7).reversed().compactMap { cal.date(byAdding: .day, value: -$0, to: Date()) }
-        let letters = ["ح", "ن", "ث", "ر", "خ", "ج", "س"]          // الأحد..السبت
+        let letters = [L("ح"), L("ن"), L("ث"), L("ر"), L("خ"), L("ج"), L("س")]          // الأحد..السبت
         return VStack(alignment: .leading, spacing: 4) {
             Text(title).font(AppFont.ui(16, 700)).foregroundColor(Palette.ink)
-            Text(Reading.readOn(Date()) ? "أحسنت، قرأت اليوم ✓" : "اقرأ ولو آية اليوم لتكملها")
+            Text(Reading.readOn(Date()) ? L("أحسنت، قرأت اليوم ✓") : L("اقرأ ولو آية اليوم لتكملها"))
                 .font(AppFont.ui(12)).foregroundColor(Palette.muted).padding(.bottom, 8)
             HStack {
                 ForEach(Array(days.enumerated()), id: \.offset) { i, d in
@@ -147,8 +147,8 @@ struct ToolsView: View {
                     .frame(width: 40, height: 40)
                     .background(RoundedRectangle(cornerRadius: 12).fill(Palette.gold.opacity(0.18)))
                 VStack(alignment: .leading, spacing: 2) {
-                    Text("اجعلها صدقة جارية").font(AppFont.ui(16, 700)).foregroundColor(.white)
-                    Text("شارك التطبيق باسم من تحب، حيًّا أو ميتًا").font(AppFont.ui(12)).foregroundColor(Palette.onDarkMuted)
+                    Text(L("اجعلها صدقة جارية")).font(AppFont.ui(16, 700)).foregroundColor(.white)
+                    Text(L("شارك التطبيق باسم من تحب، حيًّا أو ميتًا")).font(AppFont.ui(12)).foregroundColor(Palette.onDarkMuted)
                 }
                 Spacer()
                 Image(systemName: "chevron.left").foregroundColor(Palette.goldLight)
@@ -156,7 +156,7 @@ struct ToolsView: View {
             .padding(16)
             .background(PatternBackground().clipShape(RoundedRectangle(cornerRadius: 18)))
         }
-        .accessibilityLabel("اجعلها صدقة جارية: شارك التطبيق باسم من تحب")
+        .accessibilityLabel(L("اجعلها صدقة جارية: شارك التطبيق باسم من تحب"))
     }
 }
 
@@ -192,39 +192,39 @@ struct PrayerTimesView: View {
                 } header: {
                     Text(hijriToday() + (state.city.isEmpty ? "" : " · " + state.city)).font(AppFont.ui(13))
                 } footer: {
-                    Text((Store.int("calc_method", 0) == 0 ? "تلقائي حسب دولتك · " : "")
+                    Text((Store.int("calc_method", 0) == 0 ? L("تلقائي حسب دولتك · ") : "")
                          + Prayer.currentMethod().name + "\n" + Prayer.currentMethod().detail).font(AppFont.ui(12))
                 }
             } else {
-                Text("حدّد موقعك لعرض مواقيت الصلاة في مدينتك").font(AppFont.ui(15)).foregroundColor(Palette.muted)
+                Text(L("حدّد موقعك لعرض مواقيت الصلاة في مدينتك")).font(AppFont.ui(15)).foregroundColor(Palette.muted)
             }
             Section {
                 Button { location.requestLocation() } label: {
                     HStack {
-                        Label(state.hasLocation ? "تحديث الموقع" : "تحديد الموقع", systemImage: "location").font(AppFont.ui(15, 700))
+                        Label(state.hasLocation ? L("تحديث الموقع") : L("تحديد الموقع"), systemImage: "location").font(AppFont.ui(15, 700))
                         Spacer()
                         if location.busy { ProgressView() }
                     }
                 }
                 if location.denied {
-                    Button("السماح بالموقع من الإعدادات") {
+                    Button(L("السماح بالموقع من الإعدادات")) {
                         if let u = URL(string: UIApplication.openSettingsURLString) { UIApplication.shared.open(u) }
                     }.font(AppFont.ui(14))
                 }
                 if location.failed {
-                    Text("تعذّر تحديد الموقع، فعّل خدمة الموقع ثم حاول مرة أخرى").font(AppFont.ui(13)).foregroundColor(Palette.muted)
+                    Text(L("تعذّر تحديد الموقع، فعّل خدمة الموقع ثم حاول مرة أخرى")).font(AppFont.ui(13)).foregroundColor(Palette.muted)
                 }
                 Toggle(isOn: state.toggle("adhan_on")) {
-                    Text("تنبيه الأذان").font(AppFont.ui(15, 500))
+                    Text(L("تنبيه الأذان")).font(AppFont.ui(15, 500))
                 }
                 .tint(Palette.goldDeep)
                 .disabled(!state.hasLocation)
-                NavigationLink(value: Screen.web(Links.prayerTimes, "مواقيت الصلاة")) {
-                    Label("مواقيت الشهر في الموقع", systemImage: "calendar").font(AppFont.ui(15))
+                NavigationLink(value: Screen.web(Links.prayerTimes, L("مواقيت الصلاة"))) {
+                    Label(L("مواقيت الشهر في الموقع"), systemImage: "calendar").font(AppFont.ui(15))
                 }
             }
         }
-        .navigationTitle("مواقيت الصلاة")
+        .navigationTitle(L("مواقيت الصلاة"))
         .navigationBarTitleDisplayMode(.inline)
         .onReceive(Timer.publish(every: 30, on: .main, in: .common).autoconnect()) { now = $0 }
     }
@@ -262,27 +262,27 @@ struct QiblaView: View {
         ScrollView {
             VStack(spacing: 16) {
                 if let b = bearing {
-                    Text(state.city.isEmpty ? "موقعك الحالي" : state.city)
+                    Text(state.city.isEmpty ? L("موقعك الحالي") : state.city)
                         .font(AppFont.ui(16, 700)).foregroundColor(Palette.ink)
                     dial(qibla: b)
                     hint(qibla: b)
                     HStack(spacing: 0) {
-                        stat(icon: "safari", title: "اتجاه القبلة من الشمال", value: ar(Int(b.rounded())) + "°")
+                        stat(icon: "safari", title: L("اتجاه القبلة من الشمال"), value: ar(Int(b.rounded())) + "°")
                         Rectangle().fill(Palette.line).frame(width: 1, height: 44)
-                        stat(icon: "mappin.and.ellipse", title: "البُعد عن الكعبة", value: ar(Int(distanceKm.rounded())) + " كم")
+                        stat(icon: "mappin.and.ellipse", title: L("البُعد عن الكعبة"), value: ar(Int(distanceKm.rounded())) + L(" كم"))
                     }
                     .padding(.vertical, 12)
                     .background(RoundedRectangle(cornerRadius: 18).fill(Palette.card))
                     .overlay(RoundedRectangle(cornerRadius: 18).stroke(Palette.line))
                 } else {
-                    Text(location.denied ? "نحتاج إذن الموقع لتحديد اتجاه القبلة" : "حدّد موقعك لمعرفة اتجاه القبلة")
+                    Text(location.denied ? L("نحتاج إذن الموقع لتحديد اتجاه القبلة") : L("حدّد موقعك لمعرفة اتجاه القبلة"))
                         .font(AppFont.ui(16, 500)).foregroundColor(Palette.muted)
                     Button { location.requestLocation() } label: {
-                        HStack { if location.busy { ProgressView() }; Pill(title: "تحديد الموقع", systemImage: "location", primary: true) }
+                        HStack { if location.busy { ProgressView() }; Pill(title: L("تحديد الموقع"), systemImage: "location", primary: true) }
                     }
                     .frame(width: 240)
                 }
-                Text("ضع الجوال مسطحًا بعيدًا عن المعادن والمغناطيس. إذا كانت القراءة غير مستقرة، حرّك الجوال في الهواء على شكل الرقم 8 لمعايرة البوصلة.")
+                Text(L("ضع الجوال مسطحًا بعيدًا عن المعادن والمغناطيس. إذا كانت القراءة غير مستقرة، حرّك الجوال في الهواء على شكل الرقم 8 لمعايرة البوصلة."))
                     .font(AppFont.ui(13)).foregroundColor(Palette.muted).multilineTextAlignment(.center)
                     .padding(.top, 4)
             }
@@ -291,7 +291,7 @@ struct QiblaView: View {
         }
         .background(Palette.page.ignoresSafeArea())
         .keepScreenOn(force: true)
-        .navigationTitle("اتجاه القبلة")
+        .navigationTitle(L("اتجاه القبلة"))
         .navigationBarTitleDisplayMode(.inline)
         .onAppear {
             location.startHeading()
@@ -346,7 +346,7 @@ struct QiblaView: View {
                             .rotationEffect(.degrees(Double(d)))
                     }
                 }
-                ForEach(Array(["ش", "ق", "ج", "غ"].enumerated()), id: \.offset) { i, l in
+                ForEach(Array((Lang.en ? ["N", "E", "S", "W"] : ["ش", "ق", "ج", "غ"]).enumerated()), id: \.offset) { i, l in
                     Text(l).font(AppFont.ui(18, 800)).foregroundColor(i == 0 ? Color(red: 0.7, green: 0.25, blue: 0.18) : Palette.ink)
                         .rotationEffect(.degrees(heading - Double(i) * 90))
                         .offset(y: -(R - 40))
@@ -369,7 +369,7 @@ struct QiblaView: View {
             Circle().fill(Palette.ink).frame(width: 18, height: 18)
             Circle().fill(Palette.card).frame(width: 7, height: 7)
             if lowAccuracy {
-                Text("البوصلة تحتاج معايرة").font(AppFont.ui(12, 700)).foregroundColor(Palette.goldDeep).offset(y: 46)
+                Text(L("البوصلة تحتاج معايرة")).font(AppFont.ui(12, 700)).foregroundColor(Palette.goldDeep).offset(y: 46)
             }
         }
         .frame(width: R * 2, height: R * 2)
@@ -377,7 +377,7 @@ struct QiblaView: View {
         .environment(\.layoutDirection, .leftToRight)
         .animation(.easeOut(duration: 0.25), value: heading)
         .accessibilityElement(children: .ignore)
-        .accessibilityLabel("بوصلة القبلة")
+        .accessibilityLabel(L("بوصلة القبلة"))
         .onChange(of: isAligned) { now in
             if now && !aligned { UINotificationFeedbackGenerator().notificationOccurred(.success) }
             aligned = now
@@ -397,19 +397,19 @@ struct QiblaView: View {
             .overlay(RoundedRectangle(cornerRadius: 16).stroke(color == Palette.goldDeep ? Palette.gold : Palette.line, lineWidth: 1.5)))
         }
         if !location.headingAvailable {
-            box("جوالك لا يحتوي على بوصلة", nil, Palette.ink)
+            box(L("جوالك لا يحتوي على بوصلة"), nil, Palette.ink)
         } else if let off = offset(qibla) {
             if abs(off) <= 4 {
-                box("أنت باتجاه القبلة", "checkmark.circle.fill", Palette.goldDeep)
+                box(L("أنت باتجاه القبلة"), "checkmark.circle.fill", Palette.goldDeep)
             } else if abs(off) > 150 {
-                box("القبلة خلفك، استدر", "arrow.uturn.down", Palette.ink)
+                box(L("القبلة خلفك، استدر"), "arrow.uturn.down", Palette.ink)
             } else if off > 0 {
-                box("حرّك الجوال نحو اليمين", "arrow.right", Palette.ink)
+                box(L("حرّك الجوال نحو اليمين"), "arrow.right", Palette.ink)
             } else {
-                box("حرّك الجوال نحو اليسار", "arrow.left", Palette.ink)
+                box(L("حرّك الجوال نحو اليسار"), "arrow.left", Palette.ink)
             }
         } else {
-            box("جارٍ قراءة البوصلة…", nil, Palette.muted)
+            box(L("جارٍ قراءة البوصلة…"), nil, Palette.muted)
         }
     }
 }
@@ -439,9 +439,9 @@ struct TasbeehView: View {
     @AppStorage("tasbeeh_total") private var total = 0
 
     private static let dhikrs = [
-        "سُبْحَانَ اللَّهِ", "الْحَمْدُ لِلَّهِ", "اللَّهُ أَكْبَرُ", "لَا إِلَهَ إِلَّا اللَّهُ",
-        "أَسْتَغْفِرُ اللَّهَ", "سُبْحَانَ اللَّهِ وَبِحَمْدِهِ", "لَا حَوْلَ وَلَا قُوَّةَ إِلَّا بِاللَّهِ",
-        "اللَّهُمَّ صَلِّ عَلَى مُحَمَّدٍ"]
+        L("سُبْحَانَ اللَّهِ"), L("الْحَمْدُ لِلَّهِ"), L("اللَّهُ أَكْبَرُ"), L("لَا إِلَهَ إِلَّا اللَّهُ"),
+        L("أَسْتَغْفِرُ اللَّهَ"), L("سُبْحَانَ اللَّهِ وَبِحَمْدِهِ"), L("لَا حَوْلَ وَلَا قُوَّةَ إِلَّا بِاللَّهِ"),
+        L("اللَّهُمَّ صَلِّ عَلَى مُحَمَّدٍ")]
     private static let targets = [33, 99, 100, 0]
 
     var body: some View {
@@ -478,7 +478,7 @@ struct TasbeehView: View {
                         VStack(spacing: 4) {
                             Text(ar(count)).font(AppFont.ui(side * 0.25, 700)).foregroundColor(.white).monospacedDigit()
                             if side >= 140 {
-                                Text(target > 0 ? "من " + ar(target) : "عدّ مفتوح").font(AppFont.ui(14, 500)).foregroundColor(Palette.gold)
+                                Text(target > 0 ? L("من ") + ar(target) : L("عدّ مفتوح")).font(AppFont.ui(14, 500)).foregroundColor(Palette.gold)
                             }
                         }
                     }
@@ -487,13 +487,13 @@ struct TasbeehView: View {
                 }
                 .buttonStyle(.plain)
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
-                .accessibilityLabel("اضغط للتسبيح، العدد " + ar(count))
+                .accessibilityLabel(L("اضغط للتسبيح، العدد ") + ar(count))
             }
 
             HStack(spacing: 6) {
                 ForEach(Self.targets, id: \.self) { t in
                     Button { target = t; count = 0 } label: {
-                        Text(t == 0 ? "بلا حد" : ar(t)).font(AppFont.ui(14, 700))
+                        Text(t == 0 ? L("بلا حد") : ar(t)).font(AppFont.ui(14, 700))
                             .foregroundColor(t == target ? .white : Palette.ink)
                             .frame(maxWidth: .infinity, minHeight: 42)
                             .background(Capsule().fill(t == target ? Palette.goldDeep : Palette.card))
@@ -502,15 +502,15 @@ struct TasbeehView: View {
                 }
             }
             .padding(.horizontal, 20)
-            Text("مجموع تسبيحاتك: " + ar(total)).font(AppFont.ui(13)).foregroundColor(Palette.muted)
+            Text(L("مجموع تسبيحاتك: ") + ar(total)).font(AppFont.ui(13)).foregroundColor(Palette.muted)
                 .padding(.top, 12).padding(.bottom, 20)
         }
         .background(Palette.page.ignoresSafeArea())
-        .navigationTitle("المسبحة")
+        .navigationTitle(L("المسبحة"))
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
             ToolbarItem(placement: .navigationBarLeading) {
-                Button("تصفير") { count = 0 }.font(AppFont.ui(14, 700)).foregroundColor(Palette.goldDeep)
+                Button(L("تصفير")) { count = 0 }.font(AppFont.ui(14, 700)).foregroundColor(Palette.goldDeep)
             }
         }
         .keepScreenOn(force: true)                           // مضاءة، وتنطفئ بعد ١٠ دقائق دون تسبيح

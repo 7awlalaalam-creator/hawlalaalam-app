@@ -38,8 +38,8 @@ struct HawlApp: App {
         WindowGroup {
             RootView()
                 .environmentObject(state)
-                .environment(\.layoutDirection, .rightToLeft)
-                .environment(\.locale, Locale(identifier: "ar"))
+                .environment(\.layoutDirection, Lang.dir)
+                .environment(\.locale, Lang.locale)
                 .preferredColorScheme(state.colorScheme)
                 .tint(Palette.goldDeep)
                 .onOpenURL { url in state.open(url) }
@@ -80,40 +80,40 @@ struct RootView: View {
                 TodayView().navigationDestination(for: Screen.self) { ScreenView(screen: $0) }
             }
             .safeAreaInset(edge: .bottom) { MiniPlayerBar() }
-            .tabItem { Label("اليوم", systemImage: "house") }
+            .tabItem { Label(L("اليوم"), systemImage: "house") }
             .tag(AppState.Tab.today)
 
             NavigationStack { MushafScreen() }
-                .tabItem { Label("المصحف", systemImage: "book") }
+                .tabItem { Label(L("المصحف"), systemImage: "book") }
                 .tag(AppState.Tab.mushaf)
 
             NavigationStack(path: $state.listenPath) {
                 ListenView().navigationDestination(for: Screen.self) { ScreenView(screen: $0) }
             }
                 .safeAreaInset(edge: .bottom) { MiniPlayerBar() }
-                .tabItem { Label("الاستماع", systemImage: "headphones") }
+                .tabItem { Label(L("الاستماع"), systemImage: "headphones") }
                 .tag(AppState.Tab.listen)
 
             NavigationStack(path: $state.toolsPath) {
                 ToolsView().navigationDestination(for: Screen.self) { ScreenView(screen: $0) }
             }
             .safeAreaInset(edge: .bottom) { MiniPlayerBar() }
-            .tabItem { Label("الأدوات", systemImage: "square.grid.2x2") }
+            .tabItem { Label(L("الأدوات"), systemImage: "square.grid.2x2") }
             .tag(AppState.Tab.tools)
         }
         .overlay { ToastOverlay() }
         .sheet(isPresented: $state.showPrayerAzkar) {
             NavigationStack { PrayerAzkarView() }
-                .environment(\.layoutDirection, .rightToLeft)
+                .environment(\.layoutDirection, Lang.dir)
         }
         .fullScreenCover(isPresented: $state.showWelcome) {
             WelcomeView()
                 .environmentObject(state)
-                .environment(\.layoutDirection, .rightToLeft)
+                .environment(\.layoutDirection, Lang.dir)
         }
         .sheet(isPresented: $state.showTour) {
             FeaturesView()
-                .environment(\.layoutDirection, .rightToLeft)
+                .environment(\.layoutDirection, Lang.dir)
         }
     }
 }
@@ -172,12 +172,12 @@ struct MushafScreen: View {
         MushafWebView(page: page == 0 ? Khatma.lastMushafPage() : page, night: scheme == .dark, zoom: state.textZoom,
                       extra: extra, extraID: extraID)
             .background(Palette.page.ignoresSafeArea())
-            .navigationTitle("المصحف")
+            .navigationTitle(L("المصحف"))
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
                     NavigationLink { IndexView() } label: {
-                        Label("الفهرس", systemImage: "list.bullet").labelStyle(.titleAndIcon).font(AppFont.ui(15, 700))
+                        Label(L("الفهرس"), systemImage: "list.bullet").labelStyle(.titleAndIcon).font(AppFont.ui(15, 700))
                     }
                 }
             }

@@ -33,14 +33,14 @@ final class SpeechService {
             Task { @MainActor in
                 guard self.gen == token else { return }
                 guard status == .authorized else {
-                    self.state("error", "اسمح للتطبيق بالتعرّف على الكلام من: الإعدادات ← حول العالم")
+                    self.state("error", L("اسمح للتطبيق بالتعرّف على الكلام من: الإعدادات ← حول العالم"))
                     return
                 }
                 AVAudioSession.sharedInstance().requestRecordPermission { granted in
                     Task { @MainActor in
                         guard self.gen == token else { return }
                         guard granted else {
-                            self.state("error", "اسمح للتطبيق باستخدام الميكروفون من: الإعدادات ← حول العالم")
+                            self.state("error", L("اسمح للتطبيق باستخدام الميكروفون من: الإعدادات ← حول العالم"))
                             return
                         }
                         self.active = true
@@ -73,7 +73,7 @@ final class SpeechService {
         let myGen = gen
         guard let rec = SFSpeechRecognizer(locale: Locale(identifier: lang)), rec.isAvailable else {
             active = false
-            state("error", "التعرّف على العربية غير متاح الآن في جوالك")
+            state("error", L("التعرّف على العربية غير متاح الآن في جوالك"))
             return
         }
         do {
@@ -92,7 +92,7 @@ final class SpeechService {
             let format = input.inputFormat(forBus: 0)
             guard format.sampleRate > 0, format.channelCount > 0 else {
                 active = false
-                state("error", "تعذّر الوصول إلى الميكروفون")
+                state("error", L("تعذّر الوصول إلى الميكروفون"))
                 return
             }
             input.installTap(onBus: 0, bufferSize: 1024, format: format) { buffer, _ in req.append(buffer) }
@@ -113,7 +113,7 @@ final class SpeechService {
         } catch {
             active = false
             finishRequest()
-            state("error", "تعذّر بدء الاستماع")
+            state("error", L("تعذّر بدء الاستماع"))
         }
     }
 

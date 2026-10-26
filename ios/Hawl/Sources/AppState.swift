@@ -300,7 +300,7 @@ final class AppState: ObservableObject {
         Store.d.set(loc.coordinate.longitude, forKey: "lng")
         Store.d.set(Date().timeIntervalSince1970, forKey: "loc_time")
         changed()
-        CLGeocoder().reverseGeocodeLocation(loc, preferredLocale: Locale(identifier: "ar")) { marks, _ in
+        CLGeocoder().reverseGeocodeLocation(loc, preferredLocale: Lang.locale) { marks, _ in
             let name = marks?.first?.locality ?? marks?.first?.administrativeArea ?? ""
             let cc = marks?.first?.isoCountryCode ?? ""
             Task { @MainActor in
@@ -322,8 +322,8 @@ final class AppState: ObservableObject {
     }
 
     var shareAppText: String {
-        "📖 تطبيق «القرآن حول العالم»\n"
-            + "قراءة واستماع وتفسير وأكثر من ٣٠ أداة إسلامية، مجانًا وبلا تسجيل.\n\n"
+        L("📖 تطبيق «القرآن حول العالم»\n")
+            + L("قراءة واستماع وتفسير وأكثر من ٣٠ أداة إسلامية، مجانًا وبلا تسجيل.\n\n")
             + Links.homeString
     }
 }

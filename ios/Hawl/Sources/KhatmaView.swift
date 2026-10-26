@@ -4,7 +4,7 @@ import SwiftUI
 struct KhatmaView: View {
     @EnvironmentObject var state: AppState
 
-    private static let dayNames = ["أحد", "اثنين", "ثلاثاء", "أربعاء", "خميس", "جمعة", "سبت"]
+    private static let dayNames = [L("أحد"), L("اثنين"), L("ثلاثاء"), L("أربعاء"), L("خميس"), L("جمعة"), L("سبت")]
     /** خيار التذكير: صلاة (Prayer.fajr…) أو وقت ثابت أو بلا تذكير */
     private static let remindFixed = -1, remindNone = -2
 
@@ -41,35 +41,35 @@ struct KhatmaView: View {
                     progressCard.padding(.top, 14)
                     todayCard.padding(.top, 14)
                     if extendedNote {
-                        note("انتهت مدة الختمة قبل إتمامها، فمدّدنا الموعد بنفس وردك اليومي بدل أن نُثقل عليك. موعدك الجديد: " + Khatma.endDateText)
+                        note(L("انتهت مدة الختمة قبل إتمامها، فمدّدنا الموعد بنفس وردك اليومي بدل أن نُثقل عليك. موعدك الجديد: ") + Khatma.endDateText)
                             .padding(.top, 14)
                     } else if Khatma.missedDays {
-                        note(Khatma.fixedPace ? "فاتك يوم؟ لا بأس، وردك كما هو، وتحرّك موعد الختم قليلًا."
-                             : "فاتك يوم؟ لا بأس، وزّعنا الصفحات الباقية على الأيام القادمة بهدوء، وموعد ختمتك كما هو.")
+                        note(Khatma.fixedPace ? L("فاتك يوم؟ لا بأس، وردك كما هو، وتحرّك موعد الختم قليلًا.")
+                             : L("فاتك يوم؟ لا بأس، وزّعنا الصفحات الباقية على الأيام القادمة بهدوء، وموعد ختمتك كما هو."))
                             .padding(.top, 14)
                     }
-                    section("هذا الأسبوع").padding(.top, 20)
+                    section(L("هذا الأسبوع")).padding(.top, 20)
                     week.padding(.top, 8)
-                    section("خطتك").padding(.top, 20)
+                    section(L("خطتك")).padding(.top, 20)
                     planCard.padding(.top, 8)
                     Button { confirmStop = true } label: {
-                        Text("إنهاء هذه الختمة").font(AppFont.ui(13, 500)).foregroundColor(Palette.muted)
+                        Text(L("إنهاء هذه الختمة")).font(AppFont.ui(13, 500)).foregroundColor(Palette.muted)
                             .frame(maxWidth: .infinity).padding(.top, 18).padding(.bottom, 4)
                     }
                 }
                 if !Khatma.history.isEmpty {
-                    section("ختماتك السابقة").padding(.top, 20)
+                    section(L("ختماتك السابقة")).padding(.top, 20)
                     historyCard.padding(.top, 8)
                 }
-                Text("تُحتسب الصفحة مقروءة عندما تبقى عليها في المصحف بضع ثوانٍ، فلا يُحسب التصفح السريع. "
-                     + "ويصلك تذكير الورد من التطبيق نفسه ولو كان مغلقًا، ولا يصلك إن أتممت وردك.")
+                Text(L("تُحتسب الصفحة مقروءة عندما تبقى عليها في المصحف بضع ثوانٍ، فلا يُحسب التصفح السريع. ")
+                     + L("ويصلك تذكير الورد من التطبيق نفسه ولو كان مغلقًا، ولا يصلك إن أتممت وردك."))
                     .font(AppFont.ui(13)).foregroundColor(Palette.muted).lineSpacing(3)
                     .padding(.horizontal, 4).padding(.top, 18)
             }
             .padding(.horizontal, 18).padding(.bottom, 32)
         }
         .background(Palette.page.ignoresSafeArea())
-        .navigationTitle(editing ? "تعديل الخطة" : "ختمتي")
+        .navigationTitle(editing ? L("تعديل الخطة") : L("ختمتي"))
         .navigationBarTitleDisplayMode(.inline)
         .onAppear {
             Khatma.ensureDay()
@@ -77,35 +77,35 @@ struct KhatmaView: View {
             if Khatma.consumeExtendedNote() { extendedNote = true }
             if !setupLoaded { loadSetup() }
         }
-        .alert("ختمت القرآن الكريم، تقبّل الله منك", isPresented: $celebrate) {
-            Button("آمين", role: .cancel) { }
-        } message: { Text("اللهم ارحمني بالقرآن واجعله لي إمامًا ونورًا وهدًى ورحمة.") }
-        .alert("إنهاء الختمة؟", isPresented: $confirmStop) {
-            Button("نعم", role: .destructive) { Khatma.stop(); setupLoaded = false; loadSetup() }
-            Button("إلغاء", role: .cancel) { }
-        } message: { Text("سيُحذف تقدّمك في هذه الختمة.") }
-        .alert("بدء ختمة جديدة؟", isPresented: $confirmNew) {
-            Button("نعم") { commitNow() }
-            Button("إلغاء", role: .cancel) { }
-        } message: { Text("ستبدأ ختمة جديدة ويُحذف تقدّم الختمة الحالية.") }
+        .alert(L("ختمت القرآن الكريم، تقبّل الله منك"), isPresented: $celebrate) {
+            Button(L("آمين"), role: .cancel) { }
+        } message: { Text(L("اللهم ارحمني بالقرآن واجعله لي إمامًا ونورًا وهدًى ورحمة.")) }
+        .alert(L("إنهاء الختمة؟"), isPresented: $confirmStop) {
+            Button(L("نعم"), role: .destructive) { Khatma.stop(); setupLoaded = false; loadSetup() }
+            Button(L("إلغاء"), role: .cancel) { }
+        } message: { Text(L("سيُحذف تقدّمك في هذه الختمة.")) }
+        .alert(L("بدء ختمة جديدة؟"), isPresented: $confirmNew) {
+            Button(L("نعم")) { commitNow() }
+            Button(L("إلغاء"), role: .cancel) { }
+        } message: { Text(L("ستبدأ ختمة جديدة ويُحذف تقدّم الختمة الحالية.")) }
         .alert(ask?.title ?? "", isPresented: Binding(get: { ask != nil }, set: { if !$0 { ask = nil } })) {
             TextField(ask?.hint ?? "", text: $askText).keyboardType(.numberPad)
-            Button("تم") {
+            Button(L("تم")) {
                 if let a = ask, let v = Int(Self.westernDigits(askText).trimmingCharacters(in: .whitespaces)), v >= a.min && v <= a.max { a.done(v) }
                 ask = nil
             }
-            Button("إلغاء", role: .cancel) { ask = nil }
+            Button(L("إلغاء"), role: .cancel) { ask = nil }
         }
         .sheet(isPresented: $pickTime) {
             NavigationStack {
                 DatePicker("", selection: $remindTime, displayedComponents: .hourAndMinute)
                     .datePickerStyle(.wheel).labelsHidden()
-                    .environment(\.locale, Locale(identifier: "ar"))
-                    .navigationTitle("وقت التذكير").navigationBarTitleDisplayMode(.inline)
-                    .toolbar { ToolbarItem(placement: .confirmationAction) { Button("تم") { remind = Self.remindFixed; pickTime = false } } }
+                    .environment(\.locale, Lang.locale)
+                    .navigationTitle(L("وقت التذكير")).navigationBarTitleDisplayMode(.inline)
+                    .toolbar { ToolbarItem(placement: .confirmationAction) { Button(L("تم")) { remind = Self.remindFixed; pickTime = false } } }
             }
             .presentationDetents([.medium])
-            .environment(\.layoutDirection, .rightToLeft)
+            .environment(\.layoutDirection, Lang.dir)
         }
     }
 
@@ -116,26 +116,26 @@ struct KhatmaView: View {
         let next = Khatma.nextPage
         let ahead = Khatma.aheadBy
         let status: String
-        if ahead > 0 { status = "متقدّم على خطتك بـ " + ar(ahead) + " صفحة، بارك الله فيك" }
-        else if ahead < 0 { status = "متأخر " + ar(-ahead) + " صفحة عن الخطة" + (Khatma.fixedPace ? "، وتحرّك موعد الختم قليلًا" : "، وزّعناها على أيامك القادمة") }
-        else { status = "على خطتك تمامًا" }
+        if ahead > 0 { status = L("متقدّم على خطتك بـ ") + ar(ahead) + L(" صفحة، بارك الله فيك") }
+        else if ahead < 0 { status = L("متأخر ") + ar(-ahead) + L(" صفحة عن الخطة") + (Khatma.fixedPace ? L("، وتحرّك موعد الختم قليلًا") : L("، وزّعناها على أيامك القادمة")) }
+        else { status = L("على خطتك تمامًا") }
         return VStack(alignment: .leading, spacing: 0) {
             HStack {
-                Text("تقدّمك").font(AppFont.ui(16, 700)).foregroundColor(Palette.ink)
+                Text(L("تقدّمك")).font(AppFont.ui(16, 700)).foregroundColor(Palette.ink)
                 Spacer()
-                Text(ar(Khatma.read) + " من ٦٠٤ صفحة").font(AppFont.ui(13)).foregroundColor(Palette.muted)
+                Text(ar(Khatma.read) + L(" من ٦٠٤ صفحة")).font(AppFont.ui(13)).foregroundColor(Palette.muted)
             }
             ProgressView(value: Double(Khatma.percent), total: 100)
                 .tint(Palette.goldDeep)
                 .scaleEffect(x: 1, y: 2.4, anchor: .center)
                 .padding(.vertical, 12)
-                .accessibilityLabel("التقدّم " + ar(Khatma.percent) + "٪")
+                .accessibilityLabel(L("التقدّم ") + ar(Khatma.percent) + L("٪"))
             HStack(alignment: .top) {
-                Text(ar(Khatma.percent) + "٪ مكتمل").font(AppFont.ui(13)).foregroundColor(Palette.muted)
+                Text(ar(Khatma.percent) + L("٪ مكتمل")).font(AppFont.ui(13)).foregroundColor(Palette.muted)
                 Spacer()
-                Text("الختم المتوقع: " + Khatma.endDateText).font(AppFont.ui(13)).foregroundColor(Palette.muted).multilineTextAlignment(.trailing)
+                Text(L("الختم المتوقع: ") + Khatma.endDateText).font(AppFont.ui(13)).foregroundColor(Palette.muted).multilineTextAlignment(.trailing)
             }
-            Text("وصلت إلى: " + Khatma.whereIs(next) + " · صفحة " + ar(next)).font(AppFont.ui(14, 500)).foregroundColor(Palette.ink)
+            Text(L("وصلت إلى: ") + Khatma.whereIs(next) + L(" · صفحة ") + ar(next)).font(AppFont.ui(14, 500)).foregroundColor(Palette.ink)
                 .padding(.top, 10)
             Text(status).font(AppFont.ui(13, 500)).foregroundColor(ahead >= 0 ? Palette.goldDeep : Palette.muted).padding(.top, 4)
         }
@@ -148,23 +148,23 @@ struct KhatmaView: View {
         let next = Khatma.nextPage
         return VStack(alignment: .leading, spacing: 0) {
             if !Khatma.readingToday {
-                Text("يوم راحة 🌿").font(AppFont.ui(13, 700)).foregroundColor(Palette.gold)
-                Text("لا ورد اليوم حسب خطتك").font(AppFont.ui(22, 700)).foregroundColor(.white).padding(.top, 8).padding(.bottom, 4)
-                Text("وإن قرأت احتُسب لك وخفّ وردك القادم.").font(AppFont.ui(14)).foregroundColor(Palette.onDarkMuted)
-                goldButton("تابع القراءة من صفحة " + ar(next), next)
+                Text(L("يوم راحة 🌿")).font(AppFont.ui(13, 700)).foregroundColor(Palette.gold)
+                Text(L("لا ورد اليوم حسب خطتك")).font(AppFont.ui(22, 700)).foregroundColor(.white).padding(.top, 8).padding(.bottom, 4)
+                Text(L("وإن قرأت احتُسب لك وخفّ وردك القادم.")).font(AppFont.ui(14)).foregroundColor(Palette.onDarkMuted)
+                goldButton(L("تابع القراءة من صفحة ") + ar(next), next)
             } else {
                 let r = Khatma.todayRange
                 let left = Khatma.todayRemaining
                 let fromName = Khatma.surahName(r.0), toName = Khatma.surahName(r.1)
                 let open = left == 0 ? next : max(r.0, next)
-                Text(left == 0 ? "أتممت ورد اليوم ✓" : "ورد اليوم").font(AppFont.ui(13, 700)).foregroundColor(Palette.gold)
-                Text("من صفحة " + ar(r.0) + " إلى " + ar(r.1)).font(AppFont.ui(22, 700)).foregroundColor(.white)
+                Text(left == 0 ? L("أتممت ورد اليوم ✓") : L("ورد اليوم")).font(AppFont.ui(13, 700)).foregroundColor(Palette.gold)
+                Text(L("من صفحة ") + ar(r.0) + L(" إلى ") + ar(r.1)).font(AppFont.ui(22, 700)).foregroundColor(.white)
                     .padding(.top, 8).padding(.bottom, 2)
                 Text(fromName == toName ? "سورة \(fromName)" : "من سورة \(fromName) إلى سورة \(toName)")
                     .font(AppFont.ui(14, 500)).foregroundColor(Palette.onDarkSoft)
-                Text(ar(Khatma.dailyTarget) + " صفحة · " + (left == 0 ? "بارك الله فيك" : "بقي " + ar(left)))
+                Text(ar(Khatma.dailyTarget) + L(" صفحة · ") + (left == 0 ? L("بارك الله فيك") : L("بقي ") + ar(left)))
                     .font(AppFont.ui(14)).foregroundColor(Palette.onDarkMuted).padding(.top, 4)
-                goldButton(left == 0 ? "تابع القراءة من صفحة " + ar(open) : "افتح المصحف على الصفحة " + ar(open), open)
+                goldButton(left == 0 ? L("تابع القراءة من صفحة ") + ar(open) : L("افتح المصحف على الصفحة ") + ar(open), open)
             }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
@@ -220,13 +220,13 @@ struct KhatmaView: View {
     private var planCard: some View {
         _ = state.rev
         let pace = Khatma.pace
-        let rem = Reminders.enabled(Reminders.wird) ? Reminders.wirdLabel + (Reminders.followUp ? " + تذكير ثانٍ" : "") : "بلا تذكير"
+        let rem = Reminders.enabled(Reminders.wird) ? Reminders.wirdLabel + (Reminders.followUp ? L(" + تذكير ثانٍ") : "") : L("بلا تذكير")
         return VStack(spacing: 0) {
-            infoRow("الورد", "نحو " + ar(pace) + " صفحة يوميًا" + Self.juzHint(pace))
-            infoRow("أيام القراءة", Self.daysText(Khatma.offMask))
-            infoRow("إن فاتني يوم", Khatma.fixedPace ? "يتمدّد الموعد بنفس الورد" : "يُوزَّع الباقي على الأيام")
-            infoRow("التذكير", rem)
-            Button { editing = true; setupLoaded = false; loadSetup() } label: { Pill(title: "تعديل الخطة", height: 46) }
+            infoRow(L("الورد"), L("نحو ") + ar(pace) + L(" صفحة يوميًا") + Self.juzHint(pace))
+            infoRow(L("أيام القراءة"), Self.daysText(Khatma.offMask))
+            infoRow(L("إن فاتني يوم"), Khatma.fixedPace ? L("يتمدّد الموعد بنفس الورد") : L("يُوزَّع الباقي على الأيام"))
+            infoRow(L("التذكير"), rem)
+            Button { editing = true; setupLoaded = false; loadSetup() } label: { Pill(title: L("تعديل الخطة"), height: 46) }
                 .padding(.top, 12)
         }
         .padding(.horizontal, 18).padding(.top, 14).padding(.bottom, 16)
@@ -276,7 +276,7 @@ struct KhatmaView: View {
             p.ppd = 20
             p.offMask = 0
             p.extend = false
-            p.label = "شهر"
+            p.label = L("شهر")
             p.startPage = 1
         }
         plan = p
@@ -295,10 +295,10 @@ struct KhatmaView: View {
         return VStack(alignment: .leading, spacing: 12) {
             if !editing {
                 VStack(alignment: .leading, spacing: 0) {
-                    Text(Khatma.completed > 0 ? "ختمت القرآن " + ar(Khatma.completed) + " مرة، تقبّل الله منك" : "ابدأ ختمتك")
+                    Text(Khatma.completed > 0 ? L("ختمت القرآن ") + ar(Khatma.completed) + L(" مرة، تقبّل الله منك") : L("ابدأ ختمتك"))
                         .font(AppFont.ui(13, 700)).foregroundColor(Palette.gold)
-                    Text("خطة على مقاسك").font(AppFont.ui(22, 700)).foregroundColor(.white).padding(.top, 8).padding(.bottom, 4)
-                    Text("اختر المدة أو الورد اليومي، وأيام قراءتك ووقت تذكيرك، ونحسب لك الباقي.")
+                    Text(L("خطة على مقاسك")).font(AppFont.ui(22, 700)).foregroundColor(.white).padding(.top, 8).padding(.bottom, 4)
+                    Text(L("اختر المدة أو الورد اليومي، وأيام قراءتك ووقت تذكيرك، ونحسب لك الباقي."))
                         .font(AppFont.ui(14)).foregroundColor(Palette.onDarkMuted)
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
@@ -308,33 +308,33 @@ struct KhatmaView: View {
 
             VStack(alignment: .leading, spacing: 0) {
                 // ١) طريقة الختمة
-                label("طريقة الختمة")
+                label(L("طريقة الختمة"))
                 grid(2, [
-                    choice("حسب المدة", plan.mode == Khatma.modeDays) { plan.mode = Khatma.modeDays },
-                    choice("حسب الورد اليومي", plan.mode == Khatma.modePages) { plan.mode = Khatma.modePages },
+                    choice(L("حسب المدة"), plan.mode == Khatma.modeDays) { plan.mode = Khatma.modeDays },
+                    choice(L("حسب الورد اليومي"), plan.mode == Khatma.modePages) { plan.mode = Khatma.modePages },
                 ])
 
                 // ٢) المدة أو الورد
                 if plan.mode == Khatma.modeDays {
-                    label(editing ? "أختم خلال (من اليوم)" : "أختم خلال")
+                    label(editing ? L("أختم خلال (من اليوم)") : L("أختم خلال"))
                     grid(3, daysChoices)
                 } else {
-                    label("وردي اليومي")
+                    label(L("وردي اليومي"))
                     grid(3, ppdChoices)
                 }
 
                 // ٣) نقطة البداية (للختمة الجديدة)
                 if !editing {
-                    label("أبدأ من")
+                    label(L("أبدأ من"))
                     grid(startChoices.count == 3 ? 3 : 2, startChoices)
                     if plan.startPage > 1 {
-                        Text("تبدأ من " + Khatma.whereIs(plan.startPage) + "، وبعد آخر المصحف نكمل من أوله حتى تتم الختمة.")
+                        Text(L("تبدأ من ") + Khatma.whereIs(plan.startPage) + L("، وبعد آخر المصحف نكمل من أوله حتى تتم الختمة."))
                             .font(AppFont.ui(12)).foregroundColor(Palette.muted).padding(.top, 6)
                     }
                 }
 
                 // ٤) أيام القراءة
-                label("أيام القراءة (اضغط لجعل اليوم راحة)")
+                label(L("أيام القراءة (اضغط لجعل اليوم راحة)"))
                 grid(4, [7, 1, 2, 3, 4, 5, 6].map { d -> AnyView in
                     let on = (plan.offMask & (1 << d)) == 0
                     return choice(Self.dayNames[d - 1], on) {
@@ -345,28 +345,28 @@ struct KhatmaView: View {
 
                 // ٥) سياسة فوات يوم (لوضع المدة)
                 if plan.mode == Khatma.modeDays {
-                    label("إن فاتني يوم")
+                    label(L("إن فاتني يوم"))
                     grid(2, [
-                        choice("أزيد وردي لأختم في موعدي", !plan.extend) { plan.extend = false },
-                        choice("أمدّد الموعد بنفس الورد", plan.extend) { plan.extend = true },
+                        choice(L("أزيد وردي لأختم في موعدي"), !plan.extend) { plan.extend = false },
+                        choice(L("أمدّد الموعد بنفس الورد"), plan.extend) { plan.extend = true },
                     ])
                 }
 
                 // ٦) التذكير
-                label("ذكّرني بالورد")
+                label(L("ذكّرني بالورد"))
                 grid(3, remindChoices)
                 if remind != Self.remindNone {
                     Toggle(isOn: $followUp) {
                         VStack(alignment: .leading, spacing: 2) {
-                            Text("تذكير ثانٍ لطيف").font(AppFont.ui(15, 700)).foregroundColor(Palette.ink)
-                            Text("بعد ٣ ساعات إن لم تُتمّ وردك، ولا يصل بعد ١١ مساءً").font(AppFont.ui(12)).foregroundColor(Palette.muted)
+                            Text(L("تذكير ثانٍ لطيف")).font(AppFont.ui(15, 700)).foregroundColor(Palette.ink)
+                            Text(L("بعد ٣ ساعات إن لم تُتمّ وردك، ولا يصل بعد ١١ مساءً")).font(AppFont.ui(12)).foregroundColor(Palette.muted)
                         }
                     }
                     .tint(Palette.goldDeep)
                     .padding(.top, 8)
                 }
                 if !Geo.has {
-                    Text("فعّل مواقيت الصلاة من الإعدادات ليصبح التذكير بعد الصلاة متاحًا.")
+                    Text(L("فعّل مواقيت الصلاة من الإعدادات ليصبح التذكير بعد الصلاة متاحًا."))
                         .font(AppFont.ui(12)).foregroundColor(Palette.muted).padding(.top, 6)
                 }
 
@@ -378,11 +378,11 @@ struct KhatmaView: View {
                     .card(Palette.ivory, border: Palette.ivoryBorder, radius: 16)
                     .padding(.top, 16)
 
-                Button { commit() } label: { Pill(title: editing ? "احفظ التعديل" : "ابدأ الختمة", primary: true, height: 52) }
+                Button { commit() } label: { Pill(title: editing ? L("احفظ التعديل") : L("ابدأ الختمة"), primary: true, height: 52) }
                     .padding(.top, 14)
                 if editing {
                     Button { editing = false; setupLoaded = false; loadSetup() } label: {
-                        Text("إلغاء").font(AppFont.ui(14, 500)).foregroundColor(Palette.muted).frame(maxWidth: .infinity).padding(.top, 14)
+                        Text(L("إلغاء")).font(AppFont.ui(14, 500)).foregroundColor(Palette.muted).frame(maxWidth: .infinity).padding(.top, 14)
                     }
                 }
             }
@@ -393,13 +393,13 @@ struct KhatmaView: View {
 
     private var daysChoices: [AnyView] {
         var items: [AnyView] = []
-        if Ramadan.active() { items.append(dayChoice("حتى آخر رمضان", Ramadan.daysLeftInRamadan())) }
+        if Ramadan.active() { items.append(dayChoice(L("حتى آخر رمضان"), Ramadan.daysLeftInRamadan())) }
         let ds = [7, 10, 15, 30, 60, 90, 180, 365]
-        let ns = ["أسبوع", "١٠ أيام", "١٥ يومًا", "شهر", "شهران", "٣ أشهر", "٦ أشهر", "سنة"]
+        let ns = [L("أسبوع"), L("١٠ أيام"), L("١٥ يومًا"), L("شهر"), L("شهران"), L("٣ أشهر"), L("٦ أشهر"), L("سنة")]
         for i in 0..<ds.count { items.append(dayChoice(ns[i], ds[i])) }
-        items.append(choiceTap(customDays ? ar(plan.days) + " يومًا" : "مدة أخرى…", customDays, tap: {
-            askNumber("كم يومًا؟", "من ١ إلى ٧٣٠ يومًا", 1, 730) { v in
-                plan.days = v; plan.label = ar(v) + " يومًا"; customDays = true
+        items.append(choiceTap(customDays ? ar(plan.days) + L(" يومًا") : L("مدة أخرى…"), customDays, tap: {
+            askNumber(L("كم يومًا؟"), L("من ١ إلى ٧٣٠ يومًا"), 1, 730) { v in
+                plan.days = v; plan.label = ar(v) + L(" يومًا"); customDays = true
             }
         }))
         return items
@@ -408,26 +408,26 @@ struct KhatmaView: View {
     private var ppdChoices: [AnyView] {
         var items: [AnyView] = []
         let ps = [1, 2, 3, 5, 10, 20, 40]
-        let ns = ["صفحة", "صفحتان", "٣ صفحات", "ربع جزء", "نصف جزء", "جزء", "جزءان"]
+        let ns = [L("صفحة"), L("صفحتان"), L("٣ صفحات"), L("ربع جزء"), L("نصف جزء"), L("جزء"), L("جزءان")]
         for i in 0..<ps.count {
             let p = ps[i], n = ns[i]
-            items.append(choice(n, !customPpd && plan.ppd == p) { plan.ppd = p; plan.label = n + " يوميًا"; customPpd = false })
+            items.append(choice(n, !customPpd && plan.ppd == p) { plan.ppd = p; plan.label = n + L(" يوميًا"); customPpd = false })
         }
-        items.append(choiceTap(customPpd ? ar(plan.ppd) + " صفحة" : "عدد آخر…", customPpd, tap: {
-            askNumber("كم صفحة يوميًا؟", "من ١ إلى ١٢٠ صفحة", 1, 120) { v in
-                plan.ppd = v; plan.label = ar(v) + " صفحة يوميًا"; customPpd = true
+        items.append(choiceTap(customPpd ? ar(plan.ppd) + L(" صفحة") : L("عدد آخر…"), customPpd, tap: {
+            askNumber(L("كم صفحة يوميًا؟"), L("من ١ إلى ١٢٠ صفحة"), 1, 120) { v in
+                plan.ppd = v; plan.label = ar(v) + L(" صفحة يوميًا"); customPpd = true
             }
         }))
         return items
     }
 
     private var startChoices: [AnyView] {
-        var items: [AnyView] = [choice("الفاتحة", plan.startPage == 1) { plan.startPage = 1 }]
+        var items: [AnyView] = [choice(L("الفاتحة"), plan.startPage == 1) { plan.startPage = 1 }]
         let last = Khatma.lastMushafPage()
-        if last > 1 { items.append(choice("حيث توقفت · صفحة " + ar(last), plan.startPage == last) { plan.startPage = last }) }
+        if last > 1 { items.append(choice(L("حيث توقفت · صفحة ") + ar(last), plan.startPage == last) { plan.startPage = last }) }
         let other = plan.startPage != 1 && plan.startPage != last
-        items.append(choiceTap(other ? "صفحة " + ar(plan.startPage) : "صفحة أخرى…", other, tap: {
-            askNumber("من أي صفحة تبدأ؟", "من ١ إلى ٦٠٤", 1, 604) { v in plan.startPage = v }
+        items.append(choiceTap(other ? L("صفحة ") + ar(plan.startPage) : L("صفحة أخرى…"), other, tap: {
+            askNumber(L("من أي صفحة تبدأ؟"), L("من ١ إلى ٦٠٤"), 1, 604) { v in plan.startPage = v }
         }))
         return items
     }
@@ -435,14 +435,14 @@ struct KhatmaView: View {
     private var remindChoices: [AnyView] {
         var items: [AnyView] = []
         if Geo.has {
-            items.append(choice("بعد الفجر", remind == Prayer.fajr) { remind = Prayer.fajr })
-            items.append(choice("بعد العصر", remind == Prayer.asr) { remind = Prayer.asr })
-            items.append(choice("بعد العشاء", remind == Prayer.isha) { remind = Prayer.isha })
+            items.append(choice(L("بعد الفجر"), remind == Prayer.fajr) { remind = Prayer.fajr })
+            items.append(choice(L("بعد العصر"), remind == Prayer.asr) { remind = Prayer.asr })
+            items.append(choice(L("بعد العشاء"), remind == Prayer.isha) { remind = Prayer.isha })
         }
-        items.append(choiceTap(remind == Self.remindFixed ? formatTime(remindTime) : "وقت محدد…", remind == Self.remindFixed, tap: {
+        items.append(choiceTap(remind == Self.remindFixed ? formatTime(remindTime) : L("وقت محدد…"), remind == Self.remindFixed, tap: {
             pickTime = true
         }))
-        items.append(choice("بلا تذكير", remind == Self.remindNone) { remind = Self.remindNone })
+        items.append(choice(L("بلا تذكير"), remind == Self.remindNone) { remind = Self.remindNone })
         return items
     }
 
@@ -505,7 +505,7 @@ struct KhatmaView: View {
                     .overlay(RoundedRectangle(cornerRadius: 20).stroke(selected ? Color.clear : Palette.fieldBorder))
             }
             .buttonStyle(.plain)
-            .accessibilityLabel(s + (selected ? "، مختار" : ""))
+            .accessibilityLabel(s + (selected ? L("، مختار") : ""))
         )
     }
 
@@ -537,17 +537,17 @@ struct KhatmaView: View {
 
     private static func juzHint(_ pace: Int) -> String {
         switch pace {
-        case 5: return " (ربع جزء)"
-        case 10: return " (نصف جزء)"
-        case 20: return " (جزء)"
-        case 40: return " (جزءان)"
+        case 5: return L(" (ربع جزء)")
+        case 10: return L(" (نصف جزء)")
+        case 20: return L(" (جزء)")
+        case 40: return L(" (جزءان)")
         default: return ""
         }
     }
 
     private static func daysText(_ mask: Int) -> String {
-        if mask == 0 { return "كل يوم" }
+        if mask == 0 { return L("كل يوم") }
         let days = (1...7).filter { (mask & (1 << $0)) != 0 }.map { dayNames[$0 - 1] }
-        return "عدا " + days.joined(separator: " و")
+        return L("عدا ") + days.joined(separator: L(" و"))
     }
 }

@@ -4,6 +4,7 @@ import Foundation
 func ar(_ n: Int) -> String { ar(String(n)) }
 
 func ar(_ s: String) -> String {
+    if Lang.en { return s }                     // الإنجليزية: أرقام لاتينية
     let digits: [Character] = ["٠", "١", "٢", "٣", "٤", "٥", "٦", "٧", "٨", "٩"]
     return String(s.map { ch -> Character in
         if ch.isASCII, let v = ch.wholeNumberValue { return digits[v] }
@@ -14,7 +15,8 @@ func ar(_ s: String) -> String {
 /** «٧:٠٥ م» (نفس App.formatTime + Adhan.arabic في أندرويد) */
 func formatTime(hour h: Int, minute m: Int) -> String {
     let h12 = h % 12 == 0 ? 12 : h % 12
-    return ar(String(format: "%d:%02d %@", h12, m, h < 12 ? "ص" : "م"))
+    let suffix = Lang.en ? (h < 12 ? "AM" : "PM") : (h < 12 ? L("ص") : L("م"))
+    return ar(String(format: "%d:%02d %@", h12, m, suffix))
 }
 
 /** «٣:٣٠ م» */
@@ -26,12 +28,13 @@ func formatTime(_ date: Date) -> String {
 /** «٣:٣٠» بلا ص/م (خلايا المواقيت) */
 func formatClockShort(_ date: Date) -> String {
     formatTime(date).replacingOccurrences(of: " ص", with: "").replacingOccurrences(of: " م", with: "")
+        .replacingOccurrences(of: " AM", with: "").replacingOccurrences(of: " PM", with: "")
 }
 
 private let hijriFormatter: DateFormatter = {
     let f = DateFormatter()
     f.calendar = Calendar(identifier: .islamicUmmAlQura)
-    f.locale = Locale(identifier: "ar")
+    f.locale = Lang.locale
     f.dateFormat = "EEEE d MMMM"
     return f
 }()
@@ -39,7 +42,7 @@ private let hijriFormatter: DateFormatter = {
 private let hijriShortFormatter: DateFormatter = {
     let f = DateFormatter()
     f.calendar = Calendar(identifier: .islamicUmmAlQura)
-    f.locale = Locale(identifier: "ar")
+    f.locale = Lang.locale
     f.dateFormat = "d MMMM"
     return f
 }()
@@ -52,9 +55,10 @@ func hijriShort(_ date: Date) -> String { ar(hijriShortFormatter.string(from: da
 
 /** «صفحة واحدة»، «صفحتان»، «٣ صفحات»، «١٥ صفحة» */
 func pagesText(_ n: Int) -> String {
-    if n == 1 { return "صفحة واحدة" }
-    if n == 2 { return "صفحتان" }
-    return ar(n) + (n >= 3 && n <= 10 ? " صفحات" : " صفحة")
+    if Lang.en { return n == 1 ? "1 page" : "\(n) pages" }
+    if n == 1 { return L("صفحة واحدة") }
+    if n == 2 { return L("صفحتان") }
+    return ar(n) + (n >= 3 && n <= 10 ? L(" صفحات") : L(" صفحة"))
 }
 
 enum Hijri {

@@ -59,7 +59,7 @@ enum Hadith {
     private static let lock = NSLock()
     private static var daily: [(Int, Int)]?
 
-    static func title(_ key: String) -> String { key == muslim ? "صحيح مسلم" : "صحيح البخاري" }
+    static func title(_ key: String) -> String { key == muslim ? L("صحيح مسلم") : L("صحيح البخاري") }
 
     static func peek(_ key: String) -> HadithCollection? { lock.lock(); defer { lock.unlock() }; return cache[key] }
 
@@ -109,10 +109,10 @@ enum Hadith {
     static func shareText(_ c: HadithCollection, _ i: Int, isnad: Bool) -> String {
         var t = ""
         if isnad && !c.isnad[i].isEmpty { t += c.isnad[i] + "\n\n" }
-        t += c.matn[i] + "\n\n" + c.title + "، رقم " + ar(c.num[i])
+        t += c.matn[i] + "\n\n" + c.title + L("، رقم ") + ar(c.num[i])
         let b = c.bookName(c.book[i])
         if !b.isEmpty { t += " — " + b }
-        return t + "\nمن تطبيق «القرآن حول العالم»: https://7awlalaalam.com/app"
+        return t + L("\nمن تطبيق «القرآن حول العالم»: https://7awlalaalam.com/app")
     }
 
     /** تطبيع للبحث: بلا تشكيل، والهمزات ألفًا، والتاء المربوطة هاءً، والألف المقصورة ياءً */
@@ -153,7 +153,7 @@ struct HadithView: View {
             .padding(16)
         }
         .background(Palette.page.ignoresSafeArea())
-        .navigationTitle(bookID != nil ? (Hadith.peek(key)?.bookName(bookID!) ?? Hadith.title(key)) : "الأحاديث الصحيحة")
+        .navigationTitle(bookID != nil ? (Hadith.peek(key)?.bookName(bookID!) ?? Hadith.title(key)) : L("الأحاديث الصحيحة"))
         .navigationBarTitleDisplayMode(.inline)
         .onAppear { favs = Hadith.favorites; if bookID == nil { tab = key == Hadith.muslim ? 1 : tab } }
         .task {
@@ -167,15 +167,15 @@ struct HadithView: View {
     @ViewBuilder private var home: some View {
         daily
         Picker("", selection: $tab) {
-            Text("صحيح البخاري").tag(0)
-            Text("صحيح مسلم").tag(1)
-            Text("المفضلة").tag(2)
+            Text(L("صحيح البخاري")).tag(0)
+            Text(L("صحيح مسلم")).tag(1)
+            Text(L("المفضلة")).tag(2)
         }
         .pickerStyle(.segmented)
         .padding(.top, 6)
         .onChange(of: tab) { _ in shown = 40; submitted = ""; query = ""; results = []; favs = Hadith.favorites }
         if tab == 2 { favorites } else {
-            TextField("ابحث في " + (tab == 1 ? "صحيح مسلم" : "صحيح البخاري") + "…", text: $query)
+            TextField(L("ابحث في ") + (tab == 1 ? L("صحيح مسلم") : L("صحيح البخاري")) + "…", text: $query)
                 .font(AppFont.ui(15))
                 .submitLabel(.search)
                 .onSubmit { runSearch() }
@@ -184,11 +184,11 @@ struct HadithView: View {
             if let c = Hadith.peek(tab == 1 ? Hadith.muslim : Hadith.bukhari) {
                 if !submitted.isEmpty {
                     let res = results
-                    Text(res.isEmpty ? "لا نتائج لـ«\(submitted)»" : ar(res.count) + (res.count >= 300 ? "+" : "") + " نتيجة")
+                    Text(res.isEmpty ? "لا نتائج لـ«\(submitted)»" : ar(res.count) + (res.count >= 300 ? "+" : "") + L(" نتيجة"))
                         .font(AppFont.ui(13, 500)).foregroundColor(Palette.muted).padding(.top, 4)
                     items(c, res)
                 } else {
-                    Text("الكتب").font(AppFont.ui(15, 700)).foregroundColor(Palette.ink).padding(.top, 12)
+                    Text(L("الكتب")).font(AppFont.ui(15, 700)).foregroundColor(Palette.ink).padding(.top, 12)
                     VStack(spacing: 0) {
                         ForEach(Array(c.books.enumerated()), id: \.element.id) { k, b in
                             if k > 0 { Rectangle().fill(Palette.divider).frame(height: 1) }
@@ -206,11 +206,11 @@ struct HadithView: View {
                     }
                     .padding(.horizontal, 14)
                     .card()
-                    Text("البخاري بترقيم فتح الباري، ومسلم بترقيم محمد فؤاد عبد الباقي · يعمل دون إنترنت")
+                    Text(L("البخاري بترقيم فتح الباري، ومسلم بترقيم محمد فؤاد عبد الباقي · يعمل دون إنترنت"))
                         .font(AppFont.ui(11)).foregroundColor(Palette.muted).frame(maxWidth: .infinity).padding(.top, 6)
                 }
             } else {
-                Text("جارٍ فتح الأحاديث…").font(AppFont.ui(15)).foregroundColor(Palette.muted).frame(maxWidth: .infinity).padding(.top, 30)
+                Text(L("جارٍ فتح الأحاديث…")).font(AppFont.ui(15)).foregroundColor(Palette.muted).frame(maxWidth: .infinity).padding(.top, 30)
                     .id(loaded)
             }
         }
@@ -234,11 +234,11 @@ struct HadithView: View {
         let i = c?.index(of: d.1)
         return NavigationLink(value: Screen.hadithDetail(d.0, d.1)) {
             VStack(spacing: 8) {
-                Text("حديث اليوم").font(AppFont.ui(12, 700)).foregroundColor(Palette.gold)
+                Text(L("حديث اليوم")).font(AppFont.ui(12, 700)).foregroundColor(Palette.gold)
                 Text(i.map { c!.matn[$0] } ?? "…").font(AppFont.amiri(21)).foregroundColor(.white)
                     .multilineTextAlignment(.center).lineSpacing(6)
                 if let i = i, let c = c {
-                    Text((c.narrator[i].isEmpty ? "" : "عن " + c.narrator[i] + " · ") + Hadith.title(d.0) + " " + ar(c.num[i]))
+                    Text((c.narrator[i].isEmpty ? "" : L("عن ") + c.narrator[i] + " · ") + Hadith.title(d.0) + " " + ar(c.num[i]))
                         .font(AppFont.ui(12)).foregroundColor(Palette.onDarkMuted).multilineTextAlignment(.center)
                 }
             }
@@ -253,7 +253,7 @@ struct HadithView: View {
     @ViewBuilder private var favorites: some View {
         let list = favs.sorted()
         if list.isEmpty {
-            Text("لم تحفظ أحاديث بعد.\nاضغط «حفظ» في أي حديث ليظهر هنا.")
+            Text(L("لم تحفظ أحاديث بعد.\nاضغط «حفظ» في أي حديث ليظهر هنا."))
                 .font(AppFont.ui(15)).foregroundColor(Palette.muted).multilineTextAlignment(.center)
                 .frame(maxWidth: .infinity).padding(.top, 40)
         }
@@ -268,7 +268,7 @@ struct HadithView: View {
         if let c = Hadith.peek(key) {
             items(c, (0..<c.count).filter { c.book[$0] == b })
         } else {
-            Text("جارٍ فتح الأحاديث…").font(AppFont.ui(15)).foregroundColor(Palette.muted).frame(maxWidth: .infinity).padding(.top, 30)
+            Text(L("جارٍ فتح الأحاديث…")).font(AppFont.ui(15)).foregroundColor(Palette.muted).frame(maxWidth: .infinity).padding(.top, 30)
                 .id(loaded)
         }
     }
@@ -276,7 +276,7 @@ struct HadithView: View {
     @ViewBuilder private func items(_ c: HadithCollection, _ idx: [Int]) -> some View {
         ForEach(idx.prefix(shown), id: \.self) { i in item(c, i) }
         if idx.count > shown {
-            Button { shown += 80 } label: { Pill(title: "عرض المزيد (" + ar(idx.count - shown) + ")", systemImage: "chevron.down") }
+            Button { shown += 80 } label: { Pill(title: L("عرض المزيد (") + ar(idx.count - shown) + ")", systemImage: "chevron.down") }
                 .buttonStyle(.plain).padding(.top, 6)
         }
     }
@@ -286,7 +286,7 @@ struct HadithView: View {
             VStack(alignment: .leading, spacing: 6) {
                 Text(c.matn[i]).font(AppFont.amiri(18)).foregroundColor(Palette.ink).lineLimit(4).lineSpacing(4)
                     .multilineTextAlignment(.leading)
-                Text((c.narrator[i].isEmpty ? "" : "عن " + c.narrator[i] + " · ") + (c.key == Hadith.muslim ? "مسلم " : "البخاري ") + ar(c.num[i]))
+                Text((c.narrator[i].isEmpty ? "" : L("عن ") + c.narrator[i] + " · ") + (c.key == Hadith.muslim ? L("مسلم ") : L("البخاري ")) + ar(c.num[i]))
                     .font(AppFont.ui(12, 700)).foregroundColor(Palette.goldDeep)
             }
             .padding(14)
@@ -308,7 +308,7 @@ struct HadithDetailView: View {
         ScrollView {
             VStack(alignment: .leading, spacing: 12) {
                 if let c = col, let i = c.index(of: num) { content(c, i) } else {
-                    Text(col == nil ? "جارٍ فتح الحديث…" : "لم يُعثر على الحديث").font(AppFont.ui(15)).foregroundColor(Palette.muted)
+                    Text(col == nil ? L("جارٍ فتح الحديث…") : L("لم يُعثر على الحديث")).font(AppFont.ui(15)).foregroundColor(Palette.muted)
                         .frame(maxWidth: .infinity).padding(.top, 40)
                 }
             }
@@ -331,7 +331,7 @@ struct HadithDetailView: View {
         VStack(alignment: .leading, spacing: 10) {
             if hasIsnad {
                 Button { showIsnad.toggle() } label: {
-                    Label(showIsnad ? "إخفاء السند" : "إظهار السند", systemImage: "link")
+                    Label(showIsnad ? L("إخفاء السند") : L("إظهار السند"), systemImage: "link")
                         .font(AppFont.ui(13, 700)).foregroundColor(Palette.goldKey)
                         .padding(.horizontal, 14).frame(minHeight: 40)
                         .background(Capsule().fill(Palette.chip))
@@ -339,12 +339,12 @@ struct HadithDetailView: View {
                 }
                 .buttonStyle(.plain)
                 if showIsnad {
-                    Text("السند").font(AppFont.ui(12, 700)).foregroundColor(Palette.goldDeep).padding(.top, 2)
+                    Text(L("السند")).font(AppFont.ui(12, 700)).foregroundColor(Palette.goldDeep).padding(.top, 2)
                     Text(c.isnad[i]).font(AppFont.amiri(16)).foregroundColor(Palette.muted).lineSpacing(6).textSelection(.enabled)
                 }
-                Text("المتن").font(AppFont.ui(12, 700)).foregroundColor(Palette.goldDeep).padding(.top, 4)
+                Text(L("المتن")).font(AppFont.ui(12, 700)).foregroundColor(Palette.goldDeep).padding(.top, 4)
             } else {
-                Text("نص الحديث").font(AppFont.ui(12, 700)).foregroundColor(Palette.goldDeep)
+                Text(L("نص الحديث")).font(AppFont.ui(12, 700)).foregroundColor(Palette.goldDeep)
             }
             Text(c.matn[i]).font(AppFont.amiri(hasIsnad ? 23 : 20)).foregroundColor(Palette.ink).lineSpacing(8).textSelection(.enabled)
         }
@@ -353,25 +353,25 @@ struct HadithDetailView: View {
         .card(Palette.ivory, border: Palette.ivoryBorder)
 
         HStack(spacing: 8) {
-            if !c.narrator[i].isEmpty { fact("الراوي", c.narrator[i]) }
-            fact("المصدر", Hadith.title(key) + "، ح " + ar(num))
+            if !c.narrator[i].isEmpty { fact(L("الراوي"), c.narrator[i]) }
+            fact(L("المصدر"), Hadith.title(key) + L("، ح ") + ar(num))
         }
 
         HStack(spacing: 8) {
-            Button { Share.present([Hadith.shareText(c, i, isnad: showIsnad)]) } label: { Pill(title: "مشاركة", systemImage: "square.and.arrow.up", primary: true) }
+            Button { Share.present([Hadith.shareText(c, i, isnad: showIsnad)]) } label: { Pill(title: L("مشاركة"), systemImage: "square.and.arrow.up", primary: true) }
             Button {
                 UIPasteboard.general.string = Hadith.shareText(c, i, isnad: showIsnad)
-            } label: { Pill(title: "نسخ", systemImage: "doc.on.doc") }
+            } label: { Pill(title: L("نسخ"), systemImage: "doc.on.doc") }
             Button { Hadith.toggleFav(key, num); fav = Hadith.isFav(key, num) } label: {
-                Pill(title: fav ? "محفوظ" : "حفظ", systemImage: fav ? "heart.fill" : "heart")
+                Pill(title: fav ? L("محفوظ") : L("حفظ"), systemImage: fav ? "heart.fill" : "heart")
             }
         }
         .buttonStyle(.plain)
 
         HStack {
-            if i > 0 { Button("› الحديث " + ar(c.num[i - 1])) { go(c.num[i - 1]) } }
+            if i > 0 { Button(L("› الحديث ") + ar(c.num[i - 1])) { go(c.num[i - 1]) } }
             Spacer()
-            if i < c.count - 1 { Button("الحديث " + ar(c.num[i + 1]) + " ‹") { go(c.num[i + 1]) } }
+            if i < c.count - 1 { Button(L("الحديث ") + ar(c.num[i + 1]) + " ‹") { go(c.num[i + 1]) } }
         }
         .font(AppFont.ui(14, 700)).foregroundColor(Palette.goldDeep)
         .padding(.vertical, 8)

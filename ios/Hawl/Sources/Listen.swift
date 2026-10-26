@@ -220,16 +220,16 @@ final class ListenCatalog: ObservableObject {
     /** قائمة سور القارئ للتشغيل المتتالي */
     static func tracks(_ r: Reciter, _ m: Moshaf) -> [Track] {
         m.surahs.map { s in
-            Track(url: m.url(s), title: "سورة " + Quran.surahName(s), reciter: r.name, reciterID: r.id, moshafID: m.id, surah: s)
+            Track(url: m.url(s), title: L("سورة ") + Quran.surahName(s), reciter: r.name, reciterID: r.id, moshafID: m.id, surah: s)
         }
     }
 }
 
 /** «سورة واحدة»، «سورتان»، «٥ سور»، «١١٤ سورة» */
 func surahsText(_ n: Int) -> String {
-    if n == 1 { return "سورة واحدة" }
-    if n == 2 { return "سورتان" }
-    return ar(n) + (n >= 3 && n <= 10 ? " سور" : " سورة")
+    if n == 1 { return L("سورة واحدة") }
+    if n == 2 { return L("سورتان") }
+    return ar(n) + (n >= 3 && n <= 10 ? L(" سور") : L(" سورة"))
 }
 
 /** للبحث: دون تشكيل، والهمزات والتاء المربوطة والألف المقصورة موحّدة */
@@ -257,8 +257,8 @@ extension Quran {
     static func surahInfo(_ s: Int) -> String {
         guard (1...114).contains(s) else { return "" }
         let n = counts[s - 1]
-        let ayat = n >= 3 && n <= 10 ? ar(n) + " آيات" : ar(n) + " آية"
-        return (madani.contains(s) ? "مدنية" : "مكية") + " · " + ayat
+        let ayat = n >= 3 && n <= 10 ? ar(n) + L(" آيات") : ar(n) + L(" آية")
+        return (madani.contains(s) ? L("مدنية") : L("مكية")) + " · " + ayat
     }
 }
 
@@ -276,22 +276,22 @@ struct ListenView: View {
         ScrollView {
             VStack(alignment: .leading, spacing: 12) {
                 Picker("", selection: $section) {
-                    Text("القرّاء").tag(0)
-                    Text("الإذاعات").tag(1)
-                    Text("المحمّلة").tag(2)
+                    Text(L("القرّاء")).tag(0)
+                    Text(L("الإذاعات")).tag(1)
+                    Text(L("المحمّلة")).tag(2)
                 }
                 .pickerStyle(.segmented)
 
                 if section != 2 {
                     HStack(spacing: 8) {
                         Image(systemName: "magnifyingglass").foregroundColor(Palette.muted)
-                        TextField(section == 0 ? "ابحث عن قارئ…" : "ابحث عن إذاعة…", text: $query)
+                        TextField(section == 0 ? L("ابحث عن قارئ…") : L("ابحث عن إذاعة…"), text: $query)
                             .font(AppFont.ui(15))
                             .textInputAutocapitalization(.never)
                             .disableAutocorrection(true)
                         if !query.isEmpty {
                             Button { query = "" } label: { Image(systemName: "xmark.circle.fill").foregroundColor(Palette.muted) }
-                                .accessibilityLabel("مسح البحث")
+                                .accessibilityLabel(L("مسح البحث"))
                         }
                     }
                     .padding(.horizontal, 14).frame(minHeight: 46)
@@ -312,7 +312,7 @@ struct ListenView: View {
             .padding(.bottom, 8)
         }
         .background(Palette.page.ignoresSafeArea())
-        .navigationTitle("الاستماع")
+        .navigationTitle(L("الاستماع"))
         .refreshable { await catalog.load(force: true) }
         .task { await catalog.load() }
         .onChange(of: section) { _ in query = "" }
@@ -329,10 +329,10 @@ struct ListenView: View {
                     .frame(width: 46, height: 46)
                     .background(Circle().fill(Palette.gold))
                 VStack(alignment: .leading, spacing: 4) {
-                    Text("تابع الاستماع").font(AppFont.ui(13, 700)).foregroundColor(Palette.gold)
+                    Text(L("تابع الاستماع")).font(AppFont.ui(13, 700)).foregroundColor(Palette.gold)
                     Text(l.track.title + " · " + l.track.reciter).font(AppFont.ui(17, 700)).foregroundColor(.white).lineLimit(1)
                     if l.pos > 0 {
-                        Text("من " + PlayerView.clock(l.pos)).font(AppFont.ui(12)).foregroundColor(Palette.onDarkMuted)
+                        Text(L("من ") + PlayerView.clock(l.pos)).font(AppFont.ui(12)).foregroundColor(Palette.onDarkMuted)
                     }
                 }
                 Spacer(minLength: 0)
@@ -357,7 +357,7 @@ struct ListenView: View {
         } else {
             let list = filteredReciters
             if list.isEmpty {
-                Text("لا يوجد قارئ بهذا الاسم").font(AppFont.ui(15)).foregroundColor(Palette.muted).padding(.top, 20)
+                Text(L("لا يوجد قارئ بهذا الاسم")).font(AppFont.ui(15)).foregroundColor(Palette.muted).padding(.top, 20)
                     .frame(maxWidth: .infinity)
             } else {
                 LazyVStack(spacing: 0) {
@@ -400,7 +400,7 @@ struct ListenView: View {
                     .frame(width: 40, height: 40)
             }
             .buttonStyle(.plain)
-            .accessibilityLabel(catalog.isFavorite(r.id) ? "إزالة من المفضّلين" : "أضف إلى المفضّلين")
+            .accessibilityLabel(catalog.isFavorite(r.id) ? L("إزالة من المفضّلين") : L("أضف إلى المفضّلين"))
         }
         .padding(.vertical, 8)
     }
@@ -417,7 +417,7 @@ struct ListenView: View {
                     let on = player.current?.url == r.url
                     Button {
                         if on { player.toggle() }
-                        else { player.play(queue: [Track(url: r.url, title: r.name, reciter: "إذاعة مباشرة", radio: true)], start: 0) }
+                        else { player.play(queue: [Track(url: r.url, title: r.name, reciter: L("إذاعة مباشرة"), radio: true)], start: 0) }
                     } label: {
                         HStack(spacing: 12) {
                             Image(systemName: "dot.radiowaves.left.and.right").foregroundColor(Palette.goldDeep)
@@ -442,7 +442,7 @@ struct ListenView: View {
     @ViewBuilder private var downloadsList: some View {
         let done = dl.items.filter { $0.status == .done }
         if done.isEmpty {
-            Text("لا توجد تلاوات محمّلة بعد. افتح صفحة أي قارئ واضغط ⬇ بجانب السورة لتستمع إليها دون إنترنت.")
+            Text(L("لا توجد تلاوات محمّلة بعد. افتح صفحة أي قارئ واضغط ⬇ بجانب السورة لتستمع إليها دون إنترنت."))
                 .font(AppFont.ui(15)).foregroundColor(Palette.ink)
                 .padding(16).frame(maxWidth: .infinity, alignment: .leading)
                 .card(Palette.ivory, border: Palette.ivoryBorder, radius: 16)
@@ -479,7 +479,7 @@ struct ListenView: View {
             .card()
         }
         NavigationLink(value: Screen.downloads) {
-            Pill(title: "إدارة التحميلات", systemImage: "arrow.down.circle", height: 48)
+            Pill(title: L("إدارة التحميلات"), systemImage: "arrow.down.circle", height: 48)
         }
         .buttonStyle(.plain)
     }
@@ -488,14 +488,14 @@ struct ListenView: View {
         VStack(spacing: 12) {
             if catalog.loading {
                 ProgressView().tint(Palette.goldDeep)
-                Text("جارٍ تحميل القائمة…").font(AppFont.ui(14)).foregroundColor(Palette.muted)
+                Text(L("جارٍ تحميل القائمة…")).font(AppFont.ui(14)).foregroundColor(Palette.muted)
             } else {
                 Image(systemName: "wifi.slash").font(.system(size: 34)).foregroundColor(Palette.goldDeep)
-                Text("تحتاج اتصالًا بالإنترنت لأول مرة").font(AppFont.ui(16, 700)).foregroundColor(Palette.ink)
-                Text("بعدها تبقى القائمة محفوظة على جوالك، والتلاوات المحمّلة تعمل دون إنترنت.")
+                Text(L("تحتاج اتصالًا بالإنترنت لأول مرة")).font(AppFont.ui(16, 700)).foregroundColor(Palette.ink)
+                Text(L("بعدها تبقى القائمة محفوظة على جوالك، والتلاوات المحمّلة تعمل دون إنترنت."))
                     .font(AppFont.ui(13)).foregroundColor(Palette.muted).multilineTextAlignment(.center)
                 Button { Task { await catalog.load(force: true) } } label: {
-                    Pill(title: "إعادة المحاولة", systemImage: "arrow.clockwise", primary: true)
+                    Pill(title: L("إعادة المحاولة"), systemImage: "arrow.clockwise", primary: true)
                 }
                 .frame(maxWidth: 240)
             }
@@ -540,7 +540,7 @@ struct ReciterView: View {
                     Text(r.name).font(AppFont.ui(21, 700)).foregroundColor(.white).multilineTextAlignment(.center)
                     Text(m.shortName + " · " + surahsText(m.surahs.count)).font(AppFont.ui(13)).foregroundColor(Palette.onDarkMuted)
                     Button { player.play(queue: tracks, start: 0) } label: {
-                        Label("استمع للمصحف كاملًا", systemImage: "play.fill")
+                        Label(L("استمع للمصحف كاملًا"), systemImage: "play.fill")
                             .font(AppFont.ui(15, 700)).foregroundColor(Palette.dark)
                             .frame(maxWidth: .infinity, minHeight: 48)
                             .background(Capsule().fill(Palette.gold))
@@ -559,7 +559,7 @@ struct ReciterView: View {
                         }
                     } label: {
                         HStack {
-                            Text("الرواية: " + m.name).font(AppFont.ui(14, 700)).foregroundColor(Palette.ink).lineLimit(1)
+                            Text(L("الرواية: ") + m.name).font(AppFont.ui(14, 700)).foregroundColor(Palette.ink).lineLimit(1)
                             Spacer()
                             Image(systemName: "chevron.down").foregroundColor(Palette.goldDeep)
                         }
@@ -569,11 +569,11 @@ struct ReciterView: View {
 
                 HStack(spacing: 8) {
                     Button { catalog.toggleFavorite(r.id) } label: {
-                        Pill(title: catalog.isFavorite(r.id) ? "في المفضّلين" : "أضف للمفضّلين",
+                        Pill(title: catalog.isFavorite(r.id) ? L("في المفضّلين") : L("أضف للمفضّلين"),
                              systemImage: catalog.isFavorite(r.id) ? "heart.fill" : "heart", height: 44)
                     }
                     Button { confirmAll = true } label: {
-                        Pill(title: missing.isEmpty ? "كلها محمّلة" : "حمّل الكل", systemImage: "arrow.down.circle", height: 44)
+                        Pill(title: missing.isEmpty ? L("كلها محمّلة") : L("حمّل الكل"), systemImage: "arrow.down.circle", height: 44)
                     }
                     .disabled(missing.isEmpty)
                 }
@@ -591,10 +591,10 @@ struct ReciterView: View {
             .padding(16)
         }
         .navigationTitle(r.name)
-        .alert("تحميل " + surahsText(missing.count) + "؟", isPresented: $confirmAll) {
-            Button("حمّل") { for t in missing { dl.start(url: t.url, title: t.title, reciter: t.reciter) } }
-            Button("إلغاء", role: .cancel) { }
-        } message: { Text("يُفضّل التحميل عبر شبكة Wi-Fi. تجدها في «المحمّلة» وتعمل دون إنترنت.") }
+        .alert(L("تحميل ") + surahsText(missing.count) + L("؟"), isPresented: $confirmAll) {
+            Button(L("حمّل")) { for t in missing { dl.start(url: t.url, title: t.title, reciter: t.reciter) } }
+            Button(L("إلغاء"), role: .cancel) { }
+        } message: { Text(L("يُفضّل التحميل عبر شبكة Wi-Fi. تجدها في «المحمّلة» وتعمل دون إنترنت.")) }
     }
 
     private func surahRow(_ t: Track, index: Int, all: [Track]) -> some View {
@@ -606,7 +606,7 @@ struct ReciterView: View {
                 HStack(spacing: 12) {
                     StarBadge(text: ar(t.surah))
                     VStack(alignment: .leading, spacing: 3) {
-                        Text(Quran.surahName(t.surah) + (on ? "  ◂ " + (player.playing ? "يُشغَّل الآن" : "متوقف") : ""))
+                        Text(Quran.surahName(t.surah) + (on ? "  ◂ " + (player.playing ? L("يُشغَّل الآن") : L("متوقف")) : ""))
                             .font(AppFont.ui(15, 700)).foregroundColor(on ? Palette.goldDeep : Palette.ink)
                         Text(Quran.surahInfo(t.surah)).font(AppFont.ui(12)).foregroundColor(Palette.muted)
                     }
@@ -625,9 +625,9 @@ struct ReciterView: View {
         case .done:
             Image(systemName: "checkmark").font(.system(size: 13, weight: .bold)).foregroundColor(.white)
                 .frame(width: 34, height: 34).background(Circle().fill(Palette.gold))
-                .accessibilityLabel("محمّلة")
+                .accessibilityLabel(L("محمّلة"))
         case .running:
-            Text(ar(dl.item(t.url)?.percent ?? 0) + "٪").font(AppFont.ui(11, 700)).foregroundColor(Palette.goldDeep)
+            Text(ar(dl.item(t.url)?.percent ?? 0) + L("٪")).font(AppFont.ui(11, 700)).foregroundColor(Palette.goldDeep)
                 .frame(width: 40, height: 34)
         default:
             Button { dl.start(url: t.url, title: t.title, reciter: t.reciter) } label: {
@@ -635,7 +635,7 @@ struct ReciterView: View {
                     .frame(width: 34, height: 34).overlay(Circle().stroke(Palette.line, lineWidth: 1))
             }
             .buttonStyle(.plain)
-            .accessibilityLabel("تحميل " + t.title)
+            .accessibilityLabel(L("تحميل ") + t.title)
         }
     }
 }
@@ -655,7 +655,7 @@ struct MiniPlayerBar: View {
                         .font(.system(size: 16, weight: .bold)).foregroundColor(Palette.dark)
                         .frame(width: 40, height: 40).background(Circle().fill(Palette.gold))
                 }
-                .accessibilityLabel(player.playing ? "إيقاف مؤقت" : "تشغيل")
+                .accessibilityLabel(player.playing ? L("إيقاف مؤقت") : L("تشغيل"))
                 Button { open = true } label: {
                     VStack(alignment: .leading, spacing: 2) {
                         Text(t.title).font(AppFont.ui(14, 700)).foregroundColor(.white).lineLimit(1)
@@ -668,31 +668,31 @@ struct MiniPlayerBar: View {
                     Button { player.next() } label: {
                         Image(systemName: "forward.end.fill").foregroundColor(.white).frame(width: 36, height: 40)
                     }
-                    .accessibilityLabel("التالي")
+                    .accessibilityLabel(L("التالي"))
                 }
                 Button { player.stop() } label: {
                     Image(systemName: "xmark").font(.system(size: 13, weight: .bold)).foregroundColor(Palette.onDarkMuted)
                         .frame(width: 32, height: 40)
                 }
-                .accessibilityLabel("إغلاق المشغّل")
+                .accessibilityLabel(L("إغلاق المشغّل"))
             }
             .buttonStyle(.plain)
             .padding(.horizontal, 12).padding(.vertical, 8)
             .background(RoundedRectangle(cornerRadius: 18).fill(Palette.dark))
             .padding(.horizontal, 12).padding(.bottom, 6)
             .sheet(isPresented: $open) {
-                NowPlayingView().environment(\.layoutDirection, .rightToLeft)
+                NowPlayingView().environment(\.layoutDirection, Lang.dir)
             }
         }
     }
 
     private func subtitle(_ t: Track) -> String {
-        if player.failed { return "تعذّر التشغيل، تحقق من الاتصال" }
-        if t.radio { return "بث مباشر" }
-        if player.buffering && player.playing { return t.reciter + " · جارٍ التحميل…" }
+        if player.failed { return L("تعذّر التشغيل، تحقق من الاتصال") }
+        if t.radio { return L("بث مباشر") }
+        if player.buffering && player.playing { return t.reciter + L(" · جارٍ التحميل…") }
         var s = t.reciter + " · " + PlayerView.clock(player.position)
         if player.duration > 0 { s += " / " + PlayerView.clock(player.duration) }
-        if let at = player.sleepAt { s += " · النوم " + formatTime(at) }
+        if let at = player.sleepAt { s += L(" · النوم ") + formatTime(at) }
         return s
     }
 }
@@ -724,22 +724,22 @@ struct NowPlayingView: View {
                             }
                             HStack(spacing: 26) {
                                 Button { player.previous() } label: { Image(systemName: "backward.end.fill").font(.system(size: 22)) }
-                                    .disabled(t.radio).accessibilityLabel("السابق")
+                                    .disabled(t.radio).accessibilityLabel(L("السابق"))
                                 Button { player.skip(-15) } label: { Image(systemName: "gobackward.15").font(.system(size: 24)) }
-                                    .disabled(t.radio).accessibilityLabel("رجوع ١٥ ثانية")
+                                    .disabled(t.radio).accessibilityLabel(L("رجوع ١٥ ثانية"))
                                 Button { player.toggle() } label: {
                                     Image(systemName: player.playing ? "pause.circle.fill" : "play.circle.fill").font(.system(size: 62))
                                 }
-                                .accessibilityLabel(player.playing ? "إيقاف مؤقت" : "تشغيل")
+                                .accessibilityLabel(player.playing ? L("إيقاف مؤقت") : L("تشغيل"))
                                 Button { player.skip(15) } label: { Image(systemName: "goforward.15").font(.system(size: 24)) }
-                                    .disabled(t.radio).accessibilityLabel("تقديم ١٥ ثانية")
+                                    .disabled(t.radio).accessibilityLabel(L("تقديم ١٥ ثانية"))
                                 Button { player.next() } label: { Image(systemName: "forward.end.fill").font(.system(size: 22)) }
-                                    .disabled(!player.hasNext).accessibilityLabel("التالي")
+                                    .disabled(!player.hasNext).accessibilityLabel(L("التالي"))
                             }
                             .foregroundColor(Palette.gold)
                             .padding(.top, 8)
                             if player.failed {
-                                Text("تعذّر التشغيل. تحقق من اتصالك بالإنترنت أو حمّل السورة.").font(AppFont.ui(13))
+                                Text(L("تعذّر التشغيل. تحقق من اتصالك بالإنترنت أو حمّل السورة.")).font(AppFont.ui(13))
                                     .foregroundColor(Palette.onDarkSoft).multilineTextAlignment(.center)
                             }
                         }
@@ -749,27 +749,27 @@ struct NowPlayingView: View {
 
                         if !t.radio { options }
                     } else {
-                        Text("لا تلاوة الآن").font(AppFont.ui(16)).foregroundColor(Palette.muted).padding(40)
+                        Text(L("لا تلاوة الآن")).font(AppFont.ui(16)).foregroundColor(Palette.muted).padding(40)
                     }
                 }
                 .padding(16)
             }
             .background(Palette.page.ignoresSafeArea())
-            .navigationTitle("يُشغَّل الآن")
+            .navigationTitle(L("يُشغَّل الآن"))
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
-                ToolbarItem(placement: .confirmationAction) { Button("تم") { dismiss() }.font(AppFont.ui(15, 700)) }
+                ToolbarItem(placement: .confirmationAction) { Button(L("تم")) { dismiss() }.font(AppFont.ui(15, 700)) }
             }
         }
     }
 
     private var options: some View {
         VStack(alignment: .leading, spacing: 14) {
-            Text("سرعة التلاوة").font(AppFont.ui(14, 700)).foregroundColor(Palette.ink)
+            Text(L("سرعة التلاوة")).font(AppFont.ui(14, 700)).foregroundColor(Palette.ink)
             HStack(spacing: 8) {
                 ForEach(AudioPlayer.speeds, id: \.self) { v in
                     Button { player.setSpeed(v) } label: {
-                        Text(ar(v == 1 ? "١×" : String(format: "%g×", v).replacingOccurrences(of: ".", with: "٫")))
+                        Text(ar(v == 1 ? L("١×") : String(format: "%g×", v).replacingOccurrences(of: ".", with: L("٫"))))
                             .font(AppFont.ui(14, 700))
                             .foregroundColor(player.speed == v ? .white : Palette.ink)
                             .frame(maxWidth: .infinity, minHeight: 40)
@@ -778,23 +778,23 @@ struct NowPlayingView: View {
                     .buttonStyle(.plain)
                 }
             }
-            Text("مؤقت النوم").font(AppFont.ui(14, 700)).foregroundColor(Palette.ink).padding(.top, 4)
+            Text(L("مؤقت النوم")).font(AppFont.ui(14, 700)).foregroundColor(Palette.ink).padding(.top, 4)
             LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 8), count: 3), spacing: 8) {
-                ForEach([15, 30, 45, 60], id: \.self) { m in sleepButton(ar(m) + " دقيقة", minutes: m) }
-                sleepButton("نهاية السورة", minutes: 0)
-                sleepButton("إيقاف المؤقت", minutes: nil)
+                ForEach([15, 30, 45, 60], id: \.self) { m in sleepButton(ar(m) + L(" دقيقة"), minutes: m) }
+                sleepButton(L("نهاية السورة"), minutes: 0)
+                sleepButton(L("إيقاف المؤقت"), minutes: nil)
             }
             if let at = player.sleepAt {
-                Text("يتوقف الاستماع الساعة " + formatTime(at)).font(AppFont.ui(13)).foregroundColor(Palette.muted)
+                Text(L("يتوقف الاستماع الساعة ") + formatTime(at)).font(AppFont.ui(13)).foregroundColor(Palette.muted)
             } else if player.sleepAtEnd {
-                Text("يتوقف الاستماع في نهاية السورة").font(AppFont.ui(13)).foregroundColor(Palette.muted)
+                Text(L("يتوقف الاستماع في نهاية السورة")).font(AppFont.ui(13)).foregroundColor(Palette.muted)
             }
             Toggle(isOn: $player.repeatOne) {
-                Text("تكرار السورة").font(AppFont.ui(14, 700)).foregroundColor(Palette.ink)
+                Text(L("تكرار السورة")).font(AppFont.ui(14, 700)).foregroundColor(Palette.ink)
             }
             .tint(Palette.goldDeep)
             if player.queue.count > 1 {
-                Text("التالي في القائمة").font(AppFont.ui(14, 700)).foregroundColor(Palette.ink).padding(.top, 4)
+                Text(L("التالي في القائمة")).font(AppFont.ui(14, 700)).foregroundColor(Palette.ink).padding(.top, 4)
                 VStack(spacing: 0) {
                     ForEach(Array(player.queue.enumerated().dropFirst(player.index + 1).prefix(5)), id: \.offset) { i, q in
                         Button { player.play(queue: player.queue, start: i) } label: {

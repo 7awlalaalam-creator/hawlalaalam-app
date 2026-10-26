@@ -54,7 +54,7 @@ enum Stats {
     static var link: String { "https://7awlalaalam.com/app?r=" + code }
 
     static var shareText: String {
-        "تطبيق «القرآن حول العالم»: مصحف وتلاوات ومواقيت وأذان وأذكار، بلا إعلانات ولا حساب.\n"
+        L("تطبيق «القرآن حول العالم»: مصحف وتلاوات ومواقيت وأذان وأذكار، بلا إعلانات ولا حساب.\n")
             + "حمّله من هنا: \(link)\n\n"
             + "وعند فتحه اكتب رمز الدعوة \(code) في «أثرك» ليُكتب لي أثر قراءتك، «من دلّ على خير فله مثل أجر فاعله»."
     }
@@ -71,9 +71,9 @@ enum Stats {
     /** يحفظ رمز من دعاك؛ يعيد رسالة خطأ أو nil */
     static func setRef(_ raw: String) -> String? {
         let s = clean(raw)
-        if s.isEmpty { return "الرمز من ٦ حروف وأرقام، مثل K7Q2MA" }
-        if s == code { return "هذا رمزك أنت، اكتب رمز من دعاك" }
-        if !ref.isEmpty { return "سجّلت رمزًا من قبل" }
+        if s.isEmpty { return L("الرمز من ٦ حروف وأرقام، مثل K7Q2MA") }
+        if s == code { return L("هذا رمزك أنت، اكتب رمز من دعاك") }
+        if !ref.isEmpty { return L("سجّلت رمزًا من قبل") }
         Store.d.set(s, forKey: "st_ref")
         Store.d.set(false, forKey: "st_ref_joined")
         return nil
@@ -86,7 +86,7 @@ enum Stats {
     }
 
     static func countryName(_ cc: String) -> String {
-        Locale(identifier: "ar").localizedString(forRegionCode: cc) ?? cc
+        Lang.locale.localizedString(forRegionCode: cc) ?? cc
     }
 
     /** عند فتح التطبيق: لا يرسل شيئًا إلا بموافقة «الخريطة» أو رمز دعوة */
@@ -162,9 +162,9 @@ enum Mosque {
             let at = friday ? t[k].addingTimeInterval(2 * 60) : t[k].addingTimeInterval(Double(iqama(k) - 2) * 60)
             if at <= now { continue }
             let c = UNMutableNotificationContent()
-            c.title = friday ? "الخطبة: صمّت جوالك" : "أوشكت الإقامة: صمّت جوالك"
-            c.body = "اقلب مفتاح الصامت، أو فعّل «عدم الإزعاج» لمدة ساعة من مركز التحكم"
-            c.subtitle = "وضع المسجد"
+            c.title = friday ? L("الخطبة: صمّت جوالك") : L("أوشكت الإقامة: صمّت جوالك")
+            c.body = L("اقلب مفتاح الصامت، أو فعّل «عدم الإزعاج» لمدة ساعة من مركز التحكم")
+            c.subtitle = L("وضع المسجد")
             c.sound = .default
             c.threadIdentifier = "mosque"
             if #available(iOS 15.0, *) { c.interruptionLevel = .timeSensitive }
@@ -194,27 +194,27 @@ enum AdhanCheck {
         let s = await UNUserNotificationCenter.current().notificationSettings()
         var l: [Item] = []
         let auth = s.authorizationStatus == .authorized || s.authorizationStatus == .provisional
-        l.append(Item(ok: auth, title: auth ? "الإشعارات مسموحة" : "إشعارات التطبيق متوقفة",
-                      sub: auth ? nil : "يحين الوقت ولا يظهر إشعار الأذان", fix: "أصلحه", action: openSettings))
+        l.append(Item(ok: auth, title: auth ? L("الإشعارات مسموحة") : L("إشعارات التطبيق متوقفة"),
+                      sub: auth ? nil : L("يحين الوقت ولا يظهر إشعار الأذان"), fix: L("أصلحه"), action: openSettings))
         if auth {
             let sound = s.soundSetting == .enabled
-            l.append(Item(ok: sound, title: sound ? "صوت الإشعارات مفعّل · " + AdhanSound.name(AdhanSound.current) : "صوت الإشعارات مطفأ",
-                          sub: sound ? nil : "يظهر الأذان بلا صوت", fix: "أصلحه", action: openSettings))
+            l.append(Item(ok: sound, title: sound ? L("صوت الإشعارات مفعّل · ") + AdhanSound.name(AdhanSound.current) : L("صوت الإشعارات مطفأ"),
+                          sub: sound ? nil : L("يظهر الأذان بلا صوت"), fix: L("أصلحه"), action: openSettings))
         }
         let on = Store.bool("adhan_on", false)
-        l.append(Item(ok: on, title: on ? "تنبيه الأذان مفعّل" : "تنبيه الأذان مطفأ",
-                      sub: on ? nil : "من «التنبيهات» في التطبيق", fix: nil, action: nil))
-        l.append(Item(ok: Geo.has, title: Geo.has ? "الموقع محدّد" + (Geo.city.isEmpty ? "" : ": " + Geo.city) : "لم تُحدَّد مدينتك",
-                      sub: Geo.has ? nil : "المواقيت تُحسب حسب مدينتك", fix: nil, action: nil))
+        l.append(Item(ok: on, title: on ? L("تنبيه الأذان مفعّل") : L("تنبيه الأذان مطفأ"),
+                      sub: on ? nil : L("من «التنبيهات» في التطبيق"), fix: nil, action: nil))
+        l.append(Item(ok: Geo.has, title: Geo.has ? L("الموقع محدّد") + (Geo.city.isEmpty ? "" : ": " + Geo.city) : L("لم تُحدَّد مدينتك"),
+                      sub: Geo.has ? nil : L("المواقيت تُحسب حسب مدينتك"), fix: nil, action: nil))
         // آيفون يحفظ إشعارات أسبوع مقدّمًا؛ يتجدد الجدول عند فتح التطبيق أو بالتحديث في الخلفية
         let refresh = UIApplication.shared.backgroundRefreshStatus == .available
         let until = Store.d.double(forKey: "notif_until")
         let daysLeft = Int((until - Date().timeIntervalSince1970) / 86400)
         if on && Geo.has && !refresh && daysLeft < 3 {
-            l.append(Item(ok: false, title: "تحديث التطبيق في الخلفية متوقف",
-                          sub: "افتح التطبيق مرة كل أيام ليتجدد جدول الأذان، أو فعّله من الإعدادات", fix: "أصلحه", action: openSettings))
+            l.append(Item(ok: false, title: L("تحديث التطبيق في الخلفية متوقف"),
+                          sub: L("افتح التطبيق مرة كل أيام ليتجدد جدول الأذان، أو فعّله من الإعدادات"), fix: L("أصلحه"), action: openSettings))
         } else if on && Geo.has {
-            l.append(Item(ok: true, title: "الأذان مجدول للأيام القادمة", sub: nil, fix: nil, action: nil))
+            l.append(Item(ok: true, title: L("الأذان مجدول للأيام القادمة"), sub: nil, fix: nil, action: nil))
         }
         return l
     }
@@ -224,9 +224,9 @@ enum AdhanCheck {
     /** «جرّب الأذان الآن»: إشعار تجريبي بعد ١٠ ثوانٍ بالصوت المختار */
     static func test() {
         let c = UNMutableNotificationContent()
-        c.title = "أذان تجريبي"
-        c.body = "إن سمعت هذا فالأذان سيصلك في وقته بإذن الله"
-        c.subtitle = "الأذان"
+        c.title = L("أذان تجريبي")
+        c.body = L("إن سمعت هذا فالأذان سيصلك في وقته بإذن الله")
+        c.subtitle = L("الأذان")
         c.sound = AdhanSound.notificationSound(for: Prayer.dhuhr)
         UNUserNotificationCenter.current().add(UNNotificationRequest(identifier: "adhan-test", content: c,
                                                                       trigger: UNTimeIntervalNotificationTrigger(timeInterval: 10, repeats: false)))
@@ -244,8 +244,8 @@ enum AdhanCheck {
         let n = problems(l)
         guard n > 0, let first = l.first(where: { !$0.ok }), first.title != "إشعارات التطبيق متوقفة" else { return }
         let c = UNMutableNotificationContent()
-        c.title = n == 1 ? "شيء واحد قد يؤخّر الأذان" : ar(n) + " أشياء قد تؤخّر الأذان"
-        c.body = first.title + " · اضغط لإصلاحه"
+        c.title = n == 1 ? L("شيء واحد قد يؤخّر الأذان") : ar(n) + L(" أشياء قد تؤخّر الأذان")
+        c.body = first.title + L(" · اضغط لإصلاحه")
         c.sound = .default
         c.userInfo = ["route": "adhancheck"]
         try? await UNUserNotificationCenter.current().add(UNNotificationRequest(identifier: "adhan-check", content: c, trigger: nil))
@@ -289,12 +289,12 @@ struct MosqueView: View {
                     HStack(spacing: 12) {
                         Image(systemName: "speaker.slash").font(.system(size: 24)).foregroundColor(Palette.gold)
                         VStack(alignment: .leading, spacing: 2) {
-                            Text("تذكير قبل الإقامة").font(AppFont.ui(17, 700)).foregroundColor(.white)
-                            Text("ينبّهك بهدوء لتصمّت جوالك قبل الصلاة").font(AppFont.ui(12)).foregroundColor(Palette.onDarkMuted)
+                            Text(L("تذكير قبل الإقامة")).font(AppFont.ui(17, 700)).foregroundColor(.white)
+                            Text(L("ينبّهك بهدوء لتصمّت جوالك قبل الصلاة")).font(AppFont.ui(12)).foregroundColor(Palette.onDarkMuted)
                         }
                         Spacer()
                         Toggle("", isOn: $on).labelsHidden().tint(Palette.gold)
-                            .accessibilityLabel("تفعيل وضع المسجد")
+                            .accessibilityLabel(L("تفعيل وضع المسجد"))
                     }
                 }
                 .onChange(of: on) { v in
@@ -302,22 +302,22 @@ struct MosqueView: View {
                     Notifications.reschedule()
                 }
 
-                Text("الإقامة بعد الأذان (تقويم أم القرى)").font(AppFont.ui(15, 700)).foregroundColor(Palette.ink).padding(.top, 6)
+                Text(L("الإقامة بعد الأذان (تقويم أم القرى)")).font(AppFont.ui(15, 700)).foregroundColor(Palette.ink).padding(.top, 6)
                 VStack(spacing: 0) {
-                    row("الفجر", "بعد ٢٥ دقيقة")
+                    row(L("الفجر"), L("بعد ٢٥ دقيقة"))
                     Divider()
-                    row("الظهر · العصر · العشاء", "بعد ٢٠ دقيقة")
+                    row(L("الظهر · العصر · العشاء"), L("بعد ٢٠ دقيقة"))
                     Divider()
-                    row("المغرب", "بعد ١٠ دقائق")
+                    row(L("المغرب"), L("بعد ١٠ دقائق"))
                     Divider()
-                    row("الجمعة", "عند الخطبة")
+                    row(L("الجمعة"), L("عند الخطبة"))
                 }
                 .padding(.horizontal, 16).card()
 
                 HStack(alignment: .top, spacing: 10) {
                     Image(systemName: "info.circle").foregroundColor(Palette.goldDeep)
-                    Text("في آيفون لا يسمح النظام لأي تطبيق بتصميت الجوال، فيصلك تنبيه هادئ قبل الإقامة بدقيقتين. "
-                         + "أسرع طريقة: اسحب مركز التحكم واضغط مطولًا على «التركيز» ← «عدم الإزعاج» ← «لمدة ساعة واحدة».")
+                    Text(L("في آيفون لا يسمح النظام لأي تطبيق بتصميت الجوال، فيصلك تنبيه هادئ قبل الإقامة بدقيقتين. ")
+                         + L("أسرع طريقة: اسحب مركز التحكم واضغط مطولًا على «التركيز» ← «عدم الإزعاج» ← «لمدة ساعة واحدة»."))
                         .font(AppFont.ui(12)).foregroundColor(Palette.muted).lineSpacing(4)
                 }
                 .padding(14).card(Palette.chip, border: Palette.ivoryBorder, radius: 16)
@@ -325,7 +325,7 @@ struct MosqueView: View {
             .padding(16)
         }
         .background(Palette.page.ignoresSafeArea())
-        .navigationTitle("وضع المسجد")
+        .navigationTitle(L("وضع المسجد"))
         .navigationBarTitleDisplayMode(.inline)
     }
 
@@ -341,16 +341,16 @@ struct MosqueView: View {
 
 struct PrivacyView: View {
     static let points: [(String, String)] = [
-        ("بلا إعلانات أبدًا", "لا قبل المواقيت ولا بين الصفحات"),
-        ("بلا حساب ولا تسجيل", "لا رقم جوال ولا بريد ولا كلمة مرور"),
-        ("موقعك لا يصلنا", "المواقيت والقبلة تُحسب على جوالك نفسه"),
-        ("تلاوتك لا تُحفظ ولا تصلنا", "التسميع يمرّ بخدمة التعرّف في جوالك، ولا يُحفظ الصوت"),
-        ("لا بيع ولا مشاركة لبياناتك", "ولا مكتبات تتبّع أو تحليلات"),
+        (L("بلا إعلانات أبدًا"), L("لا قبل المواقيت ولا بين الصفحات")),
+        (L("بلا حساب ولا تسجيل"), L("لا رقم جوال ولا بريد ولا كلمة مرور")),
+        (L("موقعك لا يصلنا"), L("المواقيت والقبلة تُحسب على جوالك نفسه")),
+        (L("تلاوتك لا تُحفظ ولا تصلنا"), L("التسميع يمرّ بخدمة التعرّف في جوالك، ولا يُحفظ الصوت")),
+        (L("لا بيع ولا مشاركة لبياناتك"), L("ولا مكتبات تتبّع أو تحليلات")),
     ]
 
     static var shareText: String {
-        "تطبيق «القرآن حول العالم» صدقة جارية:\n" + points.map { "✓ " + $0.0 }.joined(separator: "\n")
-            + "\n\nحمّله: https://7awlalaalam.com/app"
+        L("تطبيق «القرآن حول العالم» صدقة جارية:\n") + points.map { "✓ " + $0.0 }.joined(separator: "\n")
+            + L("\n\nحمّله: https://7awlalaalam.com/app")
     }
 
     var body: some View {
@@ -358,8 +358,8 @@ struct PrivacyView: View {
             VStack(alignment: .leading, spacing: 12) {
                 DarkHero {
                     Image(systemName: "checkmark.shield").font(.system(size: 44)).foregroundColor(Palette.gold)
-                    Text("تطبيق بلا مقابل، وبلا ثمن خفي").font(AppFont.ui(21, 700)).foregroundColor(.white).multilineTextAlignment(.center)
-                    Text("صدقة جارية: لا نبيع شيئًا، ولا نجمع شيئًا عنك").font(AppFont.ui(13)).foregroundColor(Palette.onDarkMuted)
+                    Text(L("تطبيق بلا مقابل، وبلا ثمن خفي")).font(AppFont.ui(21, 700)).foregroundColor(.white).multilineTextAlignment(.center)
+                    Text(L("صدقة جارية: لا نبيع شيئًا، ولا نجمع شيئًا عنك")).font(AppFont.ui(13)).foregroundColor(Palette.onDarkMuted)
                 }
                 VStack(spacing: 0) {
                     ForEach(Array(Self.points.enumerated()), id: \.offset) { i, p in
@@ -377,20 +377,20 @@ struct PrivacyView: View {
                     }
                 }
                 .padding(.horizontal, 14).card()
-                (Text("للشفافية: ").foregroundColor(Palette.ink).bold()
-                 + Text("الإشعارات الفورية تصل عبر خدمة Firebase بمعرّف جهاز مجهول لا يُربط باسمك، ويمكنك إيقافها من «التنبيهات». "
-                        + "واسم مدينتك يعرفه الجوال من خدمة نظامه (أبل). "
-                        + "وإن فعّلت «أضِف قراءتي للخريطة» أو أدخلت رمز دعوة، يُرسل عدد الصفحات واسم الدولة أو رمز الدعوة فقط، بلا أي معرّف."))
+                (Text(L("للشفافية: ")).foregroundColor(Palette.ink).bold()
+                 + Text(L("الإشعارات الفورية تصل عبر خدمة Firebase بمعرّف جهاز مجهول لا يُربط باسمك، ويمكنك إيقافها من «التنبيهات». ")
+                        + L("واسم مدينتك يعرفه الجوال من خدمة نظامه (أبل). ")
+                        + L("وإن فعّلت «أضِف قراءتي للخريطة» أو أدخلت رمز دعوة، يُرسل عدد الصفحات واسم الدولة أو رمز الدعوة فقط، بلا أي معرّف.")))
                     .font(AppFont.ui(12)).foregroundColor(Palette.muted).lineSpacing(4).padding(.horizontal, 4)
                 Button { Share.present([Self.shareText]) } label: {
-                    Pill(title: "شارك هذا مع من يسأل عن تطبيق آمن", systemImage: "square.and.arrow.up")
+                    Pill(title: L("شارك هذا مع من يسأل عن تطبيق آمن"), systemImage: "square.and.arrow.up")
                 }
                 .buttonStyle(.plain)
             }
             .padding(16)
         }
         .background(Palette.page.ignoresSafeArea())
-        .navigationTitle("خصوصيتك")
+        .navigationTitle(L("خصوصيتك"))
         .navigationBarTitleDisplayMode(.inline)
     }
 }
@@ -408,10 +408,10 @@ struct AdhanCheckView: View {
                     Image(systemName: n == 0 ? "checkmark.seal" : "exclamationmark.triangle")
                         .font(.system(size: 26)).foregroundColor(n == 0 ? Color(hex: 0x2F8F5B) : Palette.goldDeep)
                     VStack(alignment: .leading, spacing: 2) {
-                        Text(items.isEmpty ? "يفحص…" : n == 0 ? "الأذان سيصلك في وقته بإذن الله"
-                             : n == 1 ? "شيء واحد قد يؤخّر الأذان" : ar(n) + " أشياء قد تؤخّر الأذان")
+                        Text(items.isEmpty ? L("يفحص…") : n == 0 ? L("الأذان سيصلك في وقته بإذن الله")
+                             : n == 1 ? L("شيء واحد قد يؤخّر الأذان") : ar(n) + L(" أشياء قد تؤخّر الأذان"))
                             .font(AppFont.ui(17, 700)).foregroundColor(Palette.ink)
-                        Text("آخر فحص: الآن · يُعاد كل أسبوع تلقائيًا").font(AppFont.ui(12)).foregroundColor(Palette.muted)
+                        Text(L("آخر فحص: الآن · يُعاد كل أسبوع تلقائيًا")).font(AppFont.ui(12)).foregroundColor(Palette.muted)
                     }
                     Spacer()
                 }
@@ -443,21 +443,21 @@ struct AdhanCheckView: View {
                     AdhanCheck.test()
                     sent = true
                 } label: {
-                    Text(sent ? "سيصلك بعد ١٠ ثوانٍ، يمكنك قفل الشاشة" : "جرّب الأذان الآن")
+                    Text(sent ? L("سيصلك بعد ١٠ ثوانٍ، يمكنك قفل الشاشة") : L("جرّب الأذان الآن"))
                         .font(AppFont.ui(16, 700)).foregroundColor(Color(hex: 0x0E2C31))
                         .frame(maxWidth: .infinity, minHeight: 50)
                         .background(Capsule().fill(Palette.gold))
                 }
                 .buttonStyle(.plain)
                 .padding(.top, 4)
-                Text("يصلك إشعار أذان تجريبي بعد ١٠ ثوانٍ بنفس الصوت المختار (" + AdhanSound.name(AdhanSound.current) + ")، لتتأكد أنه يُسمع. "
-                     + "تأكد أن مفتاح الصامت في جانب الجوال غير مفعّل.")
+                Text(L("يصلك إشعار أذان تجريبي بعد ١٠ ثوانٍ بنفس الصوت المختار (") + AdhanSound.name(AdhanSound.current) + L(")، لتتأكد أنه يُسمع. ")
+                     + L("تأكد أن مفتاح الصامت في جانب الجوال غير مفعّل."))
                     .font(AppFont.ui(12)).foregroundColor(Palette.muted).multilineTextAlignment(.center).frame(maxWidth: .infinity)
             }
             .padding(16)
         }
         .background(Palette.page.ignoresSafeArea())
-        .navigationTitle("فحص الأذان")
+        .navigationTitle(L("فحص الأذان"))
         .navigationBarTitleDisplayMode(.inline)
         .task { await refresh() }
         .onChange(of: phase) { p in if p == .active { Task { await refresh() } } }
@@ -482,23 +482,23 @@ struct ImpactView: View {
         ScrollView {
             VStack(alignment: .leading, spacing: 12) {
                 DarkHero {
-                    Text("صفحات قرأها من دعوتهم للتطبيق").font(AppFont.ui(13, 700)).foregroundColor(Palette.gold)
+                    Text(L("صفحات قرأها من دعوتهم للتطبيق")).font(AppFont.ui(13, 700)).foregroundColor(Palette.gold)
                     Text(data.isEmpty && loading ? "…" : num(n("pages"))).font(AppFont.ui(52, 700)).foregroundColor(Palette.goldLight)
-                    Text(n("joined") == 0 ? "شارك رابطك، وكل صفحة يقرؤونها تُكتب في أثرك" : "منها " + ar(n("today")) + " اليوم")
+                    Text(n("joined") == 0 ? L("شارك رابطك، وكل صفحة يقرؤونها تُكتب في أثرك") : L("منها ") + ar(n("today")) + L(" اليوم"))
                         .font(AppFont.ui(14)).foregroundColor(Palette.onDarkMuted).multilineTextAlignment(.center)
-                    Text("«مَن دَلَّ على خيرٍ فله مِثلُ أجرِ فاعِلِه»").font(AppFont.ui(18)).foregroundColor(Palette.onDarkSoft).padding(.top, 10)
-                    Text("رواه مسلم").font(AppFont.ui(11)).foregroundColor(Palette.onDarkMuted)
+                    Text(L("«مَن دَلَّ على خيرٍ فله مِثلُ أجرِ فاعِلِه»")).font(AppFont.ui(18)).foregroundColor(Palette.onDarkSoft).padding(.top, 10)
+                    Text(L("رواه مسلم")).font(AppFont.ui(11)).foregroundColor(Palette.onDarkMuted)
                 }
                 HStack(spacing: 8) {
-                    cell(num(n("joined")), "سجّلوا رمزك")
-                    cell(num(n("khatmas")), "ختمات أتمّوها")
-                    cell(num(n("days")), "يومًا من الأثر")
+                    cell(num(n("joined")), L("سجّلوا رمزك"))
+                    cell(num(n("khatmas")), L("ختمات أتمّوها"))
+                    cell(num(n("days")), L("يومًا من الأثر"))
                 }
                 VStack(alignment: .leading, spacing: 10) {
-                    Text("رمز دعوتك").font(AppFont.ui(14, 700)).foregroundColor(Palette.ink)
+                    Text(L("رمز دعوتك")).font(AppFont.ui(14, 700)).foregroundColor(Palette.ink)
                     Button {
                         UIPasteboard.general.string = Stats.code
-                        message = "نُسخ الرمز"
+                        message = L("نُسخ الرمز")
                     } label: {
                         Text(Stats.code).font(AppFont.ui(24, 700)).kerning(4).foregroundColor(Palette.goldDeep)
                             .environment(\.layoutDirection, .leftToRight)
@@ -508,7 +508,7 @@ struct ImpactView: View {
                     .buttonStyle(.plain)
                     .accessibilityLabel("رمز دعوتك \(Stats.code)، اضغط للنسخ")
                     Button { Share.present([Stats.shareText]) } label: {
-                        Pill(title: "شارك رابطك", systemImage: "square.and.arrow.up", primary: true, height: 50)
+                        Pill(title: L("شارك رابطك"), systemImage: "square.and.arrow.up", primary: true, height: 50)
                     }
                     .buttonStyle(.plain)
                 }
@@ -516,11 +516,11 @@ struct ImpactView: View {
 
                 VStack(alignment: .leading, spacing: 8) {
                     if !ref.isEmpty {
-                        Text("دعاك صاحب الرمز " + ref).font(AppFont.ui(14, 700)).foregroundColor(Palette.ink)
-                        Text("جزاك الله خيرًا: قراءتك تُكتب في أثره أيضًا").font(AppFont.ui(12)).foregroundColor(Palette.muted)
+                        Text(L("دعاك صاحب الرمز ") + ref).font(AppFont.ui(14, 700)).foregroundColor(Palette.ink)
+                        Text(L("جزاك الله خيرًا: قراءتك تُكتب في أثره أيضًا")).font(AppFont.ui(12)).foregroundColor(Palette.muted)
                     } else {
-                        Text("هل دعاك أحد للتطبيق؟").font(AppFont.ui(14, 700)).foregroundColor(Palette.ink)
-                        Text("اكتب رمزه ليُكتب له أثر قراءتك").font(AppFont.ui(12)).foregroundColor(Palette.muted)
+                        Text(L("هل دعاك أحد للتطبيق؟")).font(AppFont.ui(14, 700)).foregroundColor(Palette.ink)
+                        Text(L("اكتب رمزه ليُكتب له أثر قراءتك")).font(AppFont.ui(12)).foregroundColor(Palette.muted)
                         HStack(spacing: 8) {
                             TextField("K7Q2MA", text: $input)
                                 .textInputAutocapitalization(.characters).autocorrectionDisabled()
@@ -529,10 +529,10 @@ struct ImpactView: View {
                                 .padding(.horizontal, 12).frame(height: 46)
                                 .background(RoundedRectangle(cornerRadius: 12).fill(Palette.page))
                                 .overlay(RoundedRectangle(cornerRadius: 12).stroke(Palette.fieldBorder))
-                            Button("حفظ") {
+                            Button(L("حفظ")) {
                                 if let e = Stats.setRef(input) { message = e; return }
                                 ref = Stats.ref
-                                message = "تم، جزاك الله خيرًا"
+                                message = L("تم، جزاك الله خيرًا")
                                 Task.detached { await Stats.sync() }
                             }
                             .font(AppFont.ui(15, 700)).foregroundColor(Palette.ink)
@@ -544,13 +544,13 @@ struct ImpactView: View {
                 }
                 .padding(14).frame(maxWidth: .infinity, alignment: .leading).card()
 
-                Text("لا نعرف من دعوت ولا أسماءهم: جهاز من دعوته يرسل عدد الصفحات مع رمز الدعوة فقط، دون أي بيانات أخرى.")
+                Text(L("لا نعرف من دعوت ولا أسماءهم: جهاز من دعوته يرسل عدد الصفحات مع رمز الدعوة فقط، دون أي بيانات أخرى."))
                     .font(AppFont.ui(12)).foregroundColor(Palette.muted).lineSpacing(4).padding(.horizontal, 4)
             }
             .padding(16)
         }
         .background(Palette.page.ignoresSafeArea())
-        .navigationTitle("أثرك")
+        .navigationTitle(L("أثرك"))
         .navigationBarTitleDisplayMode(.inline)
         .task {
             await Stats.sync()
@@ -611,10 +611,10 @@ struct WorldMapView: View {
             VStack(spacing: 12) {
                 let total = (data["total"] as? Int) ?? 0
                 let countries = (data["countries"] as? Int) ?? 0
-                Text("صفحات قرأها المشاركون اليوم").font(AppFont.ui(13)).foregroundColor(Palette.onDarkMuted)
+                Text(L("صفحات قرأها المشاركون اليوم")).font(AppFont.ui(13)).foregroundColor(Palette.onDarkMuted)
                 Text(data.isEmpty ? (failed ? "—" : "…") : num(total)).font(AppFont.ui(44, 700)).foregroundColor(Palette.goldLight)
-                Text(countries > 0 ? "في " + ar(countries) + (countries <= 10 ? " دول" : " دولة")
-                     : failed ? "تعذّر الاتصال الآن" : "تضيء الخريطة كلما قرأ المشاركون")
+                Text(countries > 0 ? L("في ") + ar(countries) + (countries <= 10 ? L(" دول") : L(" دولة"))
+                     : failed ? L("تعذّر الاتصال الآن") : L("تضيء الخريطة كلما قرأ المشاركون"))
                     .font(AppFont.ui(12)).foregroundColor(Palette.onDarkMuted)
 
                 TimelineView(.animation) { tl in
@@ -624,7 +624,7 @@ struct WorldMapView: View {
                 .background(RoundedRectangle(cornerRadius: 18).fill(Self.cardC))
                 .overlay(RoundedRectangle(cornerRadius: 18).stroke(Self.lineC))
                 .environment(\.layoutDirection, .leftToRight)
-                .accessibilityLabel("خريطة نقاط تضيء حيث يُقرأ القرآن اليوم")
+                .accessibilityLabel(L("خريطة نقاط تضيء حيث يُقرأ القرآن اليوم"))
 
                 if !top.isEmpty {
                     VStack(spacing: 0) {
@@ -633,7 +633,7 @@ struct WorldMapView: View {
                             HStack {
                                 Text(Stats.countryName(c.0)).font(AppFont.ui(14, 700)).foregroundColor(.white)
                                 Spacer()
-                                Text(ar(c.1) + " صفحة").font(AppFont.ui(14, 700)).foregroundColor(Palette.goldLight)
+                                Text(ar(c.1) + L(" صفحة")).font(AppFont.ui(14, 700)).foregroundColor(Palette.goldLight)
                             }
                             .padding(.vertical, 11)
                         }
@@ -645,13 +645,13 @@ struct WorldMapView: View {
 
                 HStack(spacing: 12) {
                     VStack(alignment: .leading, spacing: 2) {
-                        Text("أضِف قراءتي للخريطة").font(AppFont.ui(14, 700)).foregroundColor(.white)
-                        Text("يُرسل عدد الصفحات واسم الدولة" + (Stats.country.isEmpty ? "" : " (" + Stats.countryName(Stats.country) + ")")
-                             + " فقط، بلا موقع دقيق ولا أي معرّف")
+                        Text(L("أضِف قراءتي للخريطة")).font(AppFont.ui(14, 700)).foregroundColor(.white)
+                        Text(L("يُرسل عدد الصفحات واسم الدولة") + (Stats.country.isEmpty ? "" : " (" + Stats.countryName(Stats.country) + ")")
+                             + L(" فقط، بلا موقع دقيق ولا أي معرّف"))
                             .font(AppFont.ui(11)).foregroundColor(Palette.onDarkMuted).lineSpacing(3)
                     }
                     Spacer()
-                    Toggle("", isOn: $mapOn).labelsHidden().tint(Palette.gold).accessibilityLabel("أضف قراءتي للخريطة")
+                    Toggle("", isOn: $mapOn).labelsHidden().tint(Palette.gold).accessibilityLabel(L("أضف قراءتي للخريطة"))
                 }
                 .padding(14)
                 .background(RoundedRectangle(cornerRadius: 16).fill(Color.white.opacity(0.06)))
@@ -660,14 +660,14 @@ struct WorldMapView: View {
                     if v { Task { await load() } }
                 }
                 if mapOn {
-                    Text(Stats.today == 0 ? "لم تقرأ اليوم بعد: اقرأ ولو صفحة لتضيء بها دولتك" : "قرأت اليوم " + ar(Stats.today) + " صفحة").font(AppFont.ui(12, 700)).foregroundColor(Palette.gold)
+                    Text(Stats.today == 0 ? L("لم تقرأ اليوم بعد: اقرأ ولو صفحة لتضيء بها دولتك") : L("قرأت اليوم ") + ar(Stats.today) + L(" صفحة")).font(AppFont.ui(12, 700)).foregroundColor(Palette.gold)
                         .frame(maxWidth: .infinity, alignment: .leading)
                 }
             }
             .padding(16)
         }
         .background(Self.bg.ignoresSafeArea())
-        .navigationTitle("القرآن حول العالم")
+        .navigationTitle(L("القرآن حول العالم"))
         .navigationBarTitleDisplayMode(.inline)
         .toolbarColorScheme(.dark, for: .navigationBar)
         .toolbarBackground(Self.bg, for: .navigationBar)

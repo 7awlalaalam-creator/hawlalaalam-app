@@ -8,15 +8,15 @@ struct MoodView: View {
 
     /** (الشعور، عنوان البطاقة، مراجع الآيات، الأيقونة) */
     static let moods: [(String, String, String, String)] = [
-        ("قلق", "حين يقلقك أمر", "13:28,65:3,9:51,2:286,3:173,20:46", "cloud"),
-        ("حزين", "حين يثقل الحزن قلبك", "9:40,93:3,12:86,94:6,2:155,3:139", "drop"),
-        ("ضيق", "حين يضيق صدرك", "94:1,65:2,15:97,21:88,2:214,94:5", "wind"),
-        ("خائف", "حين يغلبك الخوف", "20:46,3:175,9:51,41:30,28:31,10:62", "shield"),
-        ("مذنب", "حين تثقلك ذنوبك", "39:53,4:110,3:135,25:70,11:114,66:8", "arrow.uturn.backward"),
-        ("متعب", "حين يتعبك الطريق", "94:5,2:286,65:7,29:69,2:45,2:153", "battery.25"),
-        ("وحيد", "حين تشعر بالوحدة", "2:186,50:16,58:7,57:4,20:46,2:152", "person"),
-        ("غاضب", "حين يشتد غضبك", "3:134,41:34,7:199,42:37,42:43,3:159", "flame"),
-        ("ممتن", "حين يغمرك الامتنان", "14:7,10:58,2:152,16:18,93:11,55:13", "sparkles"),
+        (L("قلق"), L("حين يقلقك أمر"), "13:28,65:3,9:51,2:286,3:173,20:46", "cloud"),
+        (L("حزين"), L("حين يثقل الحزن قلبك"), "9:40,93:3,12:86,94:6,2:155,3:139", "drop"),
+        (L("ضيق"), L("حين يضيق صدرك"), "94:1,65:2,15:97,21:88,2:214,94:5", "wind"),
+        (L("خائف"), L("حين يغلبك الخوف"), "20:46,3:175,9:51,41:30,28:31,10:62", "shield"),
+        (L("مذنب"), L("حين تثقلك ذنوبك"), "39:53,4:110,3:135,25:70,11:114,66:8", "arrow.uturn.backward"),
+        (L("متعب"), L("حين يتعبك الطريق"), "94:5,2:286,65:7,29:69,2:45,2:153", "battery.25"),
+        (L("وحيد"), L("حين تشعر بالوحدة"), "2:186,50:16,58:7,57:4,20:46,2:152", "person"),
+        (L("غاضب"), L("حين يشتد غضبك"), "3:134,41:34,7:199,42:37,42:43,3:159", "flame"),
+        (L("ممتن"), L("حين يغمرك الامتنان"), "14:7,10:58,2:152,16:18,93:11,55:13", "sparkles"),
     ]
 
     struct Pick: Equatable { let s: Int, a: Int, text: String }
@@ -28,8 +28,8 @@ struct MoodView: View {
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 0) {
-                Text("كيف تشعر الآن؟").font(AppFont.ui(20, 700)).foregroundColor(Palette.ink).padding(.horizontal, 4).padding(.top, 8)
-                Text("اختر شعورك، وتأتيك آية من كتاب الله تواسيك").font(AppFont.ui(14)).foregroundColor(Palette.muted)
+                Text(L("كيف تشعر الآن؟")).font(AppFont.ui(20, 700)).foregroundColor(Palette.ink).padding(.horizontal, 4).padding(.top, 8)
+                Text(L("اختر شعورك، وتأتيك آية من كتاب الله تواسيك")).font(AppFont.ui(14)).foregroundColor(Palette.muted)
                     .padding(.horizontal, 4).padding(.bottom, 12)
                 LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 8), count: 3), spacing: 8) {
                     ForEach(0..<Self.moods.count, id: \.self) { i in
@@ -51,7 +51,7 @@ struct MoodView: View {
             .padding(.horizontal, 18).padding(.vertical, 14)
         }
         .background(Palette.page.ignoresSafeArea())
-        .navigationTitle("آية لحالك")
+        .navigationTitle(L("آية لحالك"))
         .navigationBarTitleDisplayMode(.inline)
         .onAppear { if mood == nil, let m = initial, Self.moods.indices.contains(m) { choose(m) } }
     }
@@ -63,17 +63,17 @@ struct MoodView: View {
                 Text(Quran.withNumber(p.text, p.a)).font(AppFont.quran(25))
                     .foregroundColor(Palette.ink).multilineTextAlignment(.center).lineSpacing(9)
                     .textSelection(.enabled)
-                Text("سورة " + Quran.surahName(p.s) + " · الآية " + ar(p.a)).font(AppFont.ui(13)).foregroundColor(Palette.muted)
+                Text(L("سورة ") + Quran.surahName(p.s) + L(" · الآية ") + ar(p.a)).font(AppFont.ui(13)).foregroundColor(Palette.muted)
             }
             .frame(maxWidth: .infinity)
             .padding(18)
             .card(Palette.ivory, border: Palette.ivoryBorder, radius: 22)
             HStack(spacing: 8) {
-                Button { shareImage(p, m) } label: { Pill(title: "شارك كصورة", systemImage: "photo", primary: true) }
-                Button { choose(m) } label: { Pill(title: "آية أخرى", systemImage: "arrow.clockwise") }
+                Button { shareImage(p, m) } label: { Pill(title: L("شارك كصورة"), systemImage: "photo", primary: true) }
+                Button { choose(m) } label: { Pill(title: L("آية أخرى"), systemImage: "arrow.clockwise") }
             }
             NavigationLink(value: Screen.tafsir(p.s, p.a)) {
-                Text("اقرأ التفسير ←").font(AppFont.ui(14, 700)).foregroundColor(Palette.goldDeep)
+                Text(L("اقرأ التفسير ←")).font(AppFont.ui(14, 700)).foregroundColor(Palette.goldDeep)
             }
             .padding(.top, 2)
         }
@@ -93,12 +93,12 @@ struct MoodView: View {
 
     @MainActor private func shareImage(_ p: Pick, _ m: Int) {
         let card = MoodCard(title: Self.moods[m].1, text: p.text, surah: p.s, ayah: p.a)
-            .environment(\.layoutDirection, .rightToLeft)
+            .environment(\.layoutDirection, Lang.dir)
         let r = ImageRenderer(content: card)
         r.scale = 3
         var msg: String = Self.moods[m].1 + " 🤍\n﴿ " + p.text + " ﴾ "
         msg += "[\(Quran.surahName(p.s)): \(ar(p.a))]\n\n"
-        msg += "اختر شعورك واقرأ آية تواسيك في تطبيق «القرآن حول العالم»:\n"
+        msg += L("اختر شعورك واقرأ آية تواسيك في تطبيق «القرآن حول العالم»:\n")
         msg += "https://7awlalaalam.com/quran/?utm_source=app_share&utm_medium=mood"
         if let img = r.uiImage { Share.present([img, msg]) } else { Share.present([msg]) }
     }
@@ -116,11 +116,11 @@ struct MoodCard: View {
             Spacer(minLength: 8)
             Text(Quran.withNumber(text, ayah)).font(AppFont.quran(text.count > 160 ? 15 : (text.count > 90 ? 18 : 21)))
                 .foregroundColor(.white).multilineTextAlignment(.center).lineSpacing(8).padding(.horizontal, 24)
-            Text("سورة " + Quran.surahName(surah) + " · الآية " + ar(ayah)).font(AppFont.ui(12, 500))
+            Text(L("سورة ") + Quran.surahName(surah) + L(" · الآية ") + ar(ayah)).font(AppFont.ui(12, 500))
                 .foregroundColor(Color(hex: 0xE9DFC9)).padding(.top, 10)
             Spacer(minLength: 8)
             Rectangle().fill(Palette.gold.opacity(0.33)).frame(width: 60, height: 1)
-            Text("آية لحالك · تطبيق «القرآن حول العالم»").font(AppFont.ui(11, 500)).foregroundColor(.white).padding(.top, 10)
+            Text(L("آية لحالك · تطبيق «القرآن حول العالم»")).font(AppFont.ui(11, 500)).foregroundColor(.white).padding(.top, 10)
             Text("7awlalaalam.com/quran").font(AppFont.ui(13, 700)).foregroundColor(Palette.gold).padding(.top, 6).padding(.bottom, 34)
         }
         .frame(width: 360, height: 450)
@@ -133,7 +133,7 @@ struct MoodCard: View {
 
 /** «اجعلها صدقة جارية»: بطاقة مشاركة التطبيق باسم من تحب (نفس DedicateActivity) */
 struct DedicateView: View {
-    private static let titles = ["رحمه الله", "رحمها الله", "حفظه الله", "حفظها الله"]
+    private static let titles = [L("رحمه الله"), L("رحمها الله"), L("حفظه الله"), L("حفظها الله")]
     private static let link = "7awlalaalam.com/quran"
 
     @State private var name = ""
@@ -142,15 +142,15 @@ struct DedicateView: View {
     private var feminine: Bool { honor == 1 || honor == 3 }
     private var shownName: String {
         let n = name.trimmingCharacters(in: .whitespaces)
-        return n.isEmpty ? "من تحب" : n
+        return n.isEmpty ? L("من تحب") : n
     }
 
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 14) {
-                Text("شارك التطبيق باسم من تحب، حيًّا أو ميتًا، ليصل القرآن إلى غيرك صدقةً عنه.")
+                Text(L("شارك التطبيق باسم من تحب، حيًّا أو ميتًا، ليصل القرآن إلى غيرك صدقةً عنه."))
                     .font(AppFont.ui(15)).foregroundColor(Palette.muted)
-                TextField("الاسم، مثال: والدي محمد", text: $name)
+                TextField(L("الاسم، مثال: والدي محمد"), text: $name)
                     .font(AppFont.ui(17, 500))
                     .padding(.horizontal, 16).frame(minHeight: 50)
                     .card(radius: 14)
@@ -168,28 +168,28 @@ struct DedicateView: View {
                 }
                 card
                     .frame(maxWidth: .infinity)
-                    .accessibilityLabel("معاينة البطاقة")
-                Button { share() } label: { Pill(title: "شارك البطاقة", systemImage: "square.and.arrow.up", primary: true, height: 56) }
+                    .accessibilityLabel(L("معاينة البطاقة"))
+                Button { share() } label: { Pill(title: L("شارك البطاقة"), systemImage: "square.and.arrow.up", primary: true, height: 56) }
             }
             .padding(.horizontal, 20).padding(.vertical, 14)
         }
         .background(Palette.page.ignoresSafeArea())
-        .navigationTitle("اجعلها صدقة جارية")
+        .navigationTitle(L("اجعلها صدقة جارية"))
         .navigationBarTitleDisplayMode(.inline)
     }
 
     private var card: some View {
         DedicateCard(name: shownName, honor: Self.titles[honor], feminine: feminine, link: Self.link)
-            .environment(\.layoutDirection, .rightToLeft)
+            .environment(\.layoutDirection, Lang.dir)
     }
 
     @MainActor private func share() {
         let r = ImageRenderer(content: card)
         r.scale = 3
         let n = name.trimmingCharacters(in: .whitespaces)
-        let who: String = n.isEmpty ? "من أحب" : n
-        var msg: String = "صدقة جارية عن " + who + " " + Self.titles[honor]
-        msg += "\nحمّل تطبيق «القرآن حول العالم» واقرأ وادعُ " + (feminine ? "لها" : "له") + " 🤍\n"
+        let who: String = n.isEmpty ? L("من أحب") : n
+        var msg: String = L("صدقة جارية عن ") + who + " " + Self.titles[honor]
+        msg += L("\nحمّل تطبيق «القرآن حول العالم» واقرأ وادعُ ") + (feminine ? L("لها") : L("له")) + " 🤍\n"
         msg += "https://" + Self.link + "/"
         if let img = r.uiImage { Share.present([img, msg]) } else { Share.present([msg]) }
     }
@@ -203,14 +203,14 @@ struct DedicateCard: View {
         VStack(spacing: 0) {
             Image(uiImage: UIImage(named: "app_logo_png") ?? UIImage()).resizable().frame(width: 74, height: 74)
                 .clipShape(RoundedRectangle(cornerRadius: 16)).padding(.top, 40)
-            Text("صدقة جارية عن").font(AppFont.ui(15, 500)).foregroundColor(Palette.gold).padding(.top, 26)
+            Text(L("صدقة جارية عن")).font(AppFont.ui(15, 500)).foregroundColor(Palette.gold).padding(.top, 26)
             Text(name).font(AppFont.ui(30, 700)).foregroundColor(.white).multilineTextAlignment(.center)
                 .lineLimit(2).minimumScaleFactor(0.5).padding(.horizontal, 24).padding(.top, 6)
             Text(honor).font(AppFont.ui(17, 500)).foregroundColor(Color(hex: 0xE9DFC9)).padding(.top, 2)
             Rectangle().fill(Palette.gold.opacity(0.33)).frame(width: 60, height: 1).padding(.top, 20)
-            Text("حمّل تطبيق «القرآن حول العالم»\nواقرأ وادعُ " + (feminine ? "لها" : "له"))
+            Text(L("حمّل تطبيق «القرآن حول العالم»\nواقرأ وادعُ ") + (feminine ? L("لها") : L("له")))
                 .font(AppFont.ui(15, 500)).foregroundColor(.white).multilineTextAlignment(.center).lineSpacing(3).padding(.top, 16)
-            Text("مجاني · بلا تسجيل · بلا إعلانات").font(AppFont.ui(12)).foregroundColor(Palette.onDarkMuted).padding(.top, 20)
+            Text(L("مجاني · بلا تسجيل · بلا إعلانات")).font(AppFont.ui(12)).foregroundColor(Palette.onDarkMuted).padding(.top, 20)
             Spacer(minLength: 0)
             Text(link).font(AppFont.ui(15, 700)).foregroundColor(Palette.gold).padding(.bottom, 44)
         }
@@ -234,8 +234,8 @@ struct DownloadsView: View {
         ScrollView {
             VStack(alignment: .leading, spacing: 16) {
                 VStack(alignment: .leading, spacing: 6) {
-                    Label("استمع في أي مكان", systemImage: "airplane").font(AppFont.ui(17, 700)).foregroundColor(.white)
-                    Text(done == 0 ? "لا توجد تلاوات محمّلة بعد" : ar(done) + " تلاوة محمّلة · " + AudioDownloads.mb(dl.totalBytes))
+                    Label(L("استمع في أي مكان"), systemImage: "airplane").font(AppFont.ui(17, 700)).foregroundColor(.white)
+                    Text(done == 0 ? L("لا توجد تلاوات محمّلة بعد") : ar(done) + L(" تلاوة محمّلة · ") + AudioDownloads.mb(dl.totalBytes))
                         .font(AppFont.ui(14)).foregroundColor(Palette.onDarkMuted)
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
@@ -243,12 +243,12 @@ struct DownloadsView: View {
                 .background(RoundedRectangle(cornerRadius: 20).fill(Palette.dark))
 
                 if dl.items.isEmpty {
-                    Text("افتح صفحة أي قارئ في «الاستماع» واضغط ⬇ بجانب السورة لتستمع إليها دون إنترنت.")
+                    Text(L("افتح صفحة أي قارئ في «الاستماع» واضغط ⬇ بجانب السورة لتستمع إليها دون إنترنت."))
                         .font(AppFont.ui(15)).foregroundColor(Palette.ink)
                         .padding(16).frame(maxWidth: .infinity, alignment: .leading)
                         .card(Palette.ivory, border: Palette.ivoryBorder, radius: 16)
                     Button { state.tab = .listen } label: {
-                        Pill(title: "تصفّح القرّاء", primary: true, height: 50)
+                        Pill(title: L("تصفّح القرّاء"), primary: true, height: 50)
                     }
                 } else {
                     VStack(spacing: 0) {
@@ -259,24 +259,24 @@ struct DownloadsView: View {
                     }
                     .padding(.horizontal, 14).padding(.vertical, 4)
                     .card()
-                    Text("يستمر الاستماع مع قفل الشاشة، وتتحكم به من شاشة القفل. والتلاوات المحمّلة تُشغَّل من جهازك حتى مع الإنترنت، توفيرًا لباقتك.")
+                    Text(L("يستمر الاستماع مع قفل الشاشة، وتتحكم به من شاشة القفل. والتلاوات المحمّلة تُشغَّل من جهازك حتى مع الإنترنت، توفيرًا لباقتك."))
                         .font(AppFont.ui(13)).foregroundColor(Palette.muted).padding(.horizontal, 4)
                 }
             }
             .padding(.horizontal, 18).padding(.vertical, 14)
         }
         .background(Palette.page.ignoresSafeArea())
-        .navigationTitle("التلاوات المحمّلة")
+        .navigationTitle(L("التلاوات المحمّلة"))
         .navigationBarTitleDisplayMode(.inline)
-        .alert("حذف التلاوة؟", isPresented: Binding(get: { deleting != nil }, set: { if !$0 { deleting = nil } })) {
-            Button("حذف", role: .destructive) {
+        .alert(L("حذف التلاوة؟"), isPresented: Binding(get: { deleting != nil }, set: { if !$0 { deleting = nil } })) {
+            Button(L("حذف"), role: .destructive) {
                 if let it = deleting {
                     if player.current?.url == it.url { player.stop() }
                     dl.delete(it.url)
                 }
                 deleting = nil
             }
-            Button("إلغاء", role: .cancel) { deleting = nil }
+            Button(L("إلغاء"), role: .cancel) { deleting = nil }
         } message: { Text((deleting?.title ?? "") + " · " + (deleting?.reciter ?? "")) }
     }
 
@@ -296,20 +296,20 @@ struct DownloadsView: View {
             switch it.status {
             case .done:
                 NavigationLink(value: Screen.player(it.url)) {
-                    Text(player.current?.url == it.url && player.playing ? "◼︎ يعمل" : "▶ تشغيل").font(AppFont.ui(13, 700)).foregroundColor(.white)
+                    Text(player.current?.url == it.url && player.playing ? L("◼︎ يعمل") : L("▶ تشغيل")).font(AppFont.ui(13, 700)).foregroundColor(.white)
                         .padding(.horizontal, 14).frame(minHeight: 36)
                         .background(Capsule().fill(Palette.primary))
                 }
             case .running:
-                Text(ar(it.percent) + "٪").font(AppFont.ui(13, 700)).foregroundColor(Palette.goldDeep)
+                Text(ar(it.percent) + L("٪")).font(AppFont.ui(13, 700)).foregroundColor(Palette.goldDeep)
             default:
-                Button("إعادة") { dl.retry(it) }.font(AppFont.ui(13, 700)).foregroundColor(Palette.goldDeep)
+                Button(L("إعادة")) { dl.retry(it) }.font(AppFont.ui(13, 700)).foregroundColor(Palette.goldDeep)
             }
             Button { deleting = it } label: {
                 Image(systemName: "xmark").font(.system(size: 14, weight: .semibold)).foregroundColor(Palette.muted)
                     .frame(width: 40, height: 40)
             }
-            .accessibilityLabel("حذف " + it.title)
+            .accessibilityLabel(L("حذف ") + it.title)
         }
         .buttonStyle(.plain)
         .padding(.vertical, 12)
@@ -327,10 +327,10 @@ struct PlayerView: View {
         let ok = dl.ready(url) != nil
         VStack(spacing: 0) {
             VStack(spacing: 0) {
-                Text("✈️ متاحة بدون إنترنت").font(AppFont.ui(13, 700)).foregroundColor(Palette.gold)
+                Text(L("✈️ متاحة بدون إنترنت")).font(AppFont.ui(13, 700)).foregroundColor(Palette.gold)
                     .padding(.horizontal, 12).padding(.vertical, 4)
                     .background(RoundedRectangle(cornerRadius: 12).fill(Color.white.opacity(0.1)))
-                Text(it?.title ?? "تلاوة").font(AppFont.ui(28, 700)).foregroundColor(.white).padding(.top, 16).padding(.bottom, 6)
+                Text(it?.title ?? L("تلاوة")).font(AppFont.ui(28, 700)).foregroundColor(.white).padding(.top, 16).padding(.bottom, 6)
                     .multilineTextAlignment(.center)
                 Text(it?.reciter ?? "").font(AppFont.ui(15)).foregroundColor(Palette.onDarkMuted)
                 if ok {
@@ -355,10 +355,10 @@ struct PlayerView: View {
                     }
                     .foregroundColor(Palette.gold)
                     .padding(.top, 12)
-                    Text("يستمر الاستماع مع قفل الشاشة، وتتحكم به من شاشة القفل").font(AppFont.ui(13)).foregroundColor(Palette.onDarkSoft)
+                    Text(L("يستمر الاستماع مع قفل الشاشة، وتتحكم به من شاشة القفل")).font(AppFont.ui(13)).foregroundColor(Palette.onDarkSoft)
                         .multilineTextAlignment(.center).padding(.top, 16)
                 } else {
-                    Text("هذه التلاوة لم تعد محمّلة على جهازك").font(AppFont.ui(13)).foregroundColor(Palette.onDarkSoft).padding(.top, 16)
+                    Text(L("هذه التلاوة لم تعد محمّلة على جهازك")).font(AppFont.ui(13)).foregroundColor(Palette.onDarkSoft).padding(.top, 16)
                 }
             }
             .padding(.horizontal, 22).padding(.vertical, 28)
@@ -368,7 +368,7 @@ struct PlayerView: View {
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background(Palette.page.ignoresSafeArea())
-        .navigationTitle(it?.title ?? "تلاوة")
+        .navigationTitle(it?.title ?? L("تلاوة"))
         .navigationBarTitleDisplayMode(.inline)
         .onAppear { if ok, let i = it, player.current?.url != url { player.play(i) } }
     }
@@ -395,23 +395,23 @@ struct WelcomeView: View {
                     .clipShape(RoundedRectangle(cornerRadius: 28, style: .continuous))
                     .shadow(color: .black.opacity(0.2), radius: 10, y: 6)
                     .padding(.top, 40)
-                Text("أهلًا بك في حول العالم").font(AppFont.ui(26, 700)).foregroundColor(Palette.ink).padding(.top, 22).padding(.bottom, 8)
-                Text("رفيقك اليومي مع كتاب الله: تقرأ، وتستمع، وتتدبّر، ولا يفوتك وِردك.")
+                Text(L("أهلًا بك في حول العالم")).font(AppFont.ui(26, 700)).foregroundColor(Palette.ink).padding(.top, 22).padding(.bottom, 8)
+                Text(L("رفيقك اليومي مع كتاب الله: تقرأ، وتستمع، وتتدبّر، ولا يفوتك وِردك."))
                     .font(AppFont.ui(15)).foregroundColor(Palette.muted).multilineTextAlignment(.center)
-                Text("اختر ما يناسبك").font(AppFont.ui(14, 700)).foregroundColor(Palette.goldDeep)
+                Text(L("اختر ما يناسبك")).font(AppFont.ui(14, 700)).foregroundColor(Palette.goldDeep)
                     .frame(maxWidth: .infinity, alignment: .leading).padding(.top, 28).padding(.bottom, 10)
                 VStack(spacing: 0) {
-                    toggle("آية اليوم كل صباح", "مع تفسيرها، الساعة ٧:٠٠ ص", $verse)
+                    toggle(L("آية اليوم كل صباح"), L("مع تفسيرها، الساعة ٧:٠٠ ص"), $verse)
                     Rectangle().fill(Palette.divider).frame(height: 1)
-                    toggle("تنبيه الأذان في مدينتي", "يحتاج إذن الموقع · بطريقة الحساب المعتمدة في دولتك", $adhan)
+                    toggle(L("تنبيه الأذان في مدينتي"), L("يحتاج إذن الموقع · بطريقة الحساب المعتمدة في دولتك"), $adhan)
                     Rectangle().fill(Palette.divider).frame(height: 1)
-                    toggle("تذكير بالورد مساءً", "الساعة ٩:٠٠ م", $wird)
+                    toggle(L("تذكير بالورد مساءً"), L("الساعة ٩:٠٠ م"), $wird)
                 }
                 .padding(.horizontal, 16)
                 .card()
-                Button { start() } label: { Pill(title: "ابدأ رحلتك مع القرآن", primary: true, height: 56) }.padding(.top, 28)
-                Text("يمكنك تغيير ذلك لاحقًا من الإعدادات").font(AppFont.ui(12)).foregroundColor(Palette.muted).padding(.top, 12)
-                Button("ليس الآن") { finish() }.font(AppFont.ui(14, 500)).foregroundColor(Palette.muted).padding(.top, 8)
+                Button { start() } label: { Pill(title: L("ابدأ رحلتك مع القرآن"), primary: true, height: 56) }.padding(.top, 28)
+                Text(L("يمكنك تغيير ذلك لاحقًا من الإعدادات")).font(AppFont.ui(12)).foregroundColor(Palette.muted).padding(.top, 12)
+                Button(L("ليس الآن")) { finish() }.font(AppFont.ui(14, 500)).foregroundColor(Palette.muted).padding(.top, 8)
             }
             .padding(.horizontal, 24).padding(.bottom, 32)
         }
@@ -463,75 +463,75 @@ struct FeaturesView: View {
 
     /** (عنوان، شرح، أيقونة، شارة ٠ بلا، ١ جديد، ٢ مطوّر) */
     private static let slides: [(String, String, String, Int)] = [
-        ("أهلًا بك في الإصدار ٢٫٠",
-         "تحديث كبير لـ«القرآن حول العالم»: الاستماع لكل القرّاء، ومتابعة صلواتك، وحفظ ومراجعة، وتسميع بصوتك، وختمة مع عائلتك، وبوصلة قبلة جديدة.\nاسحب أو اضغط «التالي».",
+        (L("أهلًا بك في الإصدار ٢٫٠"),
+         L("تحديث كبير لـ«القرآن حول العالم»: الاستماع لكل القرّاء، ومتابعة صلواتك، وحفظ ومراجعة، وتسميع بصوتك، وختمة مع عائلتك، وبوصلة قبلة جديدة.\nاسحب أو اضغط «التالي»."),
          "book", 0),
-        ("الصلاة القادمة على شاشة القفل",
-         "عدّاد هادئ حتى دخول الوقت في الجزيرة الديناميكية وشاشة القفل، ويتحول وحده للصلاة التالية.\n\nفعّله من «الأدوات» ← «التنبيهات» ← «الصلاة القادمة على شاشة القفل».",
+        (L("الصلاة القادمة على شاشة القفل"),
+         L("عدّاد هادئ حتى دخول الوقت في الجزيرة الديناميكية وشاشة القفل، ويتحول وحده للصلاة التالية.\n\nفعّله من «الأدوات» ← «التنبيهات» ← «الصلاة القادمة على شاشة القفل»."),
          "clock", 1),
-        ("«اليوم» أوضح",
-         "• مواقيت اليوم الخمس تحت الصلاة القادمة، والقادمة بالذهبي.\n• عدد أيامك المتتالية مع القرآن.\n• «صورة» في آية اليوم تُشارك البطاقة مباشرة.\n• بطاقة «مراجعة الحفظ» يوم تحين مراجعتك.",
+        (L("«اليوم» أوضح"),
+         L("• مواقيت اليوم الخمس تحت الصلاة القادمة، والقادمة بالذهبي.\n• عدد أيامك المتتالية مع القرآن.\n• «صورة» في آية اليوم تُشارك البطاقة مباشرة.\n• بطاقة «مراجعة الحفظ» يوم تحين مراجعتك."),
          "square.grid.2x2", 1),
-        ("صلواتي",
-         "سجّل صلواتك الخمس بلمسة من بطاقة «صلواتي اليوم» في الصفحة الرئيسية، أو من زر «✓ صلّيت» في إشعار الأذان.\n\nوفي «رحلتي» جدول أسبوعك وأيامك المتتالية بالصلوات الخمس.",
+        (L("صلواتي"),
+         L("سجّل صلواتك الخمس بلمسة من بطاقة «صلواتي اليوم» في الصفحة الرئيسية، أو من زر «✓ صلّيت» في إشعار الأذان.\n\nوفي «رحلتي» جدول أسبوعك وأيامك المتتالية بالصلوات الخمس."),
          "checkmark.circle", 1),
-        ("الاستماع لكل القرّاء",
-         "كل قرّاء mp3quran بالروايات المختلفة، والإذاعات.\n\n• حمّل السور للاستماع دون إنترنت.\n• سرعة التلاوة ومؤقت النوم.\n• التحكم من شاشة القفل، والتلاوة تستمر وأنت خارج التطبيق.",
+        (L("الاستماع لكل القرّاء"),
+         L("كل قرّاء mp3quran بالروايات المختلفة، والإذاعات.\n\n• حمّل السور للاستماع دون إنترنت.\n• سرعة التلاوة ومؤقت النوم.\n• التحكم من شاشة القفل، والتلاوة تستمر وأنت خارج التطبيق."),
          "headphones", 1),
-        ("الأذكار بعدّاد",
-         "أذكار الصباح والمساء والنوم وبعد الصلاة، دون إنترنت، وعدّاد لكل ذكر يعدّ معك حتى تتمّه.\n\nمن «اليوم» أو «الأدوات» ← «الأذكار».",
+        (L("الأذكار بعدّاد"),
+         L("أذكار الصباح والمساء والنوم وبعد الصلاة، دون إنترنت، وعدّاد لكل ذكر يعدّ معك حتى تتمّه.\n\nمن «اليوم» أو «الأدوات» ← «الأذكار»."),
          "sun.max", 1),
-        ("بوصلة القبلة الجديدة",
-         "الكعبة على القرص تشير إلى القبلة في أي اتجاه كان جوالك، مع الدرجة من الشمال والمسافة إلى الكعبة، وإرشاد «حرّك الجوال يمينًا أو يسارًا» واهتزاز خفيف حين تستقبل القبلة.\n\nضع الجوال مسطحًا، ومن «الأدوات» ← «القبلة».",
+        (L("بوصلة القبلة الجديدة"),
+         L("الكعبة على القرص تشير إلى القبلة في أي اتجاه كان جوالك، مع الدرجة من الشمال والمسافة إلى الكعبة، وإرشاد «حرّك الجوال يمينًا أو يسارًا» واهتزاز خفيف حين تستقبل القبلة.\n\nضع الجوال مسطحًا، ومن «الأدوات» ← «القبلة»."),
          "location.north.circle", 1),
-        ("المصحف مع التفسير",
-         "وضع جديد من زر «Aa» في المصحف: كل آية وتحتها تفسيرها الميسر، دون إنترنت.\n\nوفي المشغّل زر لتكرار كل آية ٣ أو ٥ أو ١٠ مرات، يعينك على الحفظ.",
+        (L("المصحف مع التفسير"),
+         L("وضع جديد من زر «Aa» في المصحف: كل آية وتحتها تفسيرها الميسر، دون إنترنت.\n\nوفي المشغّل زر لتكرار كل آية ٣ أو ٥ أو ١٠ مرات، يعينك على الحفظ."),
          "text.book.closed", 1),
-        ("التجويد والتفاسير والترجمات",
-         "• مصحف التجويد الملوّن مع دليل الأحكام.\n• مكتبة التفاسير: الميسر والسعدي، وابن كثير والطبري والبغوي والقرطبي تنزيلًا اختياريًا.\n• ترجمات معاني القرآن، وجذر الكلمة بلمسة مطوّلة، والآيات المتشابهة.\n\nمن زر «Aa» في المصحف.",
+        (L("التجويد والتفاسير والترجمات"),
+         L("• مصحف التجويد الملوّن مع دليل الأحكام.\n• مكتبة التفاسير: الميسر والسعدي، وابن كثير والطبري والبغوي والقرطبي تنزيلًا اختياريًا.\n• ترجمات معاني القرآن، وجذر الكلمة بلمسة مطوّلة، والآيات المتشابهة.\n\nمن زر «Aa» في المصحف."),
          "paintpalette", 1),
-        ("التمرير التلقائي",
-         "تنزل الصفحة وحدها وتنتقل إلى التالية، بالسرعة التي تختارها بزرّي − و+، ويتوقف ما دام إصبعك على الشاشة.\n\nمن زر «Aa» في المصحف ← «التمرير التلقائي للصفحات».",
+        (L("التمرير التلقائي"),
+         L("تنزل الصفحة وحدها وتنتقل إلى التالية، بالسرعة التي تختارها بزرّي − و+، ويتوقف ما دام إصبعك على الشاشة.\n\nمن زر «Aa» في المصحف ← «التمرير التلقائي للصفحات»."),
          "arrow.down.circle", 1),
-        ("ظلّل وأضف ملاحظاتك",
-         "اضغط على آية فتظلّلها بأحد أربعة ألوان، أو تضيف لها ملاحظة، أو تجمعها في مجموعة باسمك.\n\nتجدها كلها في 🔖 «ملاحظاتي» في المصحف.",
+        (L("ظلّل وأضف ملاحظاتك"),
+         L("اضغط على آية فتظلّلها بأحد أربعة ألوان، أو تضيف لها ملاحظة، أو تجمعها في مجموعة باسمك.\n\nتجدها كلها في 🔖 «ملاحظاتي» في المصحف."),
          "highlighter", 1),
-        ("احفظ وراجع",
-         "اضغط على آية ثم «أضفها لحفظي»: الآية، أو إلى آخر الصفحة، أو إلى آخر السورة.\n\nنعرضها عليك في أوقات متباعدة: تظهر أول كلمتين والباقي مخفي، ثم تختار «نسيتها» أو «بتردد» أو «متقنة»، فتعود غدًا أو بعد أيام أو بعد أسبوع وأكثر.",
+        (L("احفظ وراجع"),
+         L("اضغط على آية ثم «أضفها لحفظي»: الآية، أو إلى آخر الصفحة، أو إلى آخر السورة.\n\nنعرضها عليك في أوقات متباعدة: تظهر أول كلمتين والباقي مخفي، ثم تختار «نسيتها» أو «بتردد» أو «متقنة»، فتعود غدًا أو بعد أيام أو بعد أسبوع وأكثر."),
          "puzzlepiece", 1),
-        ("سمّع بصوتك (تجريبي)",
-         "اقرأ من حفظك فتظهر الكلمات كلما قرأتها، والكلمة التي تتجاوزها تظهر بالبرتقالي.\n\nمن «سمّع من هنا» في لوحة الآية، أو 🎙️ في مراجعة الحفظ. التعرّف من جوالك نفسه، ولا يُحفظ صوتك.",
+        (L("سمّع بصوتك (تجريبي)"),
+         L("اقرأ من حفظك فتظهر الكلمات كلما قرأتها، والكلمة التي تتجاوزها تظهر بالبرتقالي.\n\nمن «سمّع من هنا» في لوحة الآية، أو 🎙️ في مراجعة الحفظ. التعرّف من جوالك نفسه، ولا يُحفظ صوتك."),
          "mic", 1),
-        ("ابحث بالمعنى",
-         "اكتب ما تبحث عنه بكلماتك، مثل «بر الوالدين» أو «الصبر على المرض»، فتظهر الآيات التي معناها ما تقصد ولو لم تحمل لفظك، من التفسير الميسر.\n\nمن 🔍 في المصحف، أو «بحث بالمعنى» في «الأدوات».",
+        (L("ابحث بالمعنى"),
+         L("اكتب ما تبحث عنه بكلماتك، مثل «بر الوالدين» أو «الصبر على المرض»، فتظهر الآيات التي معناها ما تقصد ولو لم تحمل لفظك، من التفسير الميسر.\n\nمن 🔍 في المصحف، أو «بحث بالمعنى» في «الأدوات»."),
          "text.magnifyingglass", 1),
-        ("ختمة العائلة",
-         "أنشئ ختمة وأرسل رابطها لأهلك؛ كل فرد يحجز جزءًا ويعلّم عليه حين يُتمّه، وتتابعون التقدّم معًا حتى الختم.\n\nمن «الأدوات» ← «ختمة العائلة».",
+        (L("ختمة العائلة"),
+         L("أنشئ ختمة وأرسل رابطها لأهلك؛ كل فرد يحجز جزءًا ويعلّم عليه حين يُتمّه، وتتابعون التقدّم معًا حتى الختم.\n\nمن «الأدوات» ← «ختمة العائلة»."),
          "person.3", 1),
-        ("رحلتي",
-         "سلسلتك الحالية وأطولها، وأيام قراءتك في آخر ٣٠ يومًا، وختماتك، وحفظك.\n\nاضغط بطاقة الأيام المتتالية في «الأدوات».",
+        (L("رحلتي"),
+         L("سلسلتك الحالية وأطولها، وأيام قراءتك في آخر ٣٠ يومًا، وختماتك، وحفظك.\n\nاضغط بطاقة الأيام المتتالية في «الأدوات»."),
          "chart.bar", 1),
-        ("نسختك محفوظة",
-         "تتزامن بياناتك مع iCloud بين أجهزتك: الختمة والحفظ والعلامات والملاحظات وصلواتك.\n\nومن «الإعدادات» ← «النسخ الاحتياطي» تصدّر ملفًا يُنقل إلى جوال آخر، ولو كان أندرويد.",
+        (L("نسختك محفوظة"),
+         L("تتزامن بياناتك مع iCloud بين أجهزتك: الختمة والحفظ والعلامات والملاحظات وصلواتك.\n\nومن «الإعدادات» ← «النسخ الاحتياطي» تصدّر ملفًا يُنقل إلى جوال آخر، ولو كان أندرويد."),
          "icloud", 1),
-        ("ساعة أبل",
-         "على ساعتك: الصلاة القادمة، وورد اليوم، والتسبيح، وآية اليوم.\n\nثبّت التطبيق على الساعة من تطبيق «Watch» في الآيفون.",
+        (L("ساعة أبل"),
+         L("على ساعتك: الصلاة القادمة، وورد اليوم، والتسبيح، وآية اليوم.\n\nثبّت التطبيق على الساعة من تطبيق «Watch» في الآيفون."),
          "applewatch", 1),
-        ("اسأل Siri",
-         "قل لـ Siri: «الصلاة القادمة في حول العالم» فيجيبك بالوقت، أو «افتح المصحف في حول العالم»، أو «راجع حفظي»، أو «ورد اليوم».\n\nوتجدها في تطبيق «الاختصارات».",
+        (L("اسأل Siri"),
+         L("قل لـ Siri: «الصلاة القادمة في حول العالم» فيجيبك بالوقت، أو «افتح المصحف في حول العالم»، أو «راجع حفظي»، أو «ورد اليوم».\n\nوتجدها في تطبيق «الاختصارات»."),
          "mic.circle", 1),
-        ("ختمتي وتذكير الورد",
-         "خطتك على مقاسك: المدة أو الورد اليومي وأيام الراحة، ويُوزَّع الباقي إن فاتك يوم، وتذكير يصلك في وقته ولا يصلك إن أتممت وردك.",
+        (L("ختمتي وتذكير الورد"),
+         L("خطتك على مقاسك: المدة أو الورد اليومي وأيام الراحة، ويُوزَّع الباقي إن فاتك يوم، وتذكير يصلك في وقته ولا يصلك إن أتممت وردك."),
          "book.closed", 0),
-        ("اجعلها صدقة جارية",
-         "شارك التطبيق باسم من تحب، حيًّا أو ميتًا، ليصل القرآن إلى غيرك صدقةً عنه.\n\nوأضف إلى شاشة جوالك ويدجت: آية اليوم، ومواقيت الصلاة، وختمتي، ورمضان.",
+        (L("اجعلها صدقة جارية"),
+         L("شارك التطبيق باسم من تحب، حيًّا أو ميتًا، ليصل القرآن إلى غيرك صدقةً عنه.\n\nوأضف إلى شاشة جوالك ويدجت: آية اليوم، ومواقيت الصلاة، وختمتي، ورمضان."),
          "heart", 0),
     ]
 
     var body: some View {
         VStack(spacing: 0) {
             HStack {
-                Button("تخطٍّ") { close() }.font(AppFont.ui(15, 500)).foregroundColor(Palette.muted).padding(8)
+                Button(L("تخطٍّ")) { close() }.font(AppFont.ui(15, 500)).foregroundColor(Palette.muted).padding(8)
                 Spacer()
             }
             TabView(selection: $index) {
@@ -547,11 +547,11 @@ struct FeaturesView: View {
             }
             .padding(.vertical, 14)
             HStack(spacing: 10) {
-                Button { withAnimation { index = max(0, index - 1) } } label: { Pill(title: "السابق", height: 52) }
+                Button { withAnimation { index = max(0, index - 1) } } label: { Pill(title: L("السابق"), height: 52) }
                     .opacity(index == 0 ? 0 : 1)
                 Button {
                     if index == Self.slides.count - 1 { close() } else { withAnimation { index += 1 } }
-                } label: { Pill(title: index == Self.slides.count - 1 ? "ابدأ" : "التالي", primary: true, height: 52) }
+                } label: { Pill(title: index == Self.slides.count - 1 ? L("ابدأ") : L("التالي"), primary: true, height: 52) }
                     .layoutPriority(1.4)
             }
         }
@@ -568,7 +568,7 @@ struct FeaturesView: View {
                     .background(RoundedRectangle(cornerRadius: 36).fill(Palette.dark))
                     .padding(.top, 28)
                 if s.3 != 0 {
-                    Text(s.3 == 1 ? "جديد" : "مطوّر").font(AppFont.ui(13, 700)).foregroundColor(Palette.widgetDark)
+                    Text(s.3 == 1 ? L("جديد") : L("مطوّر")).font(AppFont.ui(13, 700)).foregroundColor(Palette.widgetDark)
                         .padding(.horizontal, 14).padding(.vertical, 4)
                         .background(Capsule().fill(Palette.gold))
                         .padding(.top, 16)

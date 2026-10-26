@@ -17,11 +17,11 @@ struct IndexView: View {
                             .frame(width: 40, height: 40)
                             .background(RoundedRectangle(cornerRadius: 12).fill(Palette.gold.opacity(0.15)))
                         VStack(alignment: .leading, spacing: 2) {
-                            Text("آخر قراءة").font(AppFont.ui(12, 700)).foregroundColor(Palette.goldLight)
-                            Text("المصحف · صفحة " + ar(state.lastPage)).font(AppFont.ui(16, 700)).foregroundColor(.white)
+                            Text(L("آخر قراءة")).font(AppFont.ui(12, 700)).foregroundColor(Palette.goldLight)
+                            Text(L("المصحف · صفحة ") + ar(state.lastPage)).font(AppFont.ui(16, 700)).foregroundColor(.white)
                         }
                         Spacer()
-                        Text("أكمل ←").font(AppFont.ui(13, 700)).foregroundColor(Palette.goldLight)
+                        Text(L("أكمل ←")).font(AppFont.ui(13, 700)).foregroundColor(Palette.goldLight)
                     }
                     .padding(12)
                     .background(PatternBackground().clipShape(RoundedRectangle(cornerRadius: 16)))
@@ -35,8 +35,8 @@ struct IndexView: View {
             } else if juz {
                 ForEach(1...30, id: \.self) { j in
                     let p = Quran.juzStart[j - 1]
-                    row(badge: ar(j), name: "الجزء " + ar(j),
-                        meta: "يبدأ في سورة " + Quran.surahName(Quran.surahOf(page: p)), page: p)
+                    row(badge: ar(j), name: L("الجزء ") + ar(j),
+                        meta: L("يبدأ في سورة ") + Quran.surahName(Quran.surahOf(page: p)), page: p)
                 }
             } else {
                 ForEach(1...114, id: \.self) { s in surahRow(s) }
@@ -47,14 +47,14 @@ struct IndexView: View {
         .background(Palette.page)
         .safeAreaInset(edge: .top) {
             VStack(spacing: 10) {
-                TextField("اسم السورة، رقمها، أو رقم الصفحة", text: $query)
+                TextField(L("اسم السورة، رقمها، أو رقم الصفحة"), text: $query)
                     .font(AppFont.ui(15, 500))
                     .padding(.horizontal, 14).frame(minHeight: 46)
                     .card(radius: 14)
                     .submitLabel(.search)
                 Picker("", selection: $juz) {
-                    Text("السور").tag(false)
-                    Text("الأجزاء").tag(true)
+                    Text(L("السور")).tag(false)
+                    Text(L("الأجزاء")).tag(true)
                 }
                 .pickerStyle(.segmented)
                 .disabled(!query.isEmpty)
@@ -62,7 +62,7 @@ struct IndexView: View {
             .padding(.horizontal, 16).padding(.vertical, 8)
             .background(Palette.page)
         }
-        .navigationTitle("فهرس المصحف")
+        .navigationTitle(L("فهرس المصحف"))
         .navigationBarTitleDisplayMode(.inline)
     }
 
@@ -70,7 +70,7 @@ struct IndexView: View {
         let n = Quran.counts[s - 1]
         let p = Quran.surahStart[s - 1]
         return row(badge: ar(s), name: Quran.names[s - 1],
-                   meta: ar(n) + (n >= 3 && n <= 10 ? " آيات" : " آية") + " · الجزء " + ar(Quran.juzOf(page: p)), page: p)
+                   meta: ar(n) + (n >= 3 && n <= 10 ? L(" آيات") : L(" آية")) + L(" · الجزء ") + ar(Quran.juzOf(page: p)), page: p)
     }
 
     private func row(badge: String, name: String, meta: String, page: Int) -> some View {
@@ -82,7 +82,7 @@ struct IndexView: View {
                     Text(meta).font(AppFont.ui(12)).foregroundColor(Palette.muted).lineLimit(1)
                 }
                 Spacer()
-                Text("ص " + ar(page)).font(AppFont.ui(13, 500)).foregroundColor(Palette.muted)
+                Text(L("ص ") + ar(page)).font(AppFont.ui(13, 500)).foregroundColor(Palette.muted)
             }
             .frame(minHeight: 44)
         }
@@ -94,7 +94,7 @@ struct IndexView: View {
         let num = Int(q)
         if let n = num {
             if n >= 1 && n <= 114 { surahRow(n) }
-            if n >= 1 && n <= Quran.pages { row(badge: ar(n), name: "صفحة " + ar(n), meta: Quran.whereIs(page: n), page: n) }
+            if n >= 1 && n <= Quran.pages { row(badge: ar(n), name: L("صفحة ") + ar(n), meta: Quran.whereIs(page: n), page: n) }
             if n < 1 || n > Quran.pages { empty }
         } else {
             let hits = Self.search(q)
@@ -103,7 +103,7 @@ struct IndexView: View {
     }
 
     private var empty: some View {
-        Text("لا توجد سورة بهذا الاسم. جرّب جزءًا من الاسم أو رقم السورة أو الصفحة.")
+        Text(L("لا توجد سورة بهذا الاسم. جرّب جزءًا من الاسم أو رقم السورة أو الصفحة."))
             .font(AppFont.ui(14)).foregroundColor(Palette.muted)
             .frame(maxWidth: .infinity).multilineTextAlignment(.center).padding(.vertical, 24)
             .listRowBackground(Color.clear).listRowSeparator(.hidden)
@@ -135,15 +135,24 @@ struct IndexView: View {
     }
 
     /** المطابقة التامة أولًا («ق» ← سورة ق)، ثم ما يحتوي الكلمة */
+    /** «Al-Baqarah» و«baqara» تتطابق: حروف لاتينية صغيرة بلا «al» ولا h أخيرة */
+    static func enKey(_ s: String) -> String {
+        var k = String(s.lowercased().filter { $0.isASCII && $0.isLetter })
+        if k.hasPrefix("al") && k.count > 4 { k = String(k.dropFirst(2)) }
+        if k.hasSuffix("h") && k.count > 3 { k = String(k.dropLast()) }
+        return k
+    }
+
     static func search(_ q: String) -> [Int] {
         guard !q.isEmpty else { return [] }
         let qq = q.hasPrefix("ال") && q.count > 2 ? String(q.dropFirst(2)) : q
         var exact: [Int] = [], partial: [Int] = []
         for s in 1...114 {
-            let name = normalize(Quran.names[s - 1])
+            let name = normalize(Quran.arNames[s - 1])
             let bare = name.hasPrefix("ال") && name.count > 2 ? String(name.dropFirst(2)) : name
-            if name == q || bare == qq { exact.append(s) }
-            else if name.contains(q) || name.contains(qq) { partial.append(s) }
+            let ek = enKey(q), en = enKey(Quran.names[s - 1])
+            if name == q || bare == qq || (!ek.isEmpty && en == ek) { exact.append(s) }
+            else if name.contains(q) || name.contains(qq) || (!ek.isEmpty && en.contains(ek)) { partial.append(s) }
         }
         return exact + partial
     }
@@ -158,35 +167,35 @@ struct PrayerAzkarView: View {
 
     /** (النص، العدد، المصدر، ملاحظة) — «Q:سورة:من:إلى» آيات من نص المجمع المدمج. نفس قائمة تطبيق أندرويد */
     static let azkar: [(String, Int, String, String)] = [
-        ("أستغفر الله", 3, "رواه مسلم", ""),
-        ("اللهم أنت السلام ومنك السلام، تباركت يا ذا الجلال والإكرام", 1, "رواه مسلم", ""),
-        ("لا إله إلا الله وحده لا شريك له، له الملك وله الحمد وهو على كل شيء قدير، اللهم لا مانع لما أعطيت، ولا معطي لما منعت، ولا ينفع ذا الجد منك الجد", 1, "متفق عليه", ""),
-        ("لا إله إلا الله وحده لا شريك له، له الملك وله الحمد وهو على كل شيء قدير، لا حول ولا قوة إلا بالله، لا إله إلا الله، ولا نعبد إلا إياه، له النعمة وله الفضل وله الثناء الحسن، لا إله إلا الله مخلصين له الدين ولو كره الكافرون", 1, "رواه مسلم", ""),
-        ("سبحان الله", 33, "رواه مسلم", ""),
-        ("الحمد لله", 33, "رواه مسلم", ""),
-        ("الله أكبر", 33, "رواه مسلم", ""),
-        ("لا إله إلا الله وحده لا شريك له، له الملك وله الحمد وهو على كل شيء قدير", 1, "رواه مسلم", "تمام المئة"),
-        ("Q:2:255:255", 1, "رواه النسائي في الكبرى", "آية الكرسي"),
-        ("Q:112:1:4", 1, "رواه أبو داود والترمذي والنسائي", "سورة الإخلاص · وثلاثًا بعد الفجر والمغرب"),
-        ("Q:113:1:5", 1, "رواه أبو داود والترمذي والنسائي", "سورة الفلق · وثلاثًا بعد الفجر والمغرب"),
-        ("Q:114:1:6", 1, "رواه أبو داود والترمذي والنسائي", "سورة الناس · وثلاثًا بعد الفجر والمغرب"),
-        ("اللهم أعني على ذكرك وشكرك وحسن عبادتك", 1, "رواه أبو داود والنسائي", ""),
-        ("لا إله إلا الله وحده لا شريك له، له الملك وله الحمد، يحيي ويميت، وهو على كل شيء قدير", 10, "رواه الترمذي وأحمد", "بعد صلاتي الفجر والمغرب"),
+        (L("أستغفر الله"), 3, L("رواه مسلم"), ""),
+        (L("اللهم أنت السلام ومنك السلام، تباركت يا ذا الجلال والإكرام"), 1, L("رواه مسلم"), ""),
+        (L("لا إله إلا الله وحده لا شريك له، له الملك وله الحمد وهو على كل شيء قدير، اللهم لا مانع لما أعطيت، ولا معطي لما منعت، ولا ينفع ذا الجد منك الجد"), 1, L("متفق عليه"), ""),
+        (L("لا إله إلا الله وحده لا شريك له، له الملك وله الحمد وهو على كل شيء قدير، لا حول ولا قوة إلا بالله، لا إله إلا الله، ولا نعبد إلا إياه، له النعمة وله الفضل وله الثناء الحسن، لا إله إلا الله مخلصين له الدين ولو كره الكافرون"), 1, L("رواه مسلم"), ""),
+        (L("سبحان الله"), 33, L("رواه مسلم"), ""),
+        (L("الحمد لله"), 33, L("رواه مسلم"), ""),
+        (L("الله أكبر"), 33, L("رواه مسلم"), ""),
+        (L("لا إله إلا الله وحده لا شريك له، له الملك وله الحمد وهو على كل شيء قدير"), 1, L("رواه مسلم"), L("تمام المئة")),
+        ("Q:2:255:255", 1, L("رواه النسائي في الكبرى"), L("آية الكرسي")),
+        ("Q:112:1:4", 1, L("رواه أبو داود والترمذي والنسائي"), L("سورة الإخلاص · وثلاثًا بعد الفجر والمغرب")),
+        ("Q:113:1:5", 1, L("رواه أبو داود والترمذي والنسائي"), L("سورة الفلق · وثلاثًا بعد الفجر والمغرب")),
+        ("Q:114:1:6", 1, L("رواه أبو داود والترمذي والنسائي"), L("سورة الناس · وثلاثًا بعد الفجر والمغرب")),
+        (L("اللهم أعني على ذكرك وشكرك وحسن عبادتك"), 1, L("رواه أبو داود والنسائي"), ""),
+        (L("لا إله إلا الله وحده لا شريك له، له الملك وله الحمد، يحيي ويميت، وهو على كل شيء قدير"), 10, L("رواه الترمذي وأحمد"), L("بعد صلاتي الفجر والمغرب")),
     ]
 
     var body: some View {
         ScrollView {
             VStack(spacing: 10) {
-                Text("اضغط على الذكر لتعدّه").font(AppFont.ui(13)).foregroundColor(Palette.muted)
+                Text(L("اضغط على الذكر لتعدّه")).font(AppFont.ui(13)).foregroundColor(Palette.muted)
                     .frame(maxWidth: .infinity, alignment: .leading)
                 ForEach(0..<Self.azkar.count, id: \.self) { i in card(i) }
-                Button("ابدأ من جديد") { counts = Array(repeating: 0, count: Self.azkar.count) }
+                Button(L("ابدأ من جديد")) { counts = Array(repeating: 0, count: Self.azkar.count) }
                     .font(AppFont.ui(14, 700)).foregroundColor(Palette.goldDeep).padding(.vertical, 12)
             }
             .padding(16)
         }
         .background(Palette.page.ignoresSafeArea())
-        .navigationTitle("أذكار بعد الصلاة")
+        .navigationTitle(L("أذكار بعد الصلاة"))
         .navigationBarTitleDisplayMode(.inline)
         .task {
             let specs = Self.azkar.map { $0.0 }
@@ -214,7 +223,7 @@ struct PrayerAzkarView: View {
         let quran = spec.hasPrefix("Q:")
         if let text = quran ? texts[i] : spec {
             let done = counts[i] >= target
-            let countText = done ? "تم ✓" : (target == 1 ? "مرة واحدة" : ar(counts[i]) + " / " + ar(target))
+            let countText = done ? L("تم ✓") : (target == 1 ? L("مرة واحدة") : ar(counts[i]) + " / " + ar(target))
             Button {
                 guard counts[i] < target else { return }
                 counts[i] += 1
@@ -241,7 +250,7 @@ struct PrayerAzkarView: View {
                 .card(done ? Palette.chip : Palette.card, border: done ? Palette.ivoryBorder : Palette.line)
             }
             .buttonStyle(.plain)
-            .accessibilityLabel(text + "، " + countText)
+            .accessibilityLabel(text + L("، ") + countText)
         }
     }
 }

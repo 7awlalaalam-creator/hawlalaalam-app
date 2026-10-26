@@ -7,7 +7,7 @@ import SwiftUI
  */
 enum PrayerLog {
     static let key = "prayer_log"
-    static let names = ["الفجر", "الظهر", "العصر", "المغرب", "العشاء"]
+    static let names = [L("الفجر"), L("الظهر"), L("العصر"), L("المغرب"), L("العشاء")]
     static let full = 0b11111
 
     static func day(_ d: Date = Date()) -> Int {
@@ -70,9 +70,9 @@ struct PrayerLogCard: View {
             let m = PrayerLog.mask(today)
             VStack(alignment: .leading, spacing: 10) {
                 HStack {
-                    Text("صلواتي اليوم").font(AppFont.ui(15, 700)).foregroundColor(Palette.ink)
+                    Text(L("صلواتي اليوم")).font(AppFont.ui(15, 700)).foregroundColor(Palette.ink)
                     Spacer()
-                    Text(ar(PrayerLog.count(m)) + " من ٥").font(AppFont.ui(13, 700)).foregroundColor(Palette.goldDeep)
+                    Text(ar(PrayerLog.count(m)) + L(" من ٥")).font(AppFont.ui(13, 700)).foregroundColor(Palette.goldDeep)
                 }
                 HStack(spacing: 6) {
                     ForEach(0..<5, id: \.self) { i in
@@ -96,11 +96,11 @@ struct PrayerLogCard: View {
                         }
                         .buttonStyle(.plain)
                         .disabled(!due && !on)
-                        .accessibilityLabel(PrayerLog.names[i] + (on ? "، صلّيتها" : due ? "، لم تُسجَّل بعد" : "، لم يدخل وقتها"))
+                        .accessibilityLabel(PrayerLog.names[i] + (on ? L("، صلّيتها") : due ? L("، لم تُسجَّل بعد") : L("، لم يدخل وقتها")))
                     }
                 }
                 NavigationLink(value: Screen.journey) {
-                    Text("هذا الأسبوع: " + ar(PrayerLog.week()) + " من ٣٥ صلاة")
+                    Text(L("هذا الأسبوع: ") + ar(PrayerLog.week()) + L(" من ٣٥ صلاة"))
                         .font(AppFont.ui(12)).foregroundColor(Palette.muted)
                         .frame(maxWidth: .infinity, alignment: .leading)
                 }
@@ -119,9 +119,9 @@ struct PrayerLogJourney: View {
         let streak = PrayerLog.streak()
         return VStack(alignment: .leading, spacing: 10) {
             HStack {
-                Text("صلواتي").font(AppFont.ui(15, 700)).foregroundColor(Palette.ink)
+                Text(L("صلواتي")).font(AppFont.ui(15, 700)).foregroundColor(Palette.ink)
                 Spacer()
-                Text(ar(PrayerLog.week()) + " من ٣٥ هذا الأسبوع").font(AppFont.ui(13)).foregroundColor(Palette.muted)
+                Text(ar(PrayerLog.week()) + L(" من ٣٥ هذا الأسبوع")).font(AppFont.ui(13)).foregroundColor(Palette.muted)
             }
             Grid(horizontalSpacing: 4, verticalSpacing: 4) {
                 GridRow {
@@ -136,7 +136,7 @@ struct PrayerLogJourney: View {
                     let mask = m[d] ?? 0
                     let date = cal.date(byAdding: .day, value: -k, to: Date()) ?? Date()
                     GridRow {
-                        Text(k == 0 ? "اليوم" : weekday(date)).font(AppFont.ui(11, k == 0 ? 700 : 400))
+                        Text(k == 0 ? L("اليوم") : weekday(date)).font(AppFont.ui(11, k == 0 ? 700 : 400))
                             .foregroundColor(Palette.ink).frame(width: 46, alignment: .leading)
                         ForEach(0..<5, id: \.self) { i in
                             RoundedRectangle(cornerRadius: 6)
@@ -147,10 +147,10 @@ struct PrayerLogJourney: View {
                 }
             }
             if streak >= 1 {
-                Label(streak == 1 ? "يوم كامل بالصلوات الخمس" : ar(streak) + " أيام متتالية بالصلوات الخمس", systemImage: "flame")
+                Label(streak == 1 ? L("يوم كامل بالصلوات الخمس") : ar(streak) + L(" أيام متتالية بالصلوات الخمس"), systemImage: "flame")
                     .font(AppFont.ui(13, 700)).foregroundColor(Palette.goldDeep)
             }
-            Text("سجّل صلواتك من بطاقة «صلواتي اليوم» في الصفحة الرئيسية.").font(AppFont.ui(12)).foregroundColor(Palette.muted)
+            Text(L("سجّل صلواتك من بطاقة «صلواتي اليوم» في الصفحة الرئيسية.")).font(AppFont.ui(12)).foregroundColor(Palette.muted)
         }
         .padding(16)
         .card()
@@ -158,7 +158,7 @@ struct PrayerLogJourney: View {
 
     private func weekday(_ d: Date) -> String {
         let f = DateFormatter()
-        f.locale = Locale(identifier: "ar")
+        f.locale = Lang.locale
         f.dateFormat = "EEEE"
         return f.string(from: d)
     }

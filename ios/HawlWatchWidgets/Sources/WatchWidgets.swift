@@ -49,13 +49,13 @@ struct PrayerComplicationView: View {
         case .accessoryCircular:
             ZStack { AccessoryWidgetBackground(); Image(systemName: "location.slash").font(.system(size: 16, weight: .semibold)) }
         case .accessoryInline:
-            Text("افتح التطبيق في جوالك")
+            Text(L("افتح التطبيق في جوالك"))
         case .accessoryCorner:
-            Image(systemName: "location.slash").widgetLabel { Text("حدّد موقعك") }
+            Image(systemName: "location.slash").widgetLabel { Text(L("حدّد موقعك")) }
         default:
             VStack(alignment: .leading, spacing: 1) {
-                Text("الصلاة القادمة").font(.system(size: 12, weight: .bold)).foregroundColor(WColor.gold)
-                Text("افتح التطبيق في جوالك لتحديد موقعك").font(.system(size: 13, weight: .semibold)).lineLimit(2)
+                Text(L("الصلاة القادمة")).font(.system(size: 12, weight: .bold)).foregroundColor(WColor.gold)
+                Text(L("افتح التطبيق في جوالك لتحديد موقعك")).font(.system(size: 13, weight: .semibold)).lineLimit(2)
             }
             .frame(maxWidth: .infinity, alignment: .leading)
         }
@@ -81,7 +81,7 @@ struct PrayerComplicationView: View {
                 .widgetLabel { Text(formatClockShort(entry.at)) }
         default:
             VStack(alignment: .leading, spacing: 1) {
-                Text("الصلاة القادمة").font(.system(size: 12, weight: .bold)).foregroundColor(WColor.gold)
+                Text(L("الصلاة القادمة")).font(.system(size: 12, weight: .bold)).foregroundColor(WColor.gold)
                 Text(name + " · " + formatTime(entry.at)).font(.system(size: 15, weight: .bold))
                 Text(entry.at, style: .timer).font(.system(size: 13).monospacedDigit())
             }
@@ -95,12 +95,12 @@ struct HawlWatchWidgets: Widget {
     var body: some WidgetConfiguration {
         StaticConfiguration(kind: "watch.prayer", provider: PrayerProvider()) { e in
             PrayerComplicationView(entry: e)
-                .environment(\.layoutDirection, .rightToLeft)
-                .environment(\.locale, Locale(identifier: "ar"))
+                .environment(\.layoutDirection, Lang.dir)
+                .environment(\.locale, Lang.locale)
                 .containerBackgroundIfAvailable()
         }
-        .configurationDisplayName("الصلاة القادمة")
-        .description("موعد الصلاة القادمة والعدّ التنازلي")
+        .configurationDisplayName(L("الصلاة القادمة"))
+        .description(L("موعد الصلاة القادمة والعدّ التنازلي"))
         .supportedFamilies([.accessoryCircular, .accessoryRectangular, .accessoryInline, .accessoryCorner])
     }
 }

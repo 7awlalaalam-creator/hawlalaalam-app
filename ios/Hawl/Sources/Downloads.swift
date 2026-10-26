@@ -103,7 +103,7 @@ final class AudioDownloads: NSObject, ObservableObject, URLSessionDownloadDelega
         guard Self.isAudio(url), let u = URL(string: url) else { return }
         if let s = item(url)?.status, s == .done || s == .running { return }
         items.removeAll { $0.url == url }
-        items.append(Item(url: url, title: title.isEmpty ? "تلاوة" : title, reciter: reciter, file: Self.fileName(url)))
+        items.append(Item(url: url, title: title.isEmpty ? L("تلاوة") : title, reciter: reciter, file: Self.fileName(url)))
         items.sort { $0.title < $1.title }
         save()
         session.downloadTask(with: u).resume()
@@ -133,7 +133,7 @@ final class AudioDownloads: NSObject, ObservableObject, URLSessionDownloadDelega
 
     var totalBytes: Int64 { items.filter { $0.status == .done }.reduce(0) { $0 + $1.size } }
 
-    static func mb(_ bytes: Int64) -> String { ar(max(1, Int((Double(bytes) / 1_048_576).rounded()))) + " م.ب" }
+    static func mb(_ bytes: Int64) -> String { ar(max(1, Int((Double(bytes) / 1_048_576).rounded()))) + L(" م.ب") }
 
     private func save() {
         if let data = try? JSONEncoder().encode(items) { UserDefaults.standard.set(data, forKey: "audio_downloads") }
@@ -518,7 +518,7 @@ final class AudioPlayer: ObservableObject {
         guard let it = current else { return }
         var info: [String: Any] = [
             MPMediaItemPropertyTitle: it.title,
-            MPMediaItemPropertyArtist: it.reciter.isEmpty ? "القرآن حول العالم" : it.reciter,
+            MPMediaItemPropertyArtist: it.reciter.isEmpty ? L("القرآن حول العالم") : it.reciter,
             MPNowPlayingInfoPropertyPlaybackRate: playing ? Double(speed) : 0.0,
             MPNowPlayingInfoPropertyIsLiveStream: it.radio,
         ]

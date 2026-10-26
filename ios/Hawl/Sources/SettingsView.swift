@@ -16,11 +16,11 @@ struct SettingsView: View {
     struct TimeEdit: Identifiable { let kind: String; var id: String { kind } }
 
     private let items: [(String, String, String)] = [
-        (Reminders.verse, "آية اليوم", "آية كل صباح مع تفسيرها وزر مشاركتها"),
-        (Reminders.wird, "الورد اليومي", "تذكير بقراءة وردك وإكمال ختمتك"),
-        (Reminders.azkarAM, "أذكار الصباح", "حصّن يومك بذكر الله"),
-        (Reminders.azkarPM, "أذكار المساء", "اختم نهارك بذكر الله"),
-        (Reminders.kahf, "سورة الكهف", "كل جمعة، نورٌ لك ما بين الجمعتين"),
+        (Reminders.verse, L("آية اليوم"), L("آية كل صباح مع تفسيرها وزر مشاركتها")),
+        (Reminders.wird, L("الورد اليومي"), L("تذكير بقراءة وردك وإكمال ختمتك")),
+        (Reminders.azkarAM, L("أذكار الصباح"), L("حصّن يومك بذكر الله")),
+        (Reminders.azkarPM, L("أذكار المساء"), L("اختم نهارك بذكر الله")),
+        (Reminders.kahf, L("سورة الكهف"), L("كل جمعة، نورٌ لك ما بين الجمعتين")),
     ]
 
     @State private var soundNow = AdhanSound.current
@@ -39,18 +39,18 @@ struct SettingsView: View {
             .padding(.bottom, 36)
         }
         .background(Palette.page.ignoresSafeArea())
-        .navigationTitle(notificationsOnly ? "التنبيهات" : "الإعدادات")
+        .navigationTitle(notificationsOnly ? L("التنبيهات") : L("الإعدادات"))
         .navigationBarTitleDisplayMode(.inline)
         .sheet(item: $editing) { e in
             TimePickerSheet(kind: e.kind) { editing = nil }
                 .environmentObject(state)
-                .environment(\.layoutDirection, .rightToLeft)
+                .environment(\.layoutDirection, Lang.dir)
                 .presentationDetents([.medium])
         }
-        .alert("تشخيص صفحة المصحف", isPresented: $showDiag) {
-            Button("حسنًا", role: .cancel) { }
+        .alert(L("تشخيص صفحة المصحف"), isPresented: $showDiag) {
+            Button(L("حسنًا"), role: .cancel) { }
         } message: {
-            Text(Store.string("bridge_diag", "لا يوجد تشخيص بعد — افتح صفحة من الموقع ثم عد هنا"))
+            Text(Store.string("bridge_diag", L("لا يوجد تشخيص بعد — افتح صفحة من الموقع ثم عد هنا")))
         }
         .onReceive(Timer.publish(every: 60, on: .main, in: .common).autoconnect()) { now = $0 }
     }
@@ -59,7 +59,7 @@ struct SettingsView: View {
 
     private var remindersSection: some View {
         VStack(alignment: .leading, spacing: 0) {
-            section("التذكيرات اليومية")
+            section(L("التذكيرات اليومية"))
             VStack(spacing: 0) {
                 ForEach(Array(items.enumerated()), id: \.offset) { i, it in
                     if i > 0 { divider }
@@ -74,13 +74,13 @@ struct SettingsView: View {
                     .padding(.bottom, 12)
                 }
                 divider
-                row("الأذكار مرتبطة بالصلاة", "الصباح بعد الفجر بربع ساعة، والمساء بعد العصر، حسب مدينتك",
+                row(L("الأذكار مرتبطة بالصلاة"), L("الصباح بعد الفجر بربع ساعة، والمساء بعد العصر، حسب مدينتك"),
                     isOn: state.toggle("azkar_by_prayer", true, needsNotifications: false))
                 divider
-                row("تنبيه الإفطار في رمضان", "دعاء الإفطار عند أذان المغرب، يعمل تلقائيًا في رمضان",
+                row(L("تنبيه الإفطار في رمضان"), L("دعاء الإفطار عند أذان المغرب، يعمل تلقائيًا في رمضان"),
                     isOn: state.toggle("iftar_on", true, denied: { permissionDenied = true }))
                 divider
-                row("أخبار وتنبيهات حول العالم", "ما يرسله صاحب التطبيق من أخبار وتنبيهات",
+                row(L("أخبار وتنبيهات حول العالم"), L("ما يرسله صاحب التطبيق من أخبار وتنبيهات"),
                     isOn: state.toggle("news_on", true, denied: { permissionDenied = true }))
             }
             .padding(.horizontal, 16)
@@ -89,12 +89,12 @@ struct SettingsView: View {
             Button {
                 Task {
                     if await Notifications.requestPermission() {
-                        Toast.show("جارٍ جلب آية اليوم…")
+                        Toast.show(L("جارٍ جلب آية اليوم…"))
                         await Notifications.testVerse()
                     } else { permissionDenied = true }
                 }
             } label: {
-                Text("جرّب إشعار آية اليوم الآن").font(AppFont.ui(14, 500)).foregroundColor(Palette.goldDeep)
+                Text(L("جرّب إشعار آية اليوم الآن")).font(AppFont.ui(14, 500)).foregroundColor(Palette.goldDeep)
                     .frame(maxWidth: .infinity, minHeight: 44)
             }
         }
@@ -107,8 +107,8 @@ struct SettingsView: View {
                 if await Notifications.requestPermission() {
                     state.setFlag(kind + "_on", true)
                     permissionDenied = false
-                    Toast.show(kind == Reminders.kahf ? "سيصلك التذكير كل " + Reminders.timeLabel(kind)
-                               : "سيصلك التذكير يوميًا " + (Reminders.byPrayer(kind) ? Reminders.timeLabel(kind) : "الساعة " + Reminders.timeLabel(kind)))
+                    Toast.show(kind == Reminders.kahf ? L("سيصلك التذكير كل ") + Reminders.timeLabel(kind)
+                               : L("سيصلك التذكير يوميًا ") + (Reminders.byPrayer(kind) ? Reminders.timeLabel(kind) : L("الساعة ") + Reminders.timeLabel(kind)))
                 } else { permissionDenied = true }
             }
         })
@@ -118,7 +118,7 @@ struct SettingsView: View {
         Button {
             if let u = URL(string: UIApplication.openSettingsURLString) { UIApplication.shared.open(u) }
         } label: {
-            Text("الإشعارات متوقفة لهذا التطبيق، فعّلها من إعدادات الجوال ›").font(AppFont.ui(13, 700)).foregroundColor(Palette.goldDeep)
+            Text(L("الإشعارات متوقفة لهذا التطبيق، فعّلها من إعدادات الجوال ›")).font(AppFont.ui(13, 700)).foregroundColor(Palette.goldDeep)
                 .padding(.top, 10)
         }
     }
@@ -127,54 +127,54 @@ struct SettingsView: View {
 
     private var adhanSection: some View {
         VStack(alignment: .leading, spacing: 0) {
-            section("الأذان ومواقيت الصلاة")
+            section(L("الأذان ومواقيت الصلاة"))
             VStack(spacing: 0) {
-                row("تنبيه الأذان", "عند دخول كل صلاة مع فضلها، حسب طريقة الحساب أدناه", isOn: adhanBinding)
+                row(L("تنبيه الأذان"), L("عند دخول كل صلاة مع فضلها، حسب طريقة الحساب أدناه"), isOn: adhanBinding)
                 if state.flag("adhan_on") { adhanHealth }
                 divider
                 NavigationLink { AdhanSoundPicker() } label: {
                     HStack {
                         VStack(alignment: .leading, spacing: 2) {
-                            Text("صوت تنبيه الأذان").font(AppFont.ui(15, 500)).foregroundColor(Palette.ink)
+                            Text(L("صوت تنبيه الأذان")).font(AppFont.ui(15, 500)).foregroundColor(Palette.ink)
                             Text(AdhanSound.name(soundNow)).font(AppFont.ui(12)).foregroundColor(Palette.muted)
                         }
                         Spacer()
-                        Text("تغيير ›").font(AppFont.ui(13)).foregroundColor(Palette.muted)
+                        Text(L("تغيير ›")).font(AppFont.ui(13)).foregroundColor(Palette.muted)
                     }
                     .frame(minHeight: 56)
                 }
                 .onAppear { soundNow = AdhanSound.current }
                 divider
                 if LiveActivities.supported {
-                    row("الصلاة القادمة على شاشة القفل", "عدّاد هادئ في الجزيرة الديناميكية وشاشة القفل حتى دخول الوقت",
+                    row(L("الصلاة القادمة على شاشة القفل"), L("عدّاد هادئ في الجزيرة الديناميكية وشاشة القفل حتى دخول الوقت"),
                         isOn: state.toggle(LiveActivities.key, false, needsNotifications: false))
                     divider
                 }
-                row("تنبيه الشروق", "انتهاء وقت الفجر، وفضل الجلوس للذكر وصلاة الضحى",
+                row(L("تنبيه الشروق"), L("انتهاء وقت الفجر، وفضل الجلوس للذكر وصلاة الضحى"),
                     isOn: state.toggle("sunrise_on", true, denied: { permissionDenied = true }))
                 divider
-                row("تذكير الصيام المسنون", "ليلة الاثنين والخميس والأيام البيض وعرفة وعاشوراء",
+                row(L("تذكير الصيام المسنون"), L("ليلة الاثنين والخميس والأيام البيض وعرفة وعاشوراء"),
                     isOn: state.toggle("fasting_on", true, denied: { permissionDenied = true }))
                 divider
                 HStack {
-                    Label(state.hasLocation ? (state.city.isEmpty ? "موقعك الحالي" : state.city) + " · " + hijriToday() : "لم يُحدَّد الموقع بعد",
+                    Label(state.hasLocation ? (state.city.isEmpty ? L("موقعك الحالي") : state.city) + " · " + hijriToday() : L("لم يُحدَّد الموقع بعد"),
                           systemImage: "mappin.and.ellipse")
                         .font(AppFont.ui(13)).foregroundColor(Palette.muted).lineLimit(2)
                     Spacer()
                     Button { location.requestLocation() } label: {
                         if location.busy { ProgressView() } else {
-                            Text("تحديث الموقع").font(AppFont.ui(13, 700)).foregroundColor(Palette.goldDeep)
+                            Text(L("تحديث الموقع")).font(AppFont.ui(13, 700)).foregroundColor(Palette.goldDeep)
                         }
                     }
                     .padding(.vertical, 10)
                 }
                 if location.denied {
-                    Button("نحتاج موقعك لحساب مواقيت الصلاة بدقة — السماح من الإعدادات ›") {
+                    Button(L("نحتاج موقعك لحساب مواقيت الصلاة بدقة — السماح من الإعدادات ›")) {
                         if let u = URL(string: UIApplication.openSettingsURLString) { UIApplication.shared.open(u) }
                     }
                     .font(AppFont.ui(12, 700)).foregroundColor(Palette.goldDeep).padding(.bottom, 8)
                 } else if location.failed {
-                    Text("تعذّر تحديد الموقع، فعّل خدمة الموقع ثم حاول مرة أخرى").font(AppFont.ui(12)).foregroundColor(Palette.muted)
+                    Text(L("تعذّر تحديد الموقع، فعّل خدمة الموقع ثم حاول مرة أخرى")).font(AppFont.ui(12)).foregroundColor(Palette.muted)
                         .padding(.bottom, 8)
                 }
                 prayerGrid.padding(.bottom, 14)
@@ -182,21 +182,21 @@ struct SettingsView: View {
                 NavigationLink { MethodPicker().environmentObject(state) } label: {
                     HStack {
                         VStack(alignment: .leading, spacing: 2) {
-                            Text("طريقة حساب المواقيت").font(AppFont.ui(15, 500)).foregroundColor(Palette.ink)
-                            Text((state.calcMethod == 0 ? "تلقائي حسب دولتك · " : "") + Prayer.currentMethod().name + "\n" + Prayer.currentMethod().detail)
+                            Text(L("طريقة حساب المواقيت")).font(AppFont.ui(15, 500)).foregroundColor(Palette.ink)
+                            Text((state.calcMethod == 0 ? L("تلقائي حسب دولتك · ") : "") + Prayer.currentMethod().name + "\n" + Prayer.currentMethod().detail)
                                 .font(AppFont.ui(12)).foregroundColor(Palette.muted).multilineTextAlignment(.leading)
                         }
                         Spacer()
-                        Text("تغيير ›").font(AppFont.ui(13)).foregroundColor(Palette.muted)
+                        Text(L("تغيير ›")).font(AppFont.ui(13)).foregroundColor(Palette.muted)
                     }
                     .frame(minHeight: 60)
                 }
                 divider
                 NavigationLink(value: Screen.qibla) {
                     HStack {
-                        Label("بوصلة القبلة", systemImage: "location.north.circle").font(AppFont.ui(15, 500)).foregroundColor(Palette.ink)
+                        Label(L("بوصلة القبلة"), systemImage: "location.north.circle").font(AppFont.ui(15, 500)).foregroundColor(Palette.ink)
                         Spacer()
-                        Text("افتح ›").font(AppFont.ui(13)).foregroundColor(Palette.muted)
+                        Text(L("افتح ›")).font(AppFont.ui(13)).foregroundColor(Palette.muted)
                     }
                     .frame(minHeight: 52)
                 }
@@ -214,7 +214,7 @@ struct SettingsView: View {
                 guard await Notifications.requestPermission() else { permissionDenied = true; return }
                 if !state.hasLocation { location.requestLocation() }
                 state.setFlag("adhan_on", true)
-                Toast.show("تم تفعيل تنبيه الأذان ✓")
+                Toast.show(L("تم تفعيل تنبيه الأذان ✓"))
             }
         })
     }
@@ -222,11 +222,11 @@ struct SettingsView: View {
     private var adhanHealth: some View {
         let until = Store.d.double(forKey: "notif_until")
         let msg: String
-        if !state.hasLocation { msg = "حدّد موقعك ليُجدول الأذان في مدينتك" }
+        if !state.hasLocation { msg = L("حدّد موقعك ليُجدول الأذان في مدينتك") }
         else if until > 0 {
-            msg = "✓ التنبيه مضبوط ليصل في وقته بالدقيقة · مجدول حتى " + hijriShort(Date(timeIntervalSince1970: until))
-                + "، ويتجدد كلما فتحت التطبيق"
-        } else { msg = "✓ التنبيه مضبوط ليصل في وقته بالدقيقة" }
+            msg = L("✓ التنبيه مضبوط ليصل في وقته بالدقيقة · مجدول حتى ") + hijriShort(Date(timeIntervalSince1970: until))
+                + L("، ويتجدد كلما فتحت التطبيق")
+        } else { msg = L("✓ التنبيه مضبوط ليصل في وقته بالدقيقة") }
         return Text(msg).font(AppFont.ui(13, 500)).foregroundColor(msg.hasPrefix("✓") ? Palette.gold : Palette.muted)
             .frame(maxWidth: .infinity, alignment: .leading)
             .padding(.bottom, 10)
@@ -254,7 +254,7 @@ struct SettingsView: View {
                     }
                 }
             } else {
-                Text("حدّد موقعك لعرض مواقيت الصلاة").font(AppFont.ui(14)).foregroundColor(Palette.muted)
+                Text(L("حدّد موقعك لعرض مواقيت الصلاة")).font(AppFont.ui(14)).foregroundColor(Palette.muted)
                     .frame(maxWidth: .infinity, alignment: .leading)
             }
         }
@@ -264,21 +264,21 @@ struct SettingsView: View {
 
     private var readingSection: some View {
         VStack(alignment: .leading, spacing: 0) {
-            section("القراءة")
+            section(L("القراءة"))
             VStack(alignment: .leading, spacing: 0) {
-                row("إبقاء الشاشة مضاءة", "لا تنطفئ الشاشة أثناء القراءة والاستماع",
+                row(L("إبقاء الشاشة مضاءة"), L("لا تنطفئ الشاشة أثناء القراءة والاستماع"),
                     isOn: state.toggle("keep_screen", true, needsNotifications: false))
                 divider
-                Text("حجم الخط: " + ar(state.textZoom) + "٪").font(AppFont.ui(16, 700)).foregroundColor(Palette.ink).padding(.top, 14)
-                Text("حجم النص في صفحات القراءة والتفسير").font(AppFont.ui(13)).foregroundColor(Palette.muted)
+                Text(L("حجم الخط: ") + ar(state.textZoom) + L("٪")).font(AppFont.ui(16, 700)).foregroundColor(Palette.ink).padding(.top, 14)
+                Text(L("حجم النص في صفحات القراءة والتفسير")).font(AppFont.ui(13)).foregroundColor(Palette.muted)
                 Slider(value: Binding(get: { Double(state.textZoom) }, set: { state.textZoom = Int($0) }), in: 80...160, step: 10)
                     .tint(Palette.goldDeep)
-                    .accessibilityLabel("حجم الخط")
+                    .accessibilityLabel(L("حجم الخط"))
                     .padding(.bottom, 6)
                 divider
-                Text("المظهر").font(AppFont.ui(16, 700)).foregroundColor(Palette.ink).padding(.top, 14).padding(.bottom, 10)
+                Text(L("المظهر")).font(AppFont.ui(16, 700)).foregroundColor(Palette.ink).padding(.top, 14).padding(.bottom, 10)
                 HStack(spacing: 8) {
-                    ForEach(Array(["تلقائي", "نهاري", "ليلي"].enumerated()), id: \.offset) { i, n in
+                    ForEach(Array([L("تلقائي"), L("نهاري"), L("ليلي")].enumerated()), id: \.offset) { i, n in
                         Button { state.themeMode = i } label: {
                             Text(n).font(AppFont.ui(14, 500)).foregroundColor(state.themeMode == i ? .white : Palette.ink)
                                 .frame(maxWidth: .infinity, minHeight: 42)
@@ -288,10 +288,12 @@ struct SettingsView: View {
                     }
                 }
                 .padding(.bottom, 14)
+                divider
+                LanguagePicker()
             }
             .padding(.horizontal, 16)
             .card()
-            Text("أضف ويدجت «آية اليوم» و«مواقيت الصلاة» و«ختمتي» و«رمضان»: اضغط مطولًا على مكان فارغ في الشاشة الرئيسية ← زر + ← حول العالم.")
+            Text(L("أضف ويدجت «آية اليوم» و«مواقيت الصلاة» و«ختمتي» و«رمضان»: اضغط مطولًا على مكان فارغ في الشاشة الرئيسية ← زر + ← حول العالم."))
                 .font(AppFont.ui(13)).foregroundColor(Palette.muted).padding(.horizontal, 6).padding(.top, 10)
         }
     }
@@ -300,14 +302,14 @@ struct SettingsView: View {
 
     private var generalSection: some View {
         VStack(spacing: 10) {
-            section("عام").frame(maxWidth: .infinity, alignment: .leading)
+            section(L("عام")).frame(maxWidth: .infinity, alignment: .leading)
             NavigationLink(value: Screen.backup) {
                 HStack(spacing: 12) {
                     Image(systemName: "icloud.and.arrow.up").foregroundColor(Palette.goldDeep)
                         .frame(width: 42, height: 42).background(Circle().fill(Palette.chip))
                     VStack(alignment: .leading, spacing: 2) {
-                        Text("النسخ والمزامنة").font(AppFont.ui(15, 700)).foregroundColor(Palette.ink)
-                        Text(CloudSync.enabled ? "المزامنة مع iCloud مفعّلة" : "iCloud وملف نسخة احتياطية").font(AppFont.ui(12)).foregroundColor(Palette.muted)
+                        Text(L("النسخ والمزامنة")).font(AppFont.ui(15, 700)).foregroundColor(Palette.ink)
+                        Text(CloudSync.enabled ? L("المزامنة مع iCloud مفعّلة") : L("iCloud وملف نسخة احتياطية")).font(AppFont.ui(12)).foregroundColor(Palette.muted)
                     }
                     Spacer()
                     Image(systemName: "chevron.left").foregroundColor(Palette.muted)
@@ -315,13 +317,13 @@ struct SettingsView: View {
                 .padding(12).card()
             }
             Button { Share.present([state.shareAppText]) } label: {
-                Pill(title: "شارك التطبيق مع من تحب", systemImage: "square.and.arrow.up", primary: true, height: 54)
+                Pill(title: L("شارك التطبيق مع من تحب"), systemImage: "square.and.arrow.up", primary: true, height: 54)
             }
             HStack(spacing: 10) {
-                Button { Browser.open(Links.contact) } label: { Pill(title: "أرسل ملاحظة", systemImage: "envelope", height: 50) }
-                Button { state.showTour = true } label: { Pill(title: "جولة في المميزات", systemImage: "sparkles", height: 50) }
+                Button { Browser.open(Links.contact) } label: { Pill(title: L("أرسل ملاحظة"), systemImage: "envelope", height: 50) }
+                Button { state.showTour = true } label: { Pill(title: L("جولة في المميزات"), systemImage: "sparkles", height: 50) }
             }
-            Text("✦  الإصدار " + ar(WebConfig.version) + "  ✦").font(AppFont.ui(13, 500)).foregroundColor(Palette.muted)
+            Text(L("✦  الإصدار ") + ar(WebConfig.version) + "  ✦").font(AppFont.ui(13, 500)).foregroundColor(Palette.muted)
                 .padding(.top, 20)
                 .onTapGesture {
                     // لصاحب الموقع: ٧ لمسات تستبعد زيارات هذا الجوال من الإحصاءات
@@ -330,13 +332,13 @@ struct SettingsView: View {
                     versionTaps = 0
                     let on = !Store.bool("internal_device", false)
                     Store.d.set(on, forKey: "internal_device")
-                    Toast.show(on ? "تم: زيارات هذا الجوال لن تُحسب في الإحصاءات" : "عادت زيارات هذا الجوال تُحسب في الإحصاءات")
+                    Toast.show(on ? L("تم: زيارات هذا الجوال لن تُحسب في الإحصاءات") : L("عادت زيارات هذا الجوال تُحسب في الإحصاءات"))
                 }
                 .onLongPressGesture { showDiag = true }
             Button { Browser.open(Links.privacy) } label: {
-                Text("سياسة الخصوصية").font(AppFont.ui(13, 700)).foregroundColor(Palette.goldDeep)
+                Text(L("سياسة الخصوصية")).font(AppFont.ui(13, 700)).foregroundColor(Palette.goldDeep)
             }
-            Text("صدقة جارية لمحمد بن مفرح الشهري رحمه الله، ولموتى المسلمين").font(AppFont.ui(12)).foregroundColor(Palette.muted)
+            Text(L("صدقة جارية لمحمد بن مفرح الشهري رحمه الله، ولموتى المسلمين")).font(AppFont.ui(12)).foregroundColor(Palette.muted)
                 .multilineTextAlignment(.center)
         }
         .buttonStyle(.plain)
@@ -373,21 +375,21 @@ private struct TimePickerSheet: View {
         NavigationStack {
             VStack(spacing: 16) {
                 if Reminders.byPrayer(kind) && kind != Reminders.wird {
-                    Text("الوقت مرتبط بالصلاة. أطفئ «الأذكار مرتبطة بالصلاة» لتحديد وقت ثابت.")
+                    Text(L("الوقت مرتبط بالصلاة. أطفئ «الأذكار مرتبطة بالصلاة» لتحديد وقت ثابت."))
                         .font(AppFont.ui(14)).foregroundColor(Palette.muted).multilineTextAlignment(.center).padding()
                 } else {
                     DatePicker("", selection: $time, displayedComponents: .hourAndMinute)
                         .datePickerStyle(.wheel)
                         .labelsHidden()
-                        .environment(\.locale, Locale(identifier: "ar"))
+                        .environment(\.locale, Lang.locale)
                 }
             }
             .padding()
-            .navigationTitle("وقت التذكير")
+            .navigationTitle(L("وقت التذكير"))
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .confirmationAction) {
-                    Button("تم") {
+                    Button(L("تم")) {
                         if !(Reminders.byPrayer(kind) && kind != Reminders.wird) {
                             let c = Calendar.current.dateComponents([.hour, .minute], from: time)
                             if kind == Reminders.wird { Store.d.set(-1, forKey: "wird_prayer") }   // وقت ثابت بدل الصلاة
@@ -402,7 +404,7 @@ private struct TimePickerSheet: View {
                     }
                     .font(AppFont.ui(15, 700))
                 }
-                ToolbarItem(placement: .cancellationAction) { Button("إلغاء") { done() }.font(AppFont.ui(15)) }
+                ToolbarItem(placement: .cancellationAction) { Button(L("إلغاء")) { done() }.font(AppFont.ui(15)) }
             }
             .onAppear {
                 time = Calendar.current.date(bySettingHour: Reminders.hour(kind), minute: Reminders.minute(kind), second: 0, of: Date()) ?? Date()
@@ -425,7 +427,7 @@ private struct MethodPicker: View {
                 } label: {
                     HStack {
                         VStack(alignment: .leading, spacing: 2) {
-                            Text(i == 0 ? "تلقائي حسب دولتك (" + (Prayer.methods[Prayer.forCountry(Prayer.country())]?.name ?? "") + ")"
+                            Text(i == 0 ? L("تلقائي حسب دولتك (") + (Prayer.methods[Prayer.forCountry(Prayer.country())]?.name ?? "") + ")"
                                  : Prayer.methods[i]?.name ?? "")
                                 .font(AppFont.ui(15, 500)).foregroundColor(Palette.ink)
                             if let m = Prayer.methods[i] { Text(m.detail).font(AppFont.ui(12)).foregroundColor(Palette.muted) }
@@ -436,7 +438,7 @@ private struct MethodPicker: View {
                 }
             }
         }
-        .navigationTitle("طريقة حساب المواقيت")
+        .navigationTitle(L("طريقة حساب المواقيت"))
         .navigationBarTitleDisplayMode(.inline)
     }
 }
@@ -452,13 +454,13 @@ struct AdhanSoundPicker: View {
         ScrollView {
             VStack(alignment: .leading, spacing: 14) {
                 VStack(spacing: 6) {
-                    Text("الله أكبر، الله أكبر").font(AppFont.amiri(30)).foregroundColor(.white)
-                    Text("بصوت أذان المسجد الحرام").font(AppFont.ui(13)).foregroundColor(Palette.onDarkMuted)
+                    Text(L("الله أكبر، الله أكبر")).font(AppFont.amiri(30)).foregroundColor(.white)
+                    Text(L("بصوت أذان المسجد الحرام")).font(AppFont.ui(13)).foregroundColor(Palette.onDarkMuted)
                 }
                 .frame(maxWidth: .infinity).padding(.vertical, 22)
                 .background(PatternBackground().clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous)))
 
-                Text("الصوت عند دخول الوقت").font(AppFont.ui(14, 700)).foregroundColor(Palette.muted)
+                Text(L("الصوت عند دخول الوقت")).font(AppFont.ui(14, 700)).foregroundColor(Palette.muted)
                 VStack(spacing: 0) {
                     ForEach(Array(AdhanSound.options.enumerated()), id: \.element) { i, s in
                         if i > 0 { Rectangle().fill(Palette.divider).frame(height: 1) }
@@ -483,7 +485,7 @@ struct AdhanSoundPicker: View {
                                         .frame(width: 44, height: 44).background(Circle().fill(Palette.chip))
                                 }
                                 .buttonStyle(.plain)
-                                .accessibilityLabel("استماع: " + AdhanSound.name(s))
+                                .accessibilityLabel(L("استماع: ") + AdhanSound.name(s))
                             }
                         }
                     }
@@ -494,8 +496,8 @@ struct AdhanSoundPicker: View {
                 if AdhanSound.available(AdhanSound.full) && AdhanSound.available(AdhanSound.takbeer) {
                     Toggle(isOn: $fajrFull) {
                         VStack(alignment: .leading, spacing: 2) {
-                            Text("أذان الفجر كاملًا دائمًا").font(AppFont.ui(15, 700)).foregroundColor(Palette.ink)
-                            Text("حتى لو اخترت التكبير فقط").font(AppFont.ui(12)).foregroundColor(Palette.muted)
+                            Text(L("أذان الفجر كاملًا دائمًا")).font(AppFont.ui(15, 700)).foregroundColor(Palette.ink)
+                            Text(L("حتى لو اخترت التكبير فقط")).font(AppFont.ui(12)).foregroundColor(Palette.muted)
                         }
                     }
                     .tint(Palette.goldDeep)
@@ -503,23 +505,23 @@ struct AdhanSoundPicker: View {
                     .card()
                     .onChange(of: fajrFull) { _ in Notifications.reschedule() }
                 }
-                Text("يعمل الصوت حتى والتطبيق مغلق. في آيفون يقتصر صوت الإشعار على ٣٠ ثانية، فيُسمع أول الأذان.")
+                Text(L("يعمل الصوت حتى والتطبيق مغلق. في آيفون يقتصر صوت الإشعار على ٣٠ ثانية، فيُسمع أول الأذان."))
                     .font(AppFont.ui(12)).foregroundColor(Palette.muted).fixedSize(horizontal: false, vertical: true)
             }
             .padding(16)
         }
         .background(Palette.page.ignoresSafeArea())
-        .navigationTitle("صوت تنبيه الأذان")
+        .navigationTitle(L("صوت تنبيه الأذان"))
         .navigationBarTitleDisplayMode(.inline)
         .onDisappear { player?.stop() }
     }
 
     private func sub(_ s: String) -> String {
         switch s {
-        case AdhanSound.takbeer: return "«الله أكبر، الله أكبر» · نحو ١٢ ثانية"
-        case AdhanSound.full: return "أذان المسجد الحرام"
-        case AdhanSound.silent: return "إشعار بلا صوت"
-        default: return "نغمة التنبيه في جوالك"
+        case AdhanSound.takbeer: return L("«الله أكبر، الله أكبر» · نحو ١٢ ثانية")
+        case AdhanSound.full: return L("أذان المسجد الحرام")
+        case AdhanSound.silent: return L("إشعار بلا صوت")
+        default: return L("نغمة التنبيه في جوالك")
         }
     }
 
@@ -535,5 +537,37 @@ struct AdhanSoundPicker: View {
         try? AVAudioSession.sharedInstance().setCategory(.playback)
         player = try? AVAudioPlayer(contentsOf: u)
         player?.play()
+    }
+}
+
+
+/** لغة التطبيق: العربية أو English (تُطبَّق عند فتح التطبيق مجددًا) */
+struct LanguagePicker: View {
+    @State private var saved = Lang.saved
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 0) {
+            Text("لغة التطبيق · Language").font(AppFont.ui(16, 700)).foregroundColor(Palette.ink).padding(.top, 14).padding(.bottom, 10)
+            HStack(spacing: 8) {
+                ForEach([(Lang.ar, "العربية"), (Lang.english, "English")], id: \.0) { code, name in
+                    Button {
+                        guard code != saved else { return }
+                        Lang.set(code)
+                        saved = code
+                    } label: {
+                        Text(name).font(AppFont.ui(14, 500)).foregroundColor(saved == code ? .white : Palette.ink)
+                            .frame(maxWidth: .infinity, minHeight: 42)
+                            .background(Capsule().fill(saved == code ? Palette.primary : Palette.card))
+                            .overlay(Capsule().stroke(saved == code ? Color.clear : Palette.fieldBorder))
+                    }
+                }
+            }
+            if saved != Lang.code {
+                Text(saved == Lang.english ? "Close the app and open it again to switch to English."
+                     : "أغلق التطبيق وافتحه مجددًا لتظهر العربية.")
+                    .font(AppFont.ui(12, 700)).foregroundColor(Palette.goldDeep).padding(.top, 8)
+            }
+        }
+        .padding(.bottom, 14)
     }
 }

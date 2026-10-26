@@ -6,7 +6,7 @@ import Foundation
  */
 enum Prayer {
     static let fajr = 0, sunrise = 1, dhuhr = 2, asr = 3, maghrib = 4, isha = 5
-    static let names = ["الفجر", "الشروق", "الظهر", "العصر", "المغرب", "العشاء"]
+    static let names = [L("الفجر"), L("الشروق"), L("الظهر"), L("العصر"), L("المغرب"), L("العشاء")]
     /** الصلوات الخمس (بلا الشروق) */
     static let alerts = [fajr, dhuhr, asr, maghrib, isha]
 
@@ -19,17 +19,17 @@ enum Prayer {
 
         /** «الفجر ١٨٫٥° · العشاء بعد المغرب بـ٩٠ دقيقة» */
         var detail: String {
-            let f = "الفجر " + Method.deg(fajr)
-            var i: String = "العشاء " + Method.deg(isha)
+            let f = L("الفجر ") + Method.deg(fajr)
+            var i: String = L("العشاء ") + Method.deg(isha)
             if ishaMin > 0 {
-                i = "العشاء بعد المغرب بـ" + ar(ishaMin) + " دقيقة"
-                if ishaMinRamadan > ishaMin { i += " (" + ar(ishaMinRamadan) + " في رمضان)" }
+                i = L("العشاء بعد المغرب بـ") + ar(ishaMin) + L(" دقيقة")
+                if ishaMinRamadan > ishaMin { i += " (" + ar(ishaMinRamadan) + L(" في رمضان)") }
             }
             return f + " · " + i
         }
 
         private static func deg(_ d: Double) -> String {
-            let s = d == d.rounded() ? String(Int(d)) : String(format: "%.1f", d).replacingOccurrences(of: ".", with: "٫")
+            let s = d == d.rounded() ? String(Int(d)) : String(format: "%.1f", d).replacingOccurrences(of: ".", with: L("٫"))
             return ar(s) + "°"
         }
     }
@@ -37,22 +37,22 @@ enum Prayer {
     /** الفهرس 0 محجوز لـ«تلقائي حسب الدولة» */
     static let methods: [Method?] = [
         nil,
-        Method(name: "أم القرى (السعودية)", fajr: 18.5, isha: 0, ishaMin: 90, ishaMinRamadan: 120),
-        Method(name: "الهيئة المصرية العامة للمساحة", fajr: 19.5, isha: 17.5),
-        Method(name: "رابطة العالم الإسلامي", fajr: 18, isha: 17),
-        Method(name: "جامعة العلوم الإسلامية بكراتشي", fajr: 18, isha: 18),
-        Method(name: "الجمعية الإسلامية لأمريكا الشمالية", fajr: 15, isha: 15),
-        Method(name: "دبي (الإمارات)", fajr: 18.2, isha: 18.2),
-        Method(name: "الكويت", fajr: 18, isha: 17.5),
-        Method(name: "قطر", fajr: 18, isha: 0, ishaMin: 90, ishaMinRamadan: 90),
-        Method(name: "الخليج (البحرين وعُمان)", fajr: 19.5, isha: 0, ishaMin: 90, ishaMinRamadan: 90),
-        Method(name: "وزارة الأوقاف المغربية", fajr: 19, isha: 17),
-        Method(name: "الجزائر", fajr: 18, isha: 17),
-        Method(name: "تونس", fajr: 18, isha: 18),
-        Method(name: "الأردن", fajr: 18, isha: 18),
-        Method(name: "رئاسة الشؤون الدينية التركية", fajr: 18, isha: 17),
-        Method(name: "ماليزيا وسنغافورة وإندونيسيا", fajr: 20, isha: 18),
-        Method(name: "روسيا", fajr: 16, isha: 15),
+        Method(name: L("أم القرى (السعودية)"), fajr: 18.5, isha: 0, ishaMin: 90, ishaMinRamadan: 120),
+        Method(name: L("الهيئة المصرية العامة للمساحة"), fajr: 19.5, isha: 17.5),
+        Method(name: L("رابطة العالم الإسلامي"), fajr: 18, isha: 17),
+        Method(name: L("جامعة العلوم الإسلامية بكراتشي"), fajr: 18, isha: 18),
+        Method(name: L("الجمعية الإسلامية لأمريكا الشمالية"), fajr: 15, isha: 15),
+        Method(name: L("دبي (الإمارات)"), fajr: 18.2, isha: 18.2),
+        Method(name: L("الكويت"), fajr: 18, isha: 17.5),
+        Method(name: L("قطر"), fajr: 18, isha: 0, ishaMin: 90, ishaMinRamadan: 90),
+        Method(name: L("الخليج (البحرين وعُمان)"), fajr: 19.5, isha: 0, ishaMin: 90, ishaMinRamadan: 90),
+        Method(name: L("وزارة الأوقاف المغربية"), fajr: 19, isha: 17),
+        Method(name: L("الجزائر"), fajr: 18, isha: 17),
+        Method(name: L("تونس"), fajr: 18, isha: 18),
+        Method(name: L("الأردن"), fajr: 18, isha: 18),
+        Method(name: L("رئاسة الشؤون الدينية التركية"), fajr: 18, isha: 17),
+        Method(name: L("ماليزيا وسنغافورة وإندونيسيا"), fajr: 20, isha: 18),
+        Method(name: L("روسيا"), fajr: 16, isha: 15),
     ]
 
     static func forCountry(_ cc: String?) -> Int {
@@ -219,24 +219,29 @@ enum Prayer {
     /** المتبقي بوحدته: «٥٢ دقيقة»، «١:٠٥ ساعة»، «ساعتان»؛ after لصيغة «بعد …» */
     static func remaining(_ seconds: TimeInterval, after: Bool) -> String {
         let m = Int((seconds / 60).rounded(.up))
-        if m <= 0 { return "الآن" }
+        if m <= 0 { return L("الآن") }
+        if Lang.en {
+            let h = m / 60, mm = m % 60
+            let t = m < 60 ? "\(m) min" : mm == 0 ? "\(h) " + (h == 1 ? "hour" : "hours") : String(format: "%d:%02d h", h, mm)
+            return after ? "in " + t : t
+        }
         let t: String
         if m < 60 {
-            t = m == 1 ? "دقيقة" : m == 2 ? (after ? "دقيقتين" : "دقيقتان") : ar(m) + (m <= 10 ? " دقائق" : " دقيقة")
+            t = m == 1 ? L("دقيقة") : m == 2 ? (after ? L("دقيقتين") : L("دقيقتان")) : ar(m) + (m <= 10 ? L(" دقائق") : L(" دقيقة"))
         } else {
             let h = m / 60, mm = m % 60
             if mm == 0 {
-                t = h == 1 ? "ساعة" : h == 2 ? (after ? "ساعتين" : "ساعتان") : ar(h) + (h <= 10 ? " ساعات" : " ساعة")
+                t = h == 1 ? L("ساعة") : h == 2 ? (after ? L("ساعتين") : L("ساعتان")) : ar(h) + (h <= 10 ? L(" ساعات") : L(" ساعة"))
             } else {
-                t = ar(String(format: "%d:%02d", h, mm)) + " ساعة"
+                t = ar(String(format: "%d:%02d", h, mm)) + L(" ساعة")
             }
         }
-        return after ? "بعد " + t : t
+        return after ? L("بعد ") + t : t
     }
 
     /** «الجمعة» بدل «الظهر» يوم الجمعة */
     static func displayName(_ index: Int, on date: Date) -> String {
-        if index == dhuhr && Calendar.current.component(.weekday, from: date) == 6 { return "الجمعة" }
+        if index == dhuhr && Calendar.current.component(.weekday, from: date) == 6 { return L("الجمعة") }
         return names[index]
     }
 }

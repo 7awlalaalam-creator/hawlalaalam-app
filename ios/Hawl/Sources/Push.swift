@@ -112,9 +112,9 @@ enum Push {
         if title.isEmpty && body.isEmpty { return }
         guard markDelivered(info) else { return }
         let c = UNMutableNotificationContent()
-        c.title = title.isEmpty ? "حول العالم" : title
+        c.title = title.isEmpty ? L("حول العالم") : title
         c.body = body
-        c.subtitle = "أخبار حول العالم"
+        c.subtitle = L("أخبار حول العالم")
         c.sound = .default
         let aid = article(info)
         if aid > 0 { c.userInfo = ["article": aid, "url": "\(info["url"] ?? "")"] }

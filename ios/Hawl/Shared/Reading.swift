@@ -14,7 +14,7 @@ enum Reading {
 
     /** عنوان قصير: «المصحف · صفحة ٤» أو اسم السورة بلا ذيل اسم الموقع */
     static func cleanTitle(_ url: URL?, _ title: String?) -> String {
-        if let u = url, Khatma.pageOf(u) > 0 { return "المصحف · صفحة " + ar(Khatma.pageOf(u)) }
+        if let u = url, Khatma.pageOf(u) > 0 { return L("المصحف · صفحة ") + ar(Khatma.pageOf(u)) }
         var t = title ?? ""
         var cut = t.endIndex
         for sep in ["|", " - ", " – ", " — ", " · "] {
@@ -23,7 +23,7 @@ enum Reading {
         t = String(t[t.startIndex..<cut]).trimmingCharacters(in: .whitespaces)
         let s = url?.absoluteString ?? ""
         let index = s.contains("action=quran") || s.contains("/quran.html")
-        if index || t.isEmpty || t.hasPrefix("http") || t.contains("القرآن الكريم كامل") { t = "المصحف الشريف" }
+        if index || t.isEmpty || t.hasPrefix("http") || t.contains("القرآن الكريم كامل") { t = L("المصحف الشريف") }
         return ar(t)
     }
 

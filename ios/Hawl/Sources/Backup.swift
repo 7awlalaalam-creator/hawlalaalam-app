@@ -107,7 +107,7 @@ enum Backup {
         }
     }
 
-    struct Invalid: LocalizedError { var errorDescription: String? { "هذا الملف ليس نسخة احتياطية من «القرآن حول العالم»" } }
+    struct Invalid: LocalizedError { var errorDescription: String? { L("هذا الملف ليس نسخة احتياطية من «القرآن حول العالم»") } }
 
     /** يكتب القيم المحفوظة (يستبدل ما يقابلها ويبقي ما سواه) */
     @MainActor static func restore(_ data: Data) throws {
@@ -293,7 +293,7 @@ struct BackupView: View {
                         Image(systemName: "icloud.fill").foregroundColor(Color(hex: 0x2F6FD6))
                             .frame(width: 46, height: 46).background(Circle().fill(Color(hex: 0x2F6FD6).opacity(0.12)))
                         VStack(alignment: .leading, spacing: 3) {
-                            Text("المزامنة مع iCloud").font(AppFont.ui(15, 700)).foregroundColor(Palette.ink)
+                            Text(L("المزامنة مع iCloud")).font(AppFont.ui(15, 700)).foregroundColor(Palette.ink)
                             Text(syncLine).font(AppFont.ui(12)).foregroundColor(Palette.muted)
                         }
                         Spacer()
@@ -308,65 +308,65 @@ struct BackupView: View {
                 }
                 .padding(.horizontal, 14).card()
 
-                Text("تنتقل ختمتك وعلاماتك وحفظك وسلسلتك تلقائيًا إلى أي آيفون أو آيباد بحسابك في iCloud.")
+                Text(L("تنتقل ختمتك وعلاماتك وحفظك وسلسلتك تلقائيًا إلى أي آيفون أو آيباد بحسابك في iCloud."))
                     .font(AppFont.ui(13)).foregroundColor(Palette.muted).padding(.horizontal, 4)
 
                 VStack(alignment: .leading, spacing: 8) {
-                    Text("ما يُحفظ").font(AppFont.ui(15, 700)).foregroundColor(Palette.ink)
-                    ForEach(["الختمة والورد اليومي", "العلامات وآخر موضع قراءة", "الحفظ ومواعيد المراجعة", "السلسلة وأيام القراءة",
-                             "الإعدادات والتنبيهات والقرّاء المفضّلون", "ختمات العائلة التي انضممت إليها"], id: \.self) { t in
+                    Text(L("ما يُحفظ")).font(AppFont.ui(15, 700)).foregroundColor(Palette.ink)
+                    ForEach([L("الختمة والورد اليومي"), L("العلامات وآخر موضع قراءة"), L("الحفظ ومواعيد المراجعة"), L("السلسلة وأيام القراءة"),
+                             L("الإعدادات والتنبيهات والقرّاء المفضّلون"), L("ختمات العائلة التي انضممت إليها")], id: \.self) { t in
                         Label(t, systemImage: "checkmark").font(AppFont.ui(14)).foregroundColor(Palette.ink)
                     }
                 }
                 .padding(16).frame(maxWidth: .infinity, alignment: .leading).card()
 
                 Button {
-                    if let u = Backup.exportFile() { Share.present([u]) } else { message = "تعذّر إنشاء الملف" }
-                } label: { Pill(title: "تصدير نسخة احتياطية", systemImage: "square.and.arrow.up", primary: true, height: 50) }
+                    if let u = Backup.exportFile() { Share.present([u]) } else { message = L("تعذّر إنشاء الملف") }
+                } label: { Pill(title: L("تصدير نسخة احتياطية"), systemImage: "square.and.arrow.up", primary: true, height: 50) }
                 .buttonStyle(.plain)
-                Button { importing = true } label: { Pill(title: "استعادة من ملف", systemImage: "arrow.down.doc", height: 50) }
+                Button { importing = true } label: { Pill(title: L("استعادة من ملف"), systemImage: "arrow.down.doc", height: 50) }
                     .buttonStyle(.plain)
-                Text("احفظ الملف في «الملفات» أو iCloud Drive أو Google Drive. ويمكن نقله إلى تطبيق أندرويد والعكس.")
+                Text(L("احفظ الملف في «الملفات» أو iCloud Drive أو Google Drive. ويمكن نقله إلى تطبيق أندرويد والعكس."))
                     .font(AppFont.ui(13)).foregroundColor(Palette.muted).padding(.horizontal, 4)
-                Text("بياناتك لك وحدك · لا حساب ولا خادم لنا").font(AppFont.ui(12, 700)).foregroundColor(Palette.goldDeep)
+                Text(L("بياناتك لك وحدك · لا حساب ولا خادم لنا")).font(AppFont.ui(12, 700)).foregroundColor(Palette.goldDeep)
                     .frame(maxWidth: .infinity).padding(.top, 6)
             }
             .padding(16)
         }
         .background(Palette.page.ignoresSafeArea())
-        .navigationTitle("النسخ والمزامنة")
+        .navigationTitle(L("النسخ والمزامنة"))
         .navigationBarTitleDisplayMode(.inline)
         .fileImporter(isPresented: $importing, allowedContentTypes: [.json, .plainText, .data]) { result in
             guard case .success(let url) = result else { return }
             let scoped = url.startAccessingSecurityScopedResource()
             defer { if scoped { url.stopAccessingSecurityScopedResource() } }
-            if let d = try? Data(contentsOf: url) { pending = d } else { message = "تعذّرت قراءة الملف" }
+            if let d = try? Data(contentsOf: url) { pending = d } else { message = L("تعذّرت قراءة الملف") }
         }
-        .alert("استعادة النسخة الاحتياطية؟", isPresented: Binding(get: { pending != nil }, set: { if !$0 { pending = nil } })) {
-            Button("استعد") {
+        .alert(L("استعادة النسخة الاحتياطية؟"), isPresented: Binding(get: { pending != nil }, set: { if !$0 { pending = nil } })) {
+            Button(L("استعد")) {
                 if let d = pending {
-                    do { try Backup.restore(d); message = "تمت الاستعادة بفضل الله"; CloudSync.schedulePush() }
+                    do { try Backup.restore(d); message = L("تمت الاستعادة بفضل الله"); CloudSync.schedulePush() }
                     catch { message = error.localizedDescription }
                 }
                 pending = nil
             }
-            Button("إلغاء", role: .cancel) { pending = nil }
-        } message: { Text("تُستبدل الختمة والعلامات والحفظ والإعدادات الحالية بما في الملف.") }
-        .alert("في iCloud نسخة أحدث", isPresented: $askRemote) {
-            Button("استخدم نسخة iCloud") { icloud = true; CloudSync.setEnabled(true, takeRemote: true) }
-            Button("استخدم بيانات هذا الجهاز") { icloud = true; CloudSync.setEnabled(true, takeRemote: false) }
-            Button("إلغاء", role: .cancel) { }
-        } message: { Text("وُجدت بيانات من جهاز آخر. أيّها تريد أن تبقى؟") }
-        .alert("النسخ والمزامنة", isPresented: Binding(get: { message != nil }, set: { if !$0 { message = nil } })) {
-            Button("حسنًا", role: .cancel) { }
+            Button(L("إلغاء"), role: .cancel) { pending = nil }
+        } message: { Text(L("تُستبدل الختمة والعلامات والحفظ والإعدادات الحالية بما في الملف.")) }
+        .alert(L("في iCloud نسخة أحدث"), isPresented: $askRemote) {
+            Button(L("استخدم نسخة iCloud")) { icloud = true; CloudSync.setEnabled(true, takeRemote: true) }
+            Button(L("استخدم بيانات هذا الجهاز")) { icloud = true; CloudSync.setEnabled(true, takeRemote: false) }
+            Button(L("إلغاء"), role: .cancel) { }
+        } message: { Text(L("وُجدت بيانات من جهاز آخر. أيّها تريد أن تبقى؟")) }
+        .alert(L("النسخ والمزامنة"), isPresented: Binding(get: { message != nil }, set: { if !$0 { message = nil } })) {
+            Button(L("حسنًا"), role: .cancel) { }
         } message: { Text(message ?? "") }
     }
 
     private var syncLine: String {
-        guard icloud else { return "متوقفة" }
-        guard let d = CloudSync.lastSync else { return "مفعّلة" }
+        guard icloud else { return L("متوقفة") }
+        guard let d = CloudSync.lastSync else { return L("مفعّلة") }
         let f = RelativeDateTimeFormatter()
-        f.locale = Locale(identifier: "ar")
-        return "آخر مزامنة " + ar(f.localizedString(for: d, relativeTo: Date()))
+        f.locale = Lang.locale
+        return L("آخر مزامنة ") + ar(f.localizedString(for: d, relativeTo: Date()))
     }
 }

@@ -22,7 +22,7 @@ enum News {
     /** رقم المقالة من رابطها (article.php?id=50 أو /مقالة-50-…html) */
     static func articleID(_ url: String) -> Int {
         let s = url.removingPercentEncoding ?? url
-        for p in ["article\\.php\\?id=([0-9]+)", "مقالة-([0-9]+)"] {
+        for p in ["article\\.php\\?id=([0-9]+)", L("مقالة-([0-9]+)")] {
             if let r = s.range(of: p, options: .regularExpression) {
                 let digits = s[r].filter(\.isNumber)
                 if let n = Int(digits) { return n }
@@ -75,15 +75,15 @@ enum News {
 
     static func ago(_ at: Double) -> String {
         let m = Int(max(0, Date().timeIntervalSince1970 - at) / 60)
-        if m < 1 { return "الآن" }
-        if m < 60 { return "قبل " + count(m, "دقيقة", "دقيقتين", "دقائق") }
-        return "قبل " + count(m / 60, "ساعة", "ساعتين", "ساعات")
+        if m < 1 { return L("الآن") }
+        if m < 60 { return L("قبل ") + count(m, L("دقيقة"), L("دقيقتين"), L("دقائق")) }
+        return L("قبل ") + count(m / 60, L("ساعة"), L("ساعتين"), L("ساعات"))
     }
 
     static func left(_ it: NewsItem) -> String {
         let m = Int(it.left / 60)
-        if m < 60 { return "يختفي بعد " + count(max(1, m), "دقيقة", "دقيقتين", "دقائق") }
-        return "يختفي بعد " + count(m / 60, "ساعة", "ساعتين", "ساعات")
+        if m < 60 { return L("يختفي بعد ") + count(max(1, m), L("دقيقة"), L("دقيقتين"), L("دقائق")) }
+        return L("يختفي بعد ") + count(m / 60, L("ساعة"), L("ساعتين"), L("ساعات"))
     }
 
     private static func count(_ n: Int, _ one: String, _ two: String, _ few: String) -> String {
@@ -101,13 +101,13 @@ struct NewsView: View {
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 12) {
-                Label("تبقى الأخبار هنا ٢٤ ساعة، ثم تُحذف تلقائيًا.", systemImage: "clock")
+                Label(L("تبقى الأخبار هنا ٢٤ ساعة، ثم تُحذف تلقائيًا."), systemImage: "clock")
                     .font(AppFont.ui(13, 500)).foregroundColor(Palette.goldKey)
                     .padding(.horizontal, 12).padding(.vertical, 10)
                     .frame(maxWidth: .infinity, alignment: .leading)
                     .background(RoundedRectangle(cornerRadius: 14).fill(Palette.chip))
                 if items.isEmpty {
-                    Text("لا توجد أخبار الآن.\nحين يصل إشعار جديد من التطبيق يظهر هنا.")
+                    Text(L("لا توجد أخبار الآن.\nحين يصل إشعار جديد من التطبيق يظهر هنا."))
                         .font(AppFont.ui(15)).foregroundColor(Palette.muted).multilineTextAlignment(.center)
                         .frame(maxWidth: .infinity).padding(.top, 50)
                 }
@@ -118,7 +118,7 @@ struct NewsView: View {
             .padding(16)
         }
         .background(Palette.page.ignoresSafeArea())
-        .navigationTitle("أخبار التطبيق")
+        .navigationTitle(L("أخبار التطبيق"))
         .navigationBarTitleDisplayMode(.inline)
         .onAppear {
             items = News.items()
@@ -133,7 +133,7 @@ struct NewsView: View {
         let content = VStack(alignment: .leading, spacing: 8) {
             HStack(spacing: 8) {
                 if it.at > seenBefore { Circle().fill(Color(hex: 0xC4462F)).frame(width: 8, height: 8) }
-                Text(it.article > 0 ? "مقال جديد" : "من صاحب التطبيق").font(AppFont.ui(12, 700))
+                Text(it.article > 0 ? L("مقال جديد") : L("من صاحب التطبيق")).font(AppFont.ui(12, 700))
                     .foregroundColor(dark ? Palette.gold : Palette.goldDeep)
                 Spacer()
                 Text(News.ago(it.at)).font(AppFont.ui(12)).foregroundColor(soft)
@@ -143,7 +143,7 @@ struct NewsView: View {
                 Text(it.body).font(AppFont.ui(14)).foregroundColor(dark ? Palette.onDarkSoft : Palette.muted).lineSpacing(4)
             }
             HStack {
-                if target(it) != nil { Text(it.article > 0 ? "اقرأ المقال" : "افتح").font(AppFont.ui(13, 700)).foregroundColor(ink) }
+                if target(it) != nil { Text(it.article > 0 ? L("اقرأ المقال") : L("افتح")).font(AppFont.ui(13, 700)).foregroundColor(ink) }
                 Spacer()
                 Text(News.left(it)).font(AppFont.ui(12, it.left < 6 * 3600 ? 700 : 400))
                     .foregroundColor(it.left < 6 * 3600 && !dark ? Color(hex: 0xB3412F) : soft)
@@ -190,11 +190,11 @@ struct ArticleItem: Identifiable, Hashable {
     }
 
     var readTime: String {
-        minutes == 1 ? "دقيقة قراءة" : minutes == 2 ? "دقيقتا قراءة" : ar(minutes) + (minutes <= 10 ? " دقائق" : " دقيقة") + " قراءة"
+        minutes == 1 ? L("دقيقة قراءة") : minutes == 2 ? L("دقيقتا قراءة") : ar(minutes) + (minutes <= 10 ? L(" دقائق") : L(" دقيقة")) + L(" قراءة")
     }
 
     var day: String {
-        let m = ["يناير", "فبراير", "مارس", "أبريل", "مايو", "يونيو", "يوليو", "أغسطس", "سبتمبر", "أكتوبر", "نوفمبر", "ديسمبر"]
+        let m = [L("يناير"), L("فبراير"), L("مارس"), L("أبريل"), L("مايو"), L("يونيو"), L("يوليو"), L("أغسطس"), L("سبتمبر"), L("أكتوبر"), L("نوفمبر"), L("ديسمبر")]
         let p = date.split(separator: "-").compactMap { Int($0) }
         guard p.count == 3, (1...12).contains(p[1]) else { return "" }
         return ar(p[2]) + " " + m[p[1] - 1]
@@ -274,7 +274,7 @@ struct ArticlesView: View {
         ScrollView {
             VStack(alignment: .leading, spacing: 10) {
                 if all.isEmpty {
-                    Text(loading ? "جارٍ جلب المقالات…" : failed ? "تحتاج اتصالًا بالإنترنت لأول مرة لجلب المقالات" : "لا توجد مقالات بعد")
+                    Text(loading ? L("جارٍ جلب المقالات…") : failed ? L("تحتاج اتصالًا بالإنترنت لأول مرة لجلب المقالات") : L("لا توجد مقالات بعد"))
                         .font(AppFont.ui(15)).foregroundColor(Palette.muted).frame(maxWidth: .infinity).padding(.top, 60)
                 } else {
                     if cats.count > 1 {
@@ -283,7 +283,7 @@ struct ArticlesView: View {
                                 ForEach([""] + cats, id: \.self) { c in
                                     let on = c == category
                                     Button { category = c } label: {
-                                        Text(c.isEmpty ? "الكل" : c).font(AppFont.ui(14, 700))
+                                        Text(c.isEmpty ? L("الكل") : c).font(AppFont.ui(14, 700))
                                             .foregroundColor(on ? .white : Palette.ink)
                                             .padding(.horizontal, 16).frame(minHeight: 38)
                                             .background(Capsule().fill(on ? Palette.primary : Palette.card))
@@ -301,15 +301,15 @@ struct ArticlesView: View {
                         }
                         .buttonStyle(.plain)
                     }
-                    Text(failed ? "أنت دون إنترنت: تظهر المقالات المحفوظة على جوالك"
-                         : "آخر " + ar(Articles.keepOffline) + " مقالًا محفوظة للقراءة دون إنترنت")
+                    Text(failed ? L("أنت دون إنترنت: تظهر المقالات المحفوظة على جوالك")
+                         : L("آخر ") + ar(Articles.keepOffline) + L(" مقالًا محفوظة للقراءة دون إنترنت"))
                         .font(AppFont.ui(12)).foregroundColor(Palette.muted).frame(maxWidth: .infinity).padding(.top, 8)
                 }
             }
             .padding(16)
         }
         .background(Palette.page.ignoresSafeArea())
-        .navigationTitle("المقالات")
+        .navigationTitle(L("المقالات"))
         .navigationBarTitleDisplayMode(.inline)
         .task {
             let fresh = await Articles.refresh()
@@ -358,13 +358,13 @@ struct ArticleView: View {
             if let a = item, let html = a.html {
                 ArticleWeb(html: page(a, html), onLink: open)
             } else {
-                Text(done ? "تعذّر فتح المقال. تحتاج اتصالًا بالإنترنت لأول مرة، أو افتحه في الموقع." : "جارٍ فتح المقال…")
+                Text(done ? L("تعذّر فتح المقال. تحتاج اتصالًا بالإنترنت لأول مرة، أو افتحه في الموقع.") : L("جارٍ فتح المقال…"))
                     .font(AppFont.ui(15)).foregroundColor(Palette.muted).multilineTextAlignment(.center)
                     .padding(24).frame(maxWidth: .infinity, maxHeight: .infinity)
             }
             HStack(spacing: 8) {
-                Button { Share.present([shareText]) } label: { Pill(title: "مشاركة المقال", systemImage: "square.and.arrow.up", primary: true) }
-                Button { Browser.open(link) } label: { Pill(title: "في الموقع", systemImage: "safari") }
+                Button { Share.present([shareText]) } label: { Pill(title: L("مشاركة المقال"), systemImage: "square.and.arrow.up", primary: true) }
+                Button { Browser.open(link) } label: { Pill(title: L("في الموقع"), systemImage: "safari") }
                     .frame(maxWidth: 130)
             }
             .buttonStyle(.plain)
@@ -372,12 +372,12 @@ struct ArticleView: View {
             .background(Palette.ivory)
         }
         .background(Palette.ivory.ignoresSafeArea())
-        .navigationTitle("المقالات")
+        .navigationTitle(L("المقالات"))
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
             ToolbarItemGroup(placement: .navigationBarTrailing) {
-                Button("أ-") { size = max(14, size - 2) }.accessibilityLabel("تصغير الخط")
-                Button("أ+") { size = min(28, size + 2) }.accessibilityLabel("تكبير الخط")
+                Button(L("أ-")) { size = max(14, size - 2) }.accessibilityLabel(L("تصغير الخط"))
+                Button(L("أ+")) { size = min(28, size + 2) }.accessibilityLabel(L("تكبير الخط"))
             }
         }
         .task {
@@ -388,7 +388,7 @@ struct ArticleView: View {
 
     private var shareText: String {
         let t = item?.title ?? ""
-        return (t.isEmpty ? "" : "«\(t)»\n") + (url.removingPercentEncoding ?? url) + "\n\nمن تطبيق «القرآن حول العالم»: https://7awlalaalam.com/app"
+        return (t.isEmpty ? "" : "«\(t)»\n") + (url.removingPercentEncoding ?? url) + L("\n\nمن تطبيق «القرآن حول العالم»: https://7awlalaalam.com/app")
     }
 
     private func open(_ u: URL) {

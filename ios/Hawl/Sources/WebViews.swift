@@ -146,7 +146,7 @@ final class HawlBridge: NSObject, WKScriptMessageHandler {
             guard let u = o["url"] as? String else { return }
             queried.insert(u)
             AudioDownloads.shared.start(url: u, title: o["title"] as? String ?? "", reciter: o["reciter"] as? String ?? "")
-            Toast.show("بدأ التحميل، تجده في «التلاوات المحمّلة»")
+            Toast.show(L("بدأ التحميل، تجده في «التلاوات المحمّلة»"))
             push(u)
         case "dl_query":
             guard let u = o["url"] as? String else { return }
@@ -224,7 +224,7 @@ struct MushafWebView: UIViewRepresentable {
     private static func script(night: Bool, zoom: Int) -> String {
         let theme: String = night ? "dark" : "light"
         return "window.HawlApp={postMessage:function(m){window.webkit.messageHandlers.HawlApp.postMessage(m)}};"
-            + "window.__hawlTheme='\(theme)';window.__hawlZoom=\(zoom);"
+            + "window.__hawlTheme='\(theme)';window.__hawlZoom=\(zoom);window.__hawlLang='\(Lang.en ? "en" : "ar")';"
     }
 
     func makeUIView(context: Context) -> WKWebView {
@@ -554,12 +554,12 @@ struct WebScreen: View {
     private var offline: some View {
         VStack(spacing: 14) {
             Image(systemName: "wifi.slash").font(.system(size: 40)).foregroundColor(Palette.goldDeep)
-            Text("لا يوجد اتصال بالإنترنت").font(AppFont.ui(18, 700)).foregroundColor(Palette.ink)
-            Text("المصحف والفهرس والأذكار بعد الصلاة والقبلة والمسبحة تعمل دون إنترنت.")
+            Text(L("لا يوجد اتصال بالإنترنت")).font(AppFont.ui(18, 700)).foregroundColor(Palette.ink)
+            Text(L("المصحف والفهرس والأذكار بعد الصلاة والقبلة والمسبحة تعمل دون إنترنت."))
                 .font(AppFont.ui(14)).foregroundColor(Palette.muted).multilineTextAlignment(.center)
-            Button { failed = false; reload += 1 } label: { Pill(title: "إعادة المحاولة", systemImage: "arrow.clockwise", primary: true) }
+            Button { failed = false; reload += 1 } label: { Pill(title: L("إعادة المحاولة"), systemImage: "arrow.clockwise", primary: true) }
                 .frame(maxWidth: 260)
-            Button { AppState.shared.openMushaf(page: nil) } label: { Pill(title: "افتح المصحف", systemImage: "book") }
+            Button { AppState.shared.openMushaf(page: nil) } label: { Pill(title: L("افتح المصحف"), systemImage: "book") }
                 .frame(maxWidth: 260)
         }
         .padding(28)
@@ -572,7 +572,7 @@ struct WebScreen: View {
         var s = t
         for sep in [" | ", " - ", " – ", " — "] { if let r = s.range(of: sep) { s = String(s[..<r.lowerBound]) } }
         s = s.trimmingCharacters(in: .whitespaces)
-        return s.isEmpty ? "حول العالم" : ar(s)
+        return s.isEmpty ? L("حول العالم") : ar(s)
     }
 }
 

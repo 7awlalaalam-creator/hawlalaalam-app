@@ -43,10 +43,10 @@ enum AzkarData {
 
     static func tabTitle(_ id: String) -> String {
         switch id {
-        case "morning": return "الصباح"
-        case "evening": return "المساء"
-        case "sleep": return "النوم"
-        default: return "بعد الصلاة"
+        case "morning": return L("الصباح")
+        case "evening": return L("المساء")
+        case "sleep": return L("النوم")
+        default: return L("بعد الصلاة")
         }
     }
 
@@ -94,17 +94,17 @@ struct AzkarView: View {
                         let c = counts[s.id] ?? AzkarData.progress(s.id, count: s.items.count)
                         let done = zip(c, s.items).filter { pair in pair.0 >= pair.1.count }.count
                         HStack {
-                            Text("أنجزت " + ar(done) + " من " + ar(s.items.count)).font(AppFont.ui(13, 700)).foregroundColor(Palette.ink)
+                            Text(L("أنجزت ") + ar(done) + L(" من ") + ar(s.items.count)).font(AppFont.ui(13, 700)).foregroundColor(Palette.ink)
                             Spacer()
                             Button { reset(s) } label: {
-                                Label("ابدأ من جديد", systemImage: "arrow.counterclockwise").font(AppFont.ui(13, 700)).foregroundColor(Palette.goldDeep)
+                                Label(L("ابدأ من جديد"), systemImage: "arrow.counterclockwise").font(AppFont.ui(13, 700)).foregroundColor(Palette.goldDeep)
                             }
                             .disabled(c.allSatisfy { $0 == 0 })
                         }
                         ProgressView(value: Double(done), total: Double(max(1, s.items.count))).tint(Palette.gold)
                             .padding(.bottom, 6)
                         if done == s.items.count {
-                            Label("أتممت " + s.title + "، تقبّل الله منك", systemImage: "checkmark.seal.fill")
+                            Label(L("أتممت ") + s.title + L("، تقبّل الله منك"), systemImage: "checkmark.seal.fill")
                                 .font(AppFont.ui(15, 700)).foregroundColor(Palette.goldDeep)
                                 .padding(14).frame(maxWidth: .infinity).card(Palette.ivory, border: Palette.ivoryBorder, radius: 16)
                         }
@@ -112,9 +112,9 @@ struct AzkarView: View {
                             zikrCard(s, it, i, c[i]).id(i)
                         }
                     } else {
-                        Text("تعذّر فتح الأذكار").font(AppFont.ui(15)).foregroundColor(Palette.muted).padding(30)
+                        Text(L("تعذّر فتح الأذكار")).font(AppFont.ui(15)).foregroundColor(Palette.muted).padding(30)
                     }
-                    Text("المصدر: حصن المسلم من القرآن والسنة الصحيحة").font(AppFont.ui(12)).foregroundColor(Palette.muted)
+                    Text(L("المصدر: حصن المسلم من القرآن والسنة الصحيحة")).font(AppFont.ui(12)).foregroundColor(Palette.muted)
                         .frame(maxWidth: .infinity).padding(.top, 6)
                 }
                 .padding(16)
@@ -131,7 +131,7 @@ struct AzkarView: View {
             }
         }
         .background(Palette.page.ignoresSafeArea())
-        .navigationTitle("الأذكار")
+        .navigationTitle(L("الأذكار"))
         .navigationBarTitleDisplayMode(.inline)
         .onAppear { load() }
         .keepScreenOn()
@@ -157,7 +157,7 @@ struct AzkarView: View {
                     .multilineTextAlignment(.leading)
                     .frame(maxWidth: .infinity, alignment: .leading)
                 HStack(spacing: 8) {
-                    Text(done ? "✓ تم" : (it.count == 1 ? "مرة واحدة" : ar(n) + " من " + ar(it.count)))
+                    Text(done ? L("✓ تم") : (it.count == 1 ? L("مرة واحدة") : ar(n) + L(" من ") + ar(it.count)))
                         .font(AppFont.ui(13, 700)).foregroundColor(Palette.goldKey)
                         .padding(.horizontal, 10).padding(.vertical, 5)
                         .background(Capsule().fill(Palette.chip))
@@ -166,7 +166,7 @@ struct AzkarView: View {
                     }
                     Spacer(minLength: 0)
                     if !done {
-                        Text("اضغط للعدّ").font(AppFont.ui(13, 700)).foregroundColor(.white)
+                        Text(L("اضغط للعدّ")).font(AppFont.ui(13, 700)).foregroundColor(.white)
                             .padding(.horizontal, 14).frame(minHeight: 34)
                             .background(Capsule().fill(Palette.primary))
                     }
@@ -179,9 +179,9 @@ struct AzkarView: View {
             .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
-        .accessibilityLabel(it.quran != nil ? (it.note ?? "آيات") : it.text)
-        .accessibilityValue(done ? "تم" : ar(n) + " من " + ar(it.count))
-        .accessibilityHint("اضغط مرتين للعدّ")
+        .accessibilityLabel(it.quran != nil ? (it.note ?? L("آيات")) : it.text)
+        .accessibilityValue(done ? L("تم") : ar(n) + L(" من ") + ar(it.count))
+        .accessibilityHint(L("اضغط مرتين للعدّ"))
     }
 
     private func tap(_ s: AzkarSection, _ i: Int) {
