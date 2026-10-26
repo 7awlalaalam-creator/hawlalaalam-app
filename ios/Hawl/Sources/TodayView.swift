@@ -380,7 +380,11 @@ struct TodayView: View {
                     .textSelection(.enabled)
                 // ثلاثة أزرار في صف واحد: الصورة، النص، التفسير
                 HStack(spacing: 6) {
-                    Button { shareImage(v) } label: {
+                    // مشاركة سريعة، أو تصميم البطاقة في الموقع (تغيير الخلفية وإضافة التفسير)
+                    Menu {
+                        Button { shareImage(v) } label: { Label(L("شارك الصورة الآن"), systemImage: "square.and.arrow.up") }
+                        Button { state.open(v.cardURL) } label: { Label(L("صمّم البطاقة: الخلفية والتفسير"), systemImage: "paintbrush") }
+                    } label: {
                         Pill(title: L("صورة"), systemImage: "photo", primary: true, height: 44)
                     }
                     .accessibilityLabel(L("شارك آية اليوم كصورة"))
