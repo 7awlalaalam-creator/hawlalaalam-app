@@ -225,7 +225,15 @@ struct MushafWebView: UIViewRepresentable {
         let theme: String = night ? "dark" : "light"
         return "window.HawlApp={postMessage:function(m){window.webkit.messageHandlers.HawlApp.postMessage(m)}};"
             + "window.__hawlTheme='\(theme)';window.__hawlZoom=\(zoom);window.__hawlLang='\(Lang.en ? "en" : "ar")';"
+            + mushafStrings
     }
+
+    /** ترجمة نصوص صفحة المصحف للإنجليزية (تُحقن قبل تحميلها) */
+    private static let mushafStrings: String = {
+        guard Lang.en, let url = Bundle.main.url(forResource: "mushaf-en", withExtension: "json"),
+              let txt = try? String(contentsOf: url, encoding: .utf8) else { return "" }
+        return "window.__hawlT=" + txt + ";"
+    }()
 
     func makeUIView(context: Context) -> WKWebView {
         let cfg = WKWebViewConfiguration()

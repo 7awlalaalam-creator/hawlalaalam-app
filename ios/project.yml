@@ -48,6 +48,8 @@ targets:
       # ترجمة الواجهة للإنجليزية (نفس ملف أندرويد)
       - path: ../app/src/main/assets/i18n/en.json
         buildPhase: resources
+      - path: ../app/src/main/assets/i18n/mushaf-en.json
+        buildPhase: resources
       # صوت تنبيه الأذان: التكبير بصوت أذان المسجد الحرام، والأذان (أول ٢٩ ثانية: حدّ آيفون لصوت الإشعار)
       - path: Hawl/Sounds/adhan_takbeer.caf
         buildPhase: resources
