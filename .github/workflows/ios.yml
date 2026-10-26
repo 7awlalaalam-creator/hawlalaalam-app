@@ -102,6 +102,22 @@ jobs:
             route "backup" "$mode-14-backup"
             route "qibla" "$mode-15-qibla"
           done
+          # الواجهة بالإنجليزية (لغة التطبيق app_lang)
+          xcrun simctl ui "$UDID" appearance light
+          ARGS+=(-app_lang en)
+          xcrun simctl terminate "$UDID" com.hawlalaalam.quran || true
+          xcrun simctl launch "$UDID" com.hawlalaalam.quran "${ARGS[@]}"
+          shot "en-01-today" 12
+          route "mushaf?page=142" "en-02-mushaf" 9
+          route "tools" "en-03-tools"
+          route "notifications" "en-07-notifications"
+          route "khatma" "en-08-khatma"
+          route "listen" "en-09-listen" 12
+          route "settings" "en-16-settings"
+          route "adhancheck" "en-17-adhancheck"
+          route "world" "en-18-world" 9
+          route "hadith" "en-19-hadith" 9
+          unset 'ARGS[${#ARGS[@]}-1]'; unset 'ARGS[${#ARGS[@]}-1]'
           # النشاط الحي «الصلاة القادمة»: نفتح التطبيق ثم الإعدادات فتظهر الجزيرة الديناميكية
           xcrun simctl ui "$UDID" appearance light
           xcrun simctl terminate "$UDID" com.hawlalaalam.quran || true
