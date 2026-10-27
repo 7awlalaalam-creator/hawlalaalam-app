@@ -1,4 +1,4 @@
-Thank you for reviewing Quran Around The World (القرآن حول العالم), a free, non-profit, ad-free Quran app. The interface is in Arabic. No account or sign-in is needed.
+Thank you for reviewing Quran Around The World (القرآن حول العالم), a free, non-profit, ad-free Quran app. The interface is in Arabic, with an English option (Settings > Language). No account or sign-in is needed.
 
 Native features to try:
 - Mushaf tab: the full Quran works completely offline (bundled data), with tafsir, search and bookmarks.
@@ -10,3 +10,9 @@ Native features to try:
 - Home screen widgets: prayer times, verse of the day, khatma progress, Ramadan.
 
 Location is used only to calculate prayer times and qibla direction and never leaves the device.
+
+New in 2.1:
+- Tools > Mosque mode: optionally silences the phone at iqama time using local notifications only.
+- Tools > Adhan check: verifies notification permissions and sends a test adhan alert after 10 seconds.
+- Tools > Your impact / Around the world: optional and off by default. If the user turns it on, only an anonymous count of pages read and the country code (from the SIM/region setting, not GPS) is sent. There is no account and no device identifier.
+- Tools > Your privacy: explains all data handling.

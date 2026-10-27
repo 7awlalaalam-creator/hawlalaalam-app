@@ -1,0 +1,11 @@
+What's new in 2.1:
+- English: choose the app language in Settings.
+- Mosque mode: your phone goes silent automatically at iqama time, then returns to normal.
+- Adhan check: confirm with one tap that adhan alerts will reach you, plus an automatic weekly check.
+- Your impact: invite others to the Quran with your personal code and see the effect.
+- Quran around the world: a map of pages read today in each country (optional and anonymous).
+- Your privacy: a clear page showing what stays on your phone and what is never stored.
+- Articles and news, Hadith, and the Haram adhan.
+- Quran for Kids in Tools.
+- Verse of the day: design the card again, pick a background and add tafsir.
+- Fixed letters separating in the color-coded tajweed Mushaf on iPhone, plus general improvements.

@@ -1,0 +1,112 @@
+name: إرسال تحديث App Store للمراجعة
+# ينشئ إصدار المتجر (رقمه من MARKETING_VERSION)، ويربطه بآخر بناء جاهز في TestFlight بنفس الرقم،
+# ويكتب «ما الجديد» بالعربية والإنجليزية وملاحظات المراجِع، ثم يرسله لمراجعة أبل (ما لم يُختر dry_run).
+on:
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: 'تجهيز فقط دون الإرسال للمراجعة'
+        type: boolean
+        default: false
+permissions:
+  contents: read
+jobs:
+  submit:
+    runs-on: ubuntu-latest
+    env:
+      ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
+      ASC_ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
+      ASC_KEY_P8: ${{ secrets.ASC_KEY_P8 }}
+      DRY: ${{ inputs.dry_run }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: التجهيز والإرسال
+        run: |
+          pip install -q pyjwt cryptography requests
+          python3 - <<'PY'
+          import os, re, time, jwt, requests, sys
+          B = "https://api.appstoreconnect.apple.com"; APP = "6823910862"
+          VER = re.search(r'MARKETING_VERSION:\s*"([^"]+)"', open("ios/project.yml").read()).group(1)
+          def tok():
+              return jwt.encode({"iss": os.environ["ASC_ISSUER_ID"], "iat": int(time.time()), "exp": int(time.time()) + 900, "aud": "appstoreconnect-v1"},
+                                os.environ["ASC_KEY_P8"], algorithm="ES256", headers={"kid": os.environ["ASC_KEY_ID"], "typ": "JWT"})
+          def call(m, path, body=None, ok=True):
+              r = requests.request(m, B + path, json=body, headers={"Authorization": "Bearer " + tok(), "Content-Type": "application/json"})
+              if r.status_code >= 400:
+                  print(f"::error title={m} {path.split('?')[0]}::{r.status_code} {r.text[:900]}")
+                  if ok: sys.exit(1)
+                  return None
+              return r.json() if r.text else {}
+          def note(t, m): print(f"::notice title={t}::{m}")
+          rd = lambda p: open(p, encoding="utf-8").read().strip()
+
+          # 1) آخر بناء جاهز بنفس رقم الإصدار
+          bs = call("GET", f"/v1/builds?filter[app]={APP}&filter[preReleaseVersion.version]={VER}&sort=-uploadedDate&limit=10")["data"]
+          bs = [b for b in bs if b["attributes"]["processingState"] == "VALID" and not b["attributes"].get("expired")]
+          if not bs: print(f"::error::لا يوجد بناء جاهز للإصدار {VER}"); sys.exit(1)
+          build = bs[0]; note("build", f"{VER} ({build['attributes']['version']}) uploaded {build['attributes']['uploadedDate'][:16]}")
+          if build["attributes"].get("usesNonExemptEncryption") is None:
+              call("PATCH", f"/v1/builds/{build['id']}", {"data": {"type": "builds", "id": build["id"], "attributes": {"usesNonExemptEncryption": False}}})
+
+          # 2) إصدار المتجر: نستعمل الموجود قيد التجهيز أو ننشئه
+          vs = call("GET", f"/v1/apps/{APP}/appStoreVersions?filter[platform]=IOS&limit=10")["data"]
+          for v in vs: note("version", f"{v['attributes']['versionString']}: {v['attributes']['appStoreState']}")
+          editable = {"PREPARE_FOR_SUBMISSION", "DEVELOPER_REJECTED", "REJECTED", "METADATA_REJECTED", "INVALID_BINARY"}
+          v = next((x for x in vs if x["attributes"]["appStoreState"] in editable), None)
+          if any(x["attributes"]["appStoreState"] in ("WAITING_FOR_REVIEW", "IN_REVIEW") for x in vs):
+              note("state", "يوجد إصدار في المراجعة الآن؛ لا شيء لفعله"); sys.exit(0)
+          if v is None:
+              v = call("POST", "/v1/appStoreVersions", {"data": {"type": "appStoreVersions",
+                    "attributes": {"platform": "IOS", "versionString": VER, "releaseType": "AFTER_APPROVAL"},
+                    "relationships": {"app": {"data": {"type": "apps", "id": APP}}}}})["data"]
+              note("version", f"أُنشئ الإصدار {VER}")
+          elif v["attributes"]["versionString"] != VER:
+              call("PATCH", f"/v1/appStoreVersions/{v['id']}", {"data": {"type": "appStoreVersions", "id": v["id"], "attributes": {"versionString": VER}}})
+          vid = v["id"]
+          call("PATCH", f"/v1/appStoreVersions/{vid}/relationships/build", {"data": {"type": "builds", "id": build["id"]}})
+
+          # 3) «ما الجديد» والنص الترويجي
+          locs = {l["attributes"]["locale"]: l for l in call("GET", f"/v1/appStoreVersions/{vid}/appStoreVersionLocalizations?limit=50")["data"]}
+          for loc in ("ar-SA", "en-US"):
+              d = f"ios/fastlane/metadata/{loc}"
+              attrs = {"whatsNew": rd(f"{d}/release_notes.txt")}
+              if os.path.exists(f"{d}/promotional_text.txt"): attrs["promotionalText"] = rd(f"{d}/promotional_text.txt")
+              if loc in locs:
+                  call("PATCH", f"/v1/appStoreVersionLocalizations/{locs[loc]['id']}", {"data": {"type": "appStoreVersionLocalizations", "id": locs[loc]["id"], "attributes": attrs}})
+              else:
+                  for k in ("description", "keywords", "marketing_url", "support_url"):
+                      f = f"{d}/{k}.txt"
+                      if os.path.exists(f): attrs[{"marketing_url": "marketingUrl", "support_url": "supportUrl"}.get(k, k)] = rd(f)
+                  attrs["locale"] = loc
+                  call("POST", "/v1/appStoreVersionLocalizations", {"data": {"type": "appStoreVersionLocalizations", "attributes": attrs,
+                        "relationships": {"appStoreVersion": {"data": {"type": "appStoreVersions", "id": vid}}}}})
+              note("whatsNew", loc)
+          for loc in locs:
+              if loc not in ("ar-SA", "en-US"):
+                  call("PATCH", f"/v1/appStoreVersionLocalizations/{locs[loc]['id']}", {"data": {"type": "appStoreVersionLocalizations", "id": locs[loc]["id"], "attributes": {"whatsNew": rd("ios/fastlane/metadata/en-US/release_notes.txt")}}})
+
+          # 4) ملاحظات المراجِع
+          R = "ios/fastlane/metadata/review_information"
+          rattrs = {"notes": rd(f"{R}/notes.txt"), "contactFirstName": rd(f"{R}/first_name.txt"), "contactLastName": rd(f"{R}/last_name.txt"),
+                    "contactEmail": rd(f"{R}/email_address.txt"), "contactPhone": rd(f"{R}/phone_number.txt"), "demoAccountRequired": False}
+          det = call("GET", f"/v1/appStoreVersions/{vid}/appStoreReviewDetail", ok=False)
+          if det and det.get("data"):
+              call("PATCH", f"/v1/appStoreReviewDetails/{det['data']['id']}", {"data": {"type": "appStoreReviewDetails", "id": det["data"]["id"], "attributes": rattrs}})
+          else:
+              call("POST", "/v1/appStoreReviewDetails", {"data": {"type": "appStoreReviewDetails", "attributes": rattrs,
+                    "relationships": {"appStoreVersion": {"data": {"type": "appStoreVersions", "id": vid}}}}})
+
+          if os.environ.get("DRY") == "true": note("dry_run", "تم التجهيز دون الإرسال"); sys.exit(0)
+
+          # 5) الإرسال للمراجعة
+          subs = call("GET", f"/v1/reviewSubmissions?filter[app]={APP}&filter[platform]=IOS&filter[state]=READY_FOR_REVIEW,UNRESOLVED_ISSUES&limit=5")["data"]
+          sid = subs[0]["id"] if subs else call("POST", "/v1/reviewSubmissions", {"data": {"type": "reviewSubmissions",
+                    "attributes": {"platform": "IOS"}, "relationships": {"app": {"data": {"type": "apps", "id": APP}}}}})["data"]["id"]
+          items = call("GET", f"/v1/reviewSubmissions/{sid}/items?limit=20")["data"]
+          if not items:
+              call("POST", "/v1/reviewSubmissionItems", {"data": {"type": "reviewSubmissionItems",
+                    "relationships": {"reviewSubmission": {"data": {"type": "reviewSubmissions", "id": sid}},
+                                      "appStoreVersion": {"data": {"type": "appStoreVersions", "id": vid}}}}})
+          call("PATCH", f"/v1/reviewSubmissions/{sid}", {"data": {"type": "reviewSubmissions", "id": sid, "attributes": {"submitted": True}}})
+          note("submitted", f"أُرسل الإصدار {VER} لمراجعة أبل")
+          PY
