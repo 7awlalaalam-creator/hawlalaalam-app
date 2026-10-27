@@ -50,4 +50,46 @@ jobs:
           print("::notice title=builds::" + " | ".join(f"{b['attributes']['version']}:{b['attributes']['processingState']}" for b in bs))
           vs = get(f"/v1/apps/{APP}/appStoreVersions?limit=5").get("data", [])
           print("::notice title=App Store versions::" + " | ".join(f"{v['attributes']['versionString']}:{v['attributes']['appStoreState']}" for v in vs))
+
+          # التقييم العام في المتجر (واجهة أبل العامة، حسب الدولة)
+          for cc in ["sa", "eg", "ae", "us"]:
+              try:
+                  j = requests.get(f"https://itunes.apple.com/lookup?id={APP}&country={cc}", timeout=20).json().get("results", [])
+                  if j: print(f"::notice title=Rating {cc.upper()}::avg={j[0].get('averageUserRating')} count={j[0].get('userRatingCount')} version={j[0].get('version')}")
+              except Exception as e: print("lookup", cc, e)
+
+          # آخر المراجعات المكتوبة (النجوم والعنوان فقط)
+          rv = get(f"/v1/apps/{APP}/customerReviews?sort=-createdDate&limit=10").get("data", [])
+          print(f"::notice title=Reviews::{len(rv)} written review(s)")
+          for r in rv[:10]:
+              a = r["attributes"]; print(f"::notice title=Review {a.get('rating')}★ {a.get('territory')} {a.get('createdDate','')[:10]}::{(a.get('title') or '')[:80]}")
+
+          # التحميلات من تقارير التحليلات (أول تشغيل يطلب التقارير، وتجهز خلال يوم أو يومين)
+          import gzip, io, csv
+          reqs = get(f"/v1/apps/{APP}/analyticsReportRequests").get("data", [])
+          ong = [x for x in reqs if x["attributes"].get("accessType") == "ONGOING"]
+          if not ong:
+              r = requests.post(B + "/v1/analyticsReportRequests", headers={"Authorization": "Bearer " + tok(), "Content-Type": "application/json"},
+                                json={"data": {"type": "analyticsReportRequests", "attributes": {"accessType": "ONGOING"},
+                                               "relationships": {"app": {"data": {"type": "apps", "id": APP}}}}})
+              print(f"::notice title=Downloads::requested analytics reports ({r.status_code}). Data appears within 1-2 days; run again then.")
+          else:
+              rid = ong[0]["id"]
+              reps = allpages(f"/v1/analyticsReportRequests/{rid}/reports?limit=200")
+              dl = [x for x in reps if x["attributes"].get("name") == "App Downloads Standard"]
+              if not dl: print("::notice title=Downloads::report not ready yet")
+              else:
+                  inst = allpages(f"/v1/analyticsReports/{dl[0]['id']}/instances?filter[granularity]=DAILY&limit=200")
+                  byday = collections.Counter(); bytype = collections.Counter(); byterr = collections.Counter()
+                  for ins in inst:
+                      for seg in allpages(f"/v1/analyticsReportInstances/{ins['id']}/segments"):
+                          raw = requests.get(seg["attributes"]["url"], timeout=60).content
+                          try: raw = gzip.decompress(raw)
+                          except Exception: pass
+                          for row in csv.DictReader(io.StringIO(raw.decode("utf-8")), delimiter="\t"):
+                              n = int(float(row.get("Counts") or 0))
+                              byday[row.get("Date")] += n; bytype[row.get("Download Type")] += n; byterr[row.get("Territory")] += n
+                  print(f"::notice title=Downloads total::{sum(byday.values())} by type={dict(bytype)}")
+                  print("::notice title=Downloads by country::" + ", ".join(f"{k}:{v}" for k, v in byterr.most_common(10)))
+                  print("::notice title=Downloads last days::" + ", ".join(f"{k}:{byday[k]}" for k in sorted(byday)[-10:]))
           PY
