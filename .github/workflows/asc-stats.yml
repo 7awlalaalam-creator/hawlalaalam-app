@@ -17,13 +17,15 @@ jobs:
           pip install -q pyjwt cryptography requests
           python3 - <<'PY'
           import os, time, jwt, requests, collections
+          OUT = []
+          def note(title, msg): OUT.append(f"{title}: {msg}")
           def tok():
               return jwt.encode({"iss": os.environ["ASC_ISSUER_ID"], "iat": int(time.time()), "exp": int(time.time()) + 900, "aud": "appstoreconnect-v1"},
                                 os.environ["ASC_KEY_P8"], algorithm="ES256", headers={"kid": os.environ["ASC_KEY_ID"], "typ": "JWT"})
           B = "https://api.appstoreconnect.apple.com"
           def get(path):
               r = requests.get(B + path, headers={"Authorization": "Bearer " + tok()})
-              if r.status_code >= 400: print(f"::warning::{path} -> {r.status_code} {r.text[:300]}"); return {}
+              if r.status_code >= 400: print(f"warn {path} -> {r.status_code} {r.text[:200]}"); return {}
               return r.json()
           APP = "6823910862"
           def allpages(path):
@@ -36,33 +38,33 @@ jobs:
           testers = allpages(f"/v1/betaTesters?filter[apps]={APP}&limit=200&fields[betaTesters]=state,inviteType")
           st = collections.Counter(t["attributes"].get("state") for t in testers)
           inv = collections.Counter(t["attributes"].get("inviteType") for t in testers)
-          print(f"::notice title=TestFlight testers::total={len(testers)} states={dict(st)} invite={dict(inv)}")
+          note(f"TestFlight testers", f"total={len(testers)} states={dict(st)} invite={dict(inv)}")
           for g in allpages(f"/v1/betaGroups?filter[app]={APP}&limit=50"):
               a = g["attributes"]; n = len(allpages(f"/v1/betaGroups/{g['id']}/betaTesters?limit=200&fields[betaTesters]=state"))
-              print(f"::notice title=group {a.get('name')}::testers={n} internal={a.get('isInternalGroup')} publicLink={a.get('publicLinkEnabled')} limit={a.get('publicLinkLimit')}")
+              note(f"group {a.get('name')}", f"testers={n} internal={a.get('isInternalGroup')} publicLink={a.get('publicLinkEnabled')} limit={a.get('publicLinkLimit')}")
           m = get(f"/v1/apps/{APP}/metrics/betaTesterUsages?period=P365D&limit=50")
           tot = collections.Counter()
           for d in m.get("data", []):
               for p in d.get("dataPoints", []):
                   for k, v in (p.get("values") or {}).items(): tot[k] += v or 0
-          print(f"::notice title=TestFlight usage (365d)::{dict(tot)}")
+          note(f"TestFlight usage (365d)", f"{dict(tot)}")
           bs = get(f"/v1/builds?filter[app]={APP}&sort=-uploadedDate&limit=5").get("data", [])
-          print("::notice title=builds::" + " | ".join(f"{b['attributes']['version']}:{b['attributes']['processingState']}" for b in bs))
+          note("builds", " | ".join(f"{b['attributes']['version']}:{b['attributes']['processingState']}" for b in bs))
           vs = get(f"/v1/apps/{APP}/appStoreVersions?limit=5").get("data", [])
-          print("::notice title=App Store versions::" + " | ".join(f"{v['attributes']['versionString']}:{v['attributes']['appStoreState']}" for v in vs))
+          note("App Store versions", " | ".join(f"{v['attributes']['versionString']}:{v['attributes']['appStoreState']}" for v in vs))
 
           # التقييم العام في المتجر (واجهة أبل العامة، حسب الدولة)
           for cc in ["sa", "eg", "ae", "us"]:
               try:
                   j = requests.get(f"https://itunes.apple.com/lookup?id={APP}&country={cc}", timeout=20).json().get("results", [])
-                  if j: print(f"::notice title=Rating {cc.upper()}::avg={j[0].get('averageUserRating')} count={j[0].get('userRatingCount')} version={j[0].get('version')}")
+                  if j: note(f"Rating {cc.upper()}", f"avg={j[0].get('averageUserRating')} count={j[0].get('userRatingCount')} version={j[0].get('version')}")
               except Exception as e: print("lookup", cc, e)
 
           # آخر المراجعات المكتوبة (النجوم والعنوان فقط)
           rv = get(f"/v1/apps/{APP}/customerReviews?sort=-createdDate&limit=10").get("data", [])
-          print(f"::notice title=Reviews::{len(rv)} written review(s)")
+          note(f"Reviews", f"{len(rv)} written review(s)")
           for r in rv[:10]:
-              a = r["attributes"]; print(f"::notice title=Review {a.get('rating')}★ {a.get('territory')} {a.get('createdDate','')[:10]}::{(a.get('title') or '')[:80]}")
+              a = r["attributes"]; note(f"Review {a.get('rating')}★ {a.get('territory')} {a.get('createdDate','')[:10]}", (a.get('title') or '')[:80])
 
           # التحميلات من تقارير التحليلات (أول تشغيل يطلب التقارير، وتجهز خلال يوم أو يومين)
           import gzip, io, csv
@@ -72,12 +74,12 @@ jobs:
               r = requests.post(B + "/v1/analyticsReportRequests", headers={"Authorization": "Bearer " + tok(), "Content-Type": "application/json"},
                                 json={"data": {"type": "analyticsReportRequests", "attributes": {"accessType": "ONGOING"},
                                                "relationships": {"app": {"data": {"type": "apps", "id": APP}}}}})
-              print(f"::notice title=Downloads::requested analytics reports ({r.status_code}). Data appears within 1-2 days; run again then.")
+              note(f"Downloads", f"requested analytics reports ({r.status_code}). Data appears within 1-2 days; run again then.")
           else:
               rid = ong[0]["id"]
               reps = allpages(f"/v1/analyticsReportRequests/{rid}/reports?limit=200")
               dl = [x for x in reps if x["attributes"].get("name") == "App Downloads Standard"]
-              if not dl: print("::notice title=Downloads::report not ready yet")
+              if not dl: note("Downloads", "report not ready yet")
               else:
                   inst = allpages(f"/v1/analyticsReports/{dl[0]['id']}/instances?filter[granularity]=DAILY&limit=200")
                   byday = collections.Counter(); bytype = collections.Counter(); byterr = collections.Counter()
@@ -89,7 +91,9 @@ jobs:
                           for row in csv.DictReader(io.StringIO(raw.decode("utf-8")), delimiter="\t"):
                               n = int(float(row.get("Counts") or 0))
                               byday[row.get("Date")] += n; bytype[row.get("Download Type")] += n; byterr[row.get("Territory")] += n
-                  print(f"::notice title=Downloads total::{sum(byday.values())} by type={dict(bytype)}")
-                  print("::notice title=Downloads by country::" + ", ".join(f"{k}:{v}" for k, v in byterr.most_common(10)))
-                  print("::notice title=Downloads last days::" + ", ".join(f"{k}:{byday[k]}" for k in sorted(byday)[-10:]))
+                  note(f"Downloads total", f"{sum(byday.values())} by type={dict(bytype)}")
+                  note("Downloads by country", ", ".join(f"{k}:{v}" for k, v in byterr.most_common(10)))
+                  note("Downloads last days", ", ".join(f"{k}:{byday[k]}" for k in sorted(byday)[-10:]))
+          for i in range(0, len(OUT), 4):
+              print("::notice title=stats " + str(i // 4 + 1) + "::" + " || ".join(OUT[i:i + 4]))
           PY
