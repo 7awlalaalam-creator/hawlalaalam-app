@@ -64,7 +64,7 @@ jobs:
           rv = get(f"/v1/apps/{APP}/customerReviews?sort=-createdDate&limit=10").get("data", [])
           note(f"Reviews", f"{len(rv)} written review(s)")
           for r in rv[:10]:
-              a = r["attributes"]; note(f"Review {a.get('rating')}★ {a.get('territory')} {a.get('createdDate','')[:10]}", (a.get('title') or '')[:80])
+              a = r["attributes"]; note(f"Review {a.get('rating')}★ {a.get('territory')} {a.get('createdDate','')[:10]}", ((a.get('title') or '') + " — " + (a.get('body') or '').replace(chr(10), ' '))[:400])
 
           # التحميلات من تقارير التحليلات (أول تشغيل يطلب التقارير، وتجهز خلال يوم أو يومين)
           import gzip, io, csv
