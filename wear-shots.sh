@@ -11,6 +11,11 @@ adb shell setprop persist.sys.timezone Asia/Riyadh
 adb shell cmd alarm set-timezone Asia/Riyadh
 adb shell service call alarm 3 s16 Asia/Riyadh
 adb shell settings put system time_12_24 12
+# المحاكي «يشحن» فتظهر شاشة الشحن فوق التطبيق؛ نفصل الشاحن ونبقي الشاشة مضاءة، وننتظر اكتمال واجهة النظام
+adb shell dumpsys battery unplug
+adb shell svc power stayon true
+adb shell settings put system screen_off_timeout 600000
+sleep 40
 D="$(TZ=Asia/Riyadh date +%Y)-$(TZ=Asia/Riyadh date +%-j)"
 cat > /tmp/w.xml <<X
 <?xml version='1.0' encoding='utf-8' standalone='yes' ?>
@@ -49,6 +54,9 @@ shot AzkarActivity 06-azkar-menu
 shot AzkarActivity 07-azkar "--es section morning"
 shot AzkarActivity 07c-azkar-sleep "--es section sleep"
 shot SettingsActivity 08-settings
+shot MainActivity 01b-main
+adb shell input swipe 225 380 225 80 400; sleep 2; adb exec-out screencap -p > wshots/02c-main-menu.png
+shot TimesActivity 03b-times
 # بطاقة Tile (أداة التصحيح في Wear OS 4)
 adb shell input keyevent KEYCODE_HOME; sleep 1
 adb shell am broadcast -a com.google.android.wearable.app.DEBUG_SURFACE --es operation add-tile --ecn component $P/$W.NextPrayerTile > wshots/tile.txt 2>&1
