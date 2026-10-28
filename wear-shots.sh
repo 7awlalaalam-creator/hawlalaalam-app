@@ -26,7 +26,7 @@ cat > /tmp/w.xml <<X
 </map>
 X
 adb push /tmp/w.xml /data/local/tmp/w.xml
-adb shell am start -W -n $P/$W.MainActivity; sleep 3; adb shell am force-stop $P
+adb shell am start -W -n $P/$W.MainActivity; sleep 8; adb exec-out screencap -p > wshots/00-first.png; adb shell am force-stop $P
 adb shell "run-as $P mkdir -p shared_prefs"
 adb shell "run-as $P cp /data/local/tmp/w.xml shared_prefs/w.xml"
 adb shell "run-as $P cat shared_prefs/w.xml" > wshots/prefs.txt 2>&1
@@ -34,7 +34,7 @@ adb shell date >> wshots/prefs.txt
 shot() {   # $1 الشاشة، $2 الاسم، $3 إضافات
   adb shell am force-stop $P
   adb shell am start -W -n $P/$W.$1 $3
-  sleep 4
+  sleep 6
   adb exec-out screencap -p > wshots/$2.png
 }
 shot MainActivity 01-main
@@ -52,5 +52,6 @@ adb shell input keyevent KEYCODE_HOME; sleep 1
 adb shell am broadcast -a com.google.android.wearable.app.DEBUG_SURFACE --es operation add-tile --ecn component $P/$W.NextPrayerTile > wshots/tile.txt 2>&1
 adb shell am broadcast -a com.google.android.wearable.app.DEBUG_SYSUI --es operation show-tile --ei index 0 >> wshots/tile.txt 2>&1
 sleep 6; adb exec-out screencap -p > wshots/09-tile.png
-adb logcat -d | grep -E "AndroidRuntime|FATAL|hawlalaalam|Tile" | tail -80 > wshots/log.txt
+adb logcat -d -b crash > wshots/crash.txt 2>&1
+adb logcat -d | grep -E "AndroidRuntime|FATAL|ANR|hawlalaalam|Exception" | grep -v DefaultMetadataPreviewProvider | head -150 > wshots/log.txt
 exit 0
