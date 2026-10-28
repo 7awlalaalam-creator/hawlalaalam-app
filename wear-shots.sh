@@ -36,6 +36,8 @@ shot() {   # $1 الشاشة، $2 الاسم، $3 إضافات
   adb shell am start -W -n $P/$W.$1 $3
   sleep 6
   adb exec-out screencap -p > wshots/$2.png
+  echo "=== $2" >> wshots/am.txt
+  adb shell dumpsys activity activities | grep -E "mResumedActivity|topResumedActivity|ResumedActivity" | head -3 >> wshots/am.txt
 }
 shot MainActivity 01-main
 adb shell input swipe 225 380 225 80 400; sleep 2; adb exec-out screencap -p > wshots/02-main-menu.png
@@ -53,5 +55,7 @@ adb shell am broadcast -a com.google.android.wearable.app.DEBUG_SURFACE --es ope
 adb shell am broadcast -a com.google.android.wearable.app.DEBUG_SYSUI --es operation show-tile --ei index 0 >> wshots/tile.txt 2>&1
 sleep 6; adb exec-out screencap -p > wshots/09-tile.png
 adb logcat -d -b crash > wshots/crash.txt 2>&1
+adb logcat -d -s ActivityManager:* ActivityTaskManager:* AndroidRuntime:* WindowManager:W System.err:* > wshots/am-log.txt 2>&1
+adb logcat -d | grep -iE "quran" | grep -v "DefaultMetadataPreviewProvider\|LauncherIconCache\|CacheInvalidation\|AllLauncherApps" | tail -200 > wshots/app-log.txt
 adb logcat -d | grep -E "AndroidRuntime|FATAL|ANR|hawlalaalam|Exception" | grep -v DefaultMetadataPreviewProvider | head -150 > wshots/log.txt
 exit 0
