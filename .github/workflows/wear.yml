@@ -1,0 +1,53 @@
+name: تطبيق الساعة (Wear OS)
+# بناء تطبيق الساعة وتشغيله على محاكي ساعة دائرية وتصوير شاشاته (للمراجعة فقط، لا يُنشر شيء)
+on:
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  wear:
+    runs-on: ubuntu-latest
+    timeout-minutes: 50
+    steps:
+      - uses: actions/checkout@v4
+      - name: فك ضغط المشروع
+        run: |
+          Z=$(ls *.zip | grep -vi keys | head -1)
+          unzip -o -q "$Z" -d /tmp/p
+          R=$(dirname "$(find /tmp/p -name settings.gradle.kts | head -1)")
+          cp -r "$R"/. .
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.11.1'
+      - name: البناء (الساعة والجوال)
+        run: |
+          set -o pipefail
+          gradle --no-daemon :wear:assembleDebug :wear:assembleRelease :app:compileDebugJavaWithJavac 2>&1 | tee build.log
+      - name: أخطاء البناء
+        if: failure()
+        run: grep -E "error:|e: |FAILURE|What went wrong" -A3 build.log | head -60 | while IFS= read -r l; do echo "::error::$l"; done
+      - name: تفعيل KVM
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules && sudo udevadm trigger --name-match=kvm
+      - name: محاكي الساعة والتصوير
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 33
+          target: android-wear
+          arch: x86_64
+          profile: wearos_large_round
+          disable-animations: true
+          script: bash wear-shots.sh
+      - name: نشر اللقطات في فرع ci-shots-wear
+        if: always()
+        run: |
+          [ -d wshots ] || exit 0
+          git config --global user.name "ci"; git config --global user.email "ci@users.noreply.github.com"
+          rm -rf /tmp/cs && mkdir -p /tmp/cs && cp wshots/* /tmp/cs/ 2>/dev/null; ls /tmp/cs | grep -q . || exit 0
+          cd /tmp/cs && git init -q && git checkout -q -b ci-shots-wear && git add . && git commit -qm "wear shots ${{ github.sha }}"
+          git push -qf "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git" ci-shots-wear

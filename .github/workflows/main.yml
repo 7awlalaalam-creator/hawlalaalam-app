@@ -71,6 +71,8 @@ jobs:
           mkdir -p out
           for f in app/build/outputs/apk/*/*.apk; do [ -e "$f" ] && cp "$f" out/hawlalaalam-quran.apk; done
           for f in app/build/outputs/bundle/*/*.aab; do [ -e "$f" ] && cp "$f" out/hawlalaalam-quran.aab; done
+          # تطبيق الساعة (Wear OS): يُرفع في Google Play على مسار Wear OS في نفس صفحة التطبيق
+          for f in wear/build/outputs/bundle/*/*.aab; do [ -e "$f" ] && cp "$f" out/hawlalaalam-wear.aab; done
       - uses: actions/upload-artifact@v4
         with:
           name: hawlalaalam-app
