@@ -1,0 +1,12 @@
+<?xml version='1.0' encoding='utf-8' standalone='yes' ?>
+<map>
+    <float name="lat" value="21.5433" />
+    <float name="lng" value="39.1728" />
+    <string name="city">جدة</string>
+    <string name="country">SA</string>
+    <string name="lang">ar</string>
+    <int name="streak" value="7" />
+    <int name="tb_n" value="22" />
+    <string name="tb_day">2026-301</string>
+</map>
+Wed Oct 28 13:02:34 +03 2026

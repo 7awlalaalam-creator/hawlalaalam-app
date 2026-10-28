@@ -1,0 +1,150 @@
+10-28 13:01:27.808   272   272 D AndroidRuntime: >>>>>> START com.android.internal.os.ZygoteInit uid 0 <<<<<<
+10-28 13:01:27.841   272   272 I AndroidRuntime: Using default boot image
+10-28 13:01:27.841   272   272 I AndroidRuntime: Leaving lock profiling enabled
+10-28 13:01:29.839   464   488 W SystemConfig: java.io.FileNotFoundException: /vendor/etc/public.libraries.txt: open failed: ENOENT (No such file or directory)
+10-28 13:01:29.839   464   488 W SystemConfig: Caused by: android.system.ErrnoException: open failed: ENOENT (No such file or directory)
+10-28 13:01:29.935   464   464 W FileUtils: Failed to chmod(/data/system/packages.list): android.system.ErrnoException: chmod failed: ENOENT (No such file or directory)
+10-28 13:01:31.264   464   491 E PinnerService: android.system.ErrnoException: open failed: ENOENT (No such file or directory)
+10-28 13:01:31.273   464   491 E PinnerService: android.system.ErrnoException: open failed: ENOENT (No such file or directory)
+10-28 13:01:31.385   464   464 W PackageDexOptimizer: com.android.server.pm.Installer$InstallerException: android.os.ServiceSpecificException: Dex2oat invocation for /apex/com.android.extservices/priv-app/GoogleExtServices@TWR7.230913.001.E7/GoogleExtServices.apk failed: dex2oat error (code 256)
+10-28 13:01:31.544   464   464 W PackageDexOptimizer: com.android.server.pm.Installer$InstallerException: android.os.ServiceSpecificException: Dex2oat invocation for /system/framework/com.google.android.wearable.jar failed: dex2oat error (code 256)
+10-28 13:01:31.566   464   464 W PackageDexOptimizer: com.android.server.pm.Installer$InstallerException: android.os.ServiceSpecificException: Dex2oat invocation for /system/framework/clockwork-system.jar failed: dex2oat error (code 256)
+10-28 13:01:31.702   464   464 W PackageDexOptimizer: com.android.server.pm.Installer$InstallerException: android.os.ServiceSpecificException: Dex2oat invocation for /apex/com.android.permission/priv-app/GooglePermissionController@TWR7.230913.001.E7/GooglePermissionController.apk failed: dex2oat error (code 256)
+10-28 13:01:31.845   464   491 E PinnerService: android.system.ErrnoException: open failed: ENOENT (No such file or directory)
+10-28 13:01:31.847   464   491 E PinnerService: android.system.ErrnoException: open failed: ENOENT (No such file or directory)
+10-28 13:01:31.847   464   491 E PinnerService: android.system.ErrnoException: open failed: ENOENT (No such file or directory)
+10-28 13:01:32.271   464   464 W PackageDexOptimizer: com.android.server.pm.Installer$InstallerException: android.os.ServiceSpecificException: Dex2oat invocation for /apex/com.android.adservices/priv-app/AdServicesApkGoogle@TWR7.230913.001.E7/AdServicesApkGoogle.apk failed: dex2oat error (code 256)
+10-28 13:01:32.331   464   464 W PackageDexOptimizer: com.android.server.pm.Installer$InstallerException: android.os.ServiceSpecificException: Dex2oat invocation for /apex/com.android.wifi/app/WifiDialog@TWR7.230913.001.E7/WifiDialog.apk failed: dex2oat error (code 256)
+10-28 13:01:32.347   464   464 W PackageDexOptimizer: com.android.server.pm.Installer$InstallerException: android.os.ServiceSpecificException: Dex2oat invocation for /apex/com.android.adservices/app/SdkSandboxGoogle@TWR7.230913.001.E7/SdkSandboxGoogle.apk failed: dex2oat error (code 256)
+10-28 13:01:32.473   464   464 W PackageDexOptimizer: com.android.server.pm.Installer$InstallerException: android.os.ServiceSpecificException: Dex2oat invocation for /apex/com.android.btservices/app/BluetoothGoogle@TWR7.230913.001.E7/BluetoothGoogle.apk failed: dex2oat error (code 256)
+10-28 13:01:32.578   464   464 W PackageDexOptimizer: com.android.server.pm.Installer$InstallerException: android.os.ServiceSpecificException: Dex2oat invocation for /system/app/WearGoogleServicesMediator/WearGoogleServicesMediator.apk failed: dex2oat error (code 256)
+10-28 13:01:32.655   464   464 W PackageDexOptimizer: com.android.server.pm.Installer$InstallerException: android.os.ServiceSpecificException: Dex2oat invocation for /apex/com.android.tethering/app/HalfSheetUX@TWR7.230913.001.E7/HalfSheetUX.apk failed: dex2oat error (code 256)
+10-28 13:01:32.682   464   464 W PackageDexOptimizer: com.android.server.pm.Installer$InstallerException: android.os.ServiceSpecificException: Dex2oat invocation for /apex/com.android.tethering/priv-app/TetheringNext@TWR7.230913.001.E7/TetheringNext.apk failed: dex2oat error (code 256)
+10-28 13:01:32.745   464   464 W PackageDexOptimizer: com.android.server.pm.Installer$InstallerException: android.os.ServiceSpecificException: Dex2oat invocation for /system/priv-app/WearHealthServicesPrebuilt/WearHealthServicesPrebuilt.apk failed: dex2oat error (code 256)
+10-28 13:01:32.866   464   464 W PackageDexOptimizer: com.android.server.pm.Installer$InstallerException: android.os.ServiceSpecificException: Dex2oat invocation for /apex/com.android.mediaprovider/priv-app/MediaProvider@TWR7.230913.001.E7/MediaProvider.apk failed: dex2oat error (code 256)
+10-28 13:01:32.890   464   464 W PackageDexOptimizer: com.android.server.pm.Installer$InstallerException: android.os.ServiceSpecificException: Dex2oat invocation for /apex/com.android.wifi/app/OsuLogin@TWR7.230913.001.E7/OsuLogin.apk failed: dex2oat error (code 256)
+10-28 13:01:32.970   464   464 W PackageDexOptimizer: com.android.server.pm.Installer$InstallerException: android.os.ServiceSpecificException: Dex2oat invocation for /apex/com.android.ondevicepersonalization/app/OnDevicePersonalization@TWR7.230913.001.E7/OnDevicePersonalization.apk failed: dex2oat error (code 256)
+10-28 13:01:33.034   464   464 E DevicePolicyManager: java.nio.file.NoSuchFileException: /data/system/device_policies_version
+10-28 13:01:33.345   464   464 W UnsafeUtil: platform method missing - proto runtime falling back to safer methods: java.lang.NoSuchMethodException: sun.misc.Unsafe.copyMemory [class java.lang.Object, long, class java.lang.Object, long, long]
+10-28 13:01:33.449   464   488 I UsbDeviceManager: java.util.NoSuchElementException
+10-28 13:01:33.576   464   464 E DisplayPowerController[0]: failed to set up display white-balance: java.lang.IllegalStateException: cannot find sensor com.google.sensor.color
+10-28 13:01:33.588   464   464 E AppIdleHistory: java.io.FileNotFoundException: /data/system/users/0/app_idle_stats.xml: open failed: ENOENT (No such file or directory)
+10-28 13:01:33.588   464   464 E AppIdleHistory: Caused by: android.system.ErrnoException: open failed: ENOENT (No such file or directory)
+10-28 13:01:33.622   464   464 E SystemServiceRegistry: android.os.ServiceManager$ServiceNotFoundException: No service published for: search
+10-28 13:01:33.642   464   616 W FileUtils: android.system.ErrnoException: chmod failed: ENOENT (No such file or directory)
+10-28 13:01:34.034   464   464 W InputMethodUtils: android.content.pm.PackageManager$NameNotFoundException: com.android.inputmethod.latin
+10-28 13:01:34.050   464   464 W BestClock: java.time.DateTimeException: Missing NTP fix
+10-28 13:01:34.543   740   740 E SafebootUtils: java.io.IOException: Failed to create directory
+10-28 13:01:34.650   740   740 W ChimeraCfgMgr: Failed to read module config: java.io.FileNotFoundException: /data/user_de/0/com.google.android.gms/app_chimera/current_config.fb: open failed: ENOENT (No such file or directory)
+10-28 13:01:34.712   740   740 W ChimeraCfgMgr: Failed to read module config: java.io.FileNotFoundException: /data/user_de/0/com.google.android.gms/app_chimera/current_config.fb: open failed: ENOENT (No such file or directory)
+10-28 13:01:34.716   740   740 W ChimeraCfgMgr: Failed to read module config: java.io.FileNotFoundException: /data/user_de/0/com.google.android.gms/app_chimera/current_config.fb: open failed: ENOENT (No such file or directory)
+10-28 13:01:34.719   464   464 E DeviceConfigUtils: android.content.pm.PackageManager$NameNotFoundException: No module info for package: com.android.tethering
+10-28 13:01:34.725   464   614 W BestClock: java.time.DateTimeException: Missing NTP fix
+10-28 13:01:34.727   464   613 W BestClock: java.time.DateTimeException: Missing NTP fix
+10-28 13:01:34.736   740   740 W ChimeraCfgMgr: Failed to read module config: java.io.FileNotFoundException: /data/user_de/0/com.google.android.gms/app_chimera/current_config.fb: open failed: ENOENT (No such file or directory)
+10-28 13:01:34.736   740   740 W IntentOperation: Failed to get Chimera config:com.google.android.chimera.config.InvalidConfigException: java.io.FileNotFoundException: /data/user_de/0/com.google.android.gms/app_chimera/current_config.fb: open failed: ENOENT (No such file or directory)
+10-28 13:01:34.743   464   613 W BestClock: java.time.DateTimeException: Missing NTP fix
+10-28 13:01:34.745   464   613 W BestClock: java.time.DateTimeException: Missing NTP fix
+10-28 13:01:34.758   464   613 W BestClock: java.time.DateTimeException: Missing NTP fix
+10-28 13:01:34.912   464   491 W BestClock: java.time.DateTimeException: Missing NTP fix
+10-28 13:01:34.931   464   491 W BestClock: java.time.DateTimeException: Missing NTP fix
+10-28 13:01:35.047   784   784 W UnsafeUtil: platform method missing - proto runtime falling back to safer methods: java.lang.NoSuchMethodException: sun.misc.Unsafe.copyMemory [class java.lang.Object, long, class java.lang.Object, long, long]
+10-28 13:01:35.099   464   491 W BestClock: java.time.DateTimeException: Missing NTP fix
+10-28 13:01:35.166   464   491 W BestClock: java.time.DateTimeException: Missing NTP fix
+10-28 13:01:35.172   464   491 W BestClock: java.time.DateTimeException: Missing NTP fix
+10-28 13:01:35.186   464   491 W BestClock: java.time.DateTimeException: Missing NTP fix
+10-28 13:01:35.209   464   491 W BestClock: java.time.DateTimeException: Missing NTP fix
+10-28 13:01:35.257   464   491 W BestClock: java.time.DateTimeException: Missing NTP fix
+10-28 13:01:35.370   464   491 W BestClock: java.time.DateTimeException: Missing NTP fix
+10-28 13:01:35.388   464   491 W BestClock: java.time.DateTimeException: Missing NTP fix
+10-28 13:01:35.392   464   491 W BestClock: java.time.DateTimeException: Missing NTP fix
+10-28 13:01:35.410   464   491 W BestClock: java.time.DateTimeException: Missing NTP fix
+10-28 13:01:35.832   870   870 E CarrierIdProvider: read carrier list from ota pb failure: java.io.FileNotFoundException: /data/misc/carrierid/carrier_list.pb: open failed: ENOENT (No such file or directory)
+10-28 13:01:35.940   464   613 W BestClock: java.time.DateTimeException: Missing NTP fix
+10-28 13:01:35.942   840   840 W BluetoothAdapterService: android.content.pm.PackageManager$NameNotFoundException: com.android.systemui
+10-28 13:01:35.973   464   484 E SystemServiceRegistry: android.os.ServiceManager$ServiceNotFoundException: No service published for: contexthub
+10-28 13:01:35.983   464   613 W BestClock: java.time.DateTimeException: Missing NTP fix
+10-28 13:01:36.043   464   666 E WearCellularMediator: java.lang.IllegalStateException: Telephony service is null.
+10-28 13:01:36.345   464   616 W FileUtils: android.system.ErrnoException: chmod failed: ENOENT (No such file or directory)
+10-28 13:01:36.431   464  1173 W UnsafeUtil: platform method missing - proto runtime falling back to safer methods: java.lang.NoSuchMethodException: sun.misc.Unsafe.copyMemory [class java.lang.Object, long, class java.lang.Object, long, long]
+10-28 13:01:36.649   685  1254 D SysUI   : java.util.concurrent.CancellationException: Task was cancelled.
+10-28 13:01:36.705   685  1182 D SysUI   : java.util.concurrent.CancellationException: Task was cancelled.
+10-28 13:01:36.711   685  1258 W SysUI   : java.lang.SecurityException: Caller can't access shortcut information
+10-28 13:01:36.711   685  1258 W SysUI   : 	at android.os.Parcel.createExceptionOrNull(Parcel.java:3011)
+10-28 13:01:36.711   685  1258 W SysUI   : 	at android.os.Parcel.createException(Parcel.java:2995)
+10-28 13:01:36.711   685  1258 W SysUI   : 	at android.os.Parcel.readException(Parcel.java:2978)
+10-28 13:01:36.711   685  1258 W SysUI   : 	at android.os.Parcel.readException(Parcel.java:2920)
+10-28 13:01:36.711   685  1258 W SysUI   : Caused by: android.os.RemoteException: Remote stack trace:
+10-28 13:01:36.720   685  1258 W SysUI   : java.lang.SecurityException: Caller can't access shortcut information
+10-28 13:01:36.720   685  1258 W SysUI   : 	at android.os.Parcel.createExceptionOrNull(Parcel.java:3011)
+10-28 13:01:36.720   685  1258 W SysUI   : 	at android.os.Parcel.createException(Parcel.java:2995)
+10-28 13:01:36.720   685  1258 W SysUI   : 	at android.os.Parcel.readException(Parcel.java:2978)
+10-28 13:01:36.720   685  1258 W SysUI   : 	at android.os.Parcel.readException(Parcel.java:2920)
+10-28 13:01:36.950   784   837 W WearServices: android.content.pm.PackageManager$NameNotFoundException: ComponentInfo{com.google.android.wearable.weather/com.google.android.wearable.weather.complications.WeatherProviderService}
+10-28 13:01:36.953   685  1258 W SysUI   : java.lang.SecurityException: Caller can't access shortcut information
+10-28 13:01:36.953   685  1258 W SysUI   : 	at android.os.Parcel.createExceptionOrNull(Parcel.java:3011)
+10-28 13:01:36.953   685  1258 W SysUI   : 	at android.os.Parcel.createException(Parcel.java:2995)
+10-28 13:01:36.953   685  1258 W SysUI   : 	at android.os.Parcel.readException(Parcel.java:2978)
+10-28 13:01:36.953   685  1258 W SysUI   : 	at android.os.Parcel.readException(Parcel.java:2920)
+10-28 13:01:36.954   784   837 W WearServices: android.content.pm.PackageManager$NameNotFoundException: ComponentInfo{com.fitbit.FitbitMobile/com.fitbit.complications.offloadable.heartrate.OffloadableHeartRateComplicationDataSourceService}
+10-28 13:01:36.954   784   837 W WearServices: android.content.pm.PackageManager$NameNotFoundException: ComponentInfo{com.fitbit.FitbitMobile/com.fitbit.complications.heartrate.HeartRateComplicationDataSourceService}
+10-28 13:01:37.380   784   837 W WearServices: android.content.pm.PackageManager$NameNotFoundException: ComponentInfo{com.fitbit.FitbitMobile/com.fitbit.complications.offloadable.steps.OffloadableStepsComplicationDataSourceService}
+10-28 13:01:37.381   784   837 W WearServices: android.content.pm.PackageManager$NameNotFoundException: ComponentInfo{com.fitbit.FitbitMobile/com.fitbit.complications.steps.StepsComplicationDataSourceService}
+10-28 13:01:37.381   784   837 W WearServices: android.content.pm.PackageManager$NameNotFoundException: ComponentInfo{com.fitbit.FitbitMobile/com.fitbit.complications.today.TodayComplicationDataSourceService}
+10-28 13:01:37.381   784   837 W WearServices: android.content.pm.PackageManager$NameNotFoundException: ComponentInfo{com.fitbit.FitbitMobile/com.fitbit.complications.offloadable.heartrate.OffloadableHeartRateComplicationDataSourceService}
+10-28 13:01:37.385   784   837 W WearServices: android.content.pm.PackageManager$NameNotFoundException: ComponentInfo{com.fitbit.FitbitMobile/com.fitbit.complications.heartrate.HeartRateComplicationDataSourceService}
+10-28 13:01:37.385   784   837 W WearServices: android.content.pm.PackageManager$NameNotFoundException: ComponentInfo{com.google.android.wearable.assistant/com.google.android.wearable.assistant.complications.proactive.ProactiveComplicationService}
+10-28 13:01:37.398   464   614 W BestClock: java.time.DateTimeException: Missing NTP fix
+10-28 13:01:37.398   464   614 W BestClock: java.time.DateTimeException: Missing NTP fix
+10-28 13:01:37.403   464   616 W FileUtils: android.system.ErrnoException: chmod failed: ENOENT (No such file or directory)
+10-28 13:01:37.484  1170  1392 W MediaProvider: Exception encountered while reading xattr:user.extdbsessionid0 from path:/data/user/0/com.android.providers.media.module/databases/external.db.
+10-28 13:01:37.484  1170  1392 W MediaProvider: Exception encountered while reading xattr:user.extdbsessionid0 from path:/data/media/0.
+10-28 13:01:37.484  1170  1392 E MediaProvider: android.system.ErrnoException: getxattr failed: ENODATA (No data available)
+10-28 13:01:37.485  1170  1392 E MediaProvider: android.system.ErrnoException: getxattr failed: ENODATA (No data available)
+10-28 13:01:37.588   685  1258 W SysUI   : java.lang.SecurityException: Caller can't access shortcut information
+10-28 13:01:37.588   685  1258 W SysUI   : 	at android.os.Parcel.createExceptionOrNull(Parcel.java:3011)
+10-28 13:01:37.588   685  1258 W SysUI   : 	at android.os.Parcel.createException(Parcel.java:2995)
+10-28 13:01:37.588   685  1258 W SysUI   : 	at android.os.Parcel.readException(Parcel.java:2978)
+10-28 13:01:37.588   685  1258 W SysUI   : 	at android.os.Parcel.readException(Parcel.java:2920)
+10-28 13:01:37.656   464   478 V SplashScreenExceptionList: parseSystemConfigPackageList adding pkg: com.google.android.apps.maps
+10-28 13:01:37.656   464   478 V SplashScreenExceptionList: parseSystemConfigPackageList adding pkg: com.google.android.wearable.sysui
+10-28 13:01:37.656   464   478 V SplashScreenExceptionList: parseSystemConfigPackageList adding pkg: com.google.android.apps.wearable.settings
+10-28 13:01:37.656   464   478 V SplashScreenExceptionList: parseSystemConfigPackageList adding pkg: com.google.android.wearable.assistant
+10-28 13:01:37.656   464   478 V SplashScreenExceptionList: parseSystemConfigPackageList adding pkg: com.google.android.wearable.app
+10-28 13:01:37.656   464   478 V SplashScreenExceptionList: parseSystemConfigPackageList adding pkg: com.google.wear.services
+10-28 13:01:37.656   464   478 V SplashScreenExceptionList: parseSystemConfigPackageList adding pkg: android
+10-28 13:01:37.656   464   478 V SplashScreenExceptionList: SplashScreen checking exception for package com.google.android.wearable.setupwizard (target sdk:33) -> false
+10-28 13:01:37.757   784   837 W WearServices: android.content.pm.PackageManager$NameNotFoundException: ComponentInfo{com.google.android.wearable.weather/com.google.android.wearable.weather.complications.WeatherProviderService}
+10-28 13:01:37.758   784   837 W WearServices: android.content.pm.PackageManager$NameNotFoundException: ComponentInfo{com.fitbit.FitbitMobile/com.fitbit.complications.today.TodayComplicationDataSourceService}
+10-28 13:01:37.759   784   837 W WearServices: android.content.pm.PackageManager$NameNotFoundException: ComponentInfo{com.fitbit.FitbitMobile/com.fitbit.complications.offloadable.steps.OffloadableStepsComplicationDataSourceService}
+10-28 13:01:37.760   784   837 W WearServices: android.content.pm.PackageManager$NameNotFoundException: ComponentInfo{com.fitbit.FitbitMobile/com.fitbit.complications.steps.StepsComplicationDataSourceService}
+10-28 13:01:37.789   685  1258 W SysUI   : java.lang.SecurityException: Caller can't access shortcut information
+10-28 13:01:37.789   685  1258 W SysUI   : 	at android.os.Parcel.createExceptionOrNull(Parcel.java:3011)
+10-28 13:01:37.789   685  1258 W SysUI   : 	at android.os.Parcel.createException(Parcel.java:2995)
+10-28 13:01:37.789   685  1258 W SysUI   : 	at android.os.Parcel.readException(Parcel.java:2978)
+10-28 13:01:37.789   685  1258 W SysUI   : 	at android.os.Parcel.readException(Parcel.java:2920)
+10-28 13:01:37.789   685  1258 W SysUI   : Caused by: android.os.RemoteException: Remote stack trace:
+10-28 13:01:37.993   464   464 W AppWidgetServiceImpl: Failed to read state: java.io.FileNotFoundException: /data/system/users/0/appwidgets.xml: open failed: ENOENT (No such file or directory)
+10-28 13:01:38.030   871   891 W MessageQueue: java.lang.IllegalStateException: Handler (android.media.MediaPlayer$EventHandler) {d0e9328} sending message to a Handler on a dead thread
+10-28 13:01:38.031   871   891 W MessageQueue: java.lang.IllegalStateException: Handler (android.media.MediaPlayer$EventHandler) {d0e9328} sending message to a Handler on a dead thread
+10-28 13:01:38.325   871   891 W MessageQueue: java.lang.IllegalStateException: Handler (android.media.MediaPlayer$EventHandler) {d0e9328} sending message to a Handler on a dead thread
+10-28 13:01:38.682   871  1306 W MessageQueue: java.lang.IllegalStateException: Handler (android.media.MediaPlayer$EventHandler) {d0e9328} sending message to a Handler on a dead thread
+10-28 13:01:38.798   871   871 D SetupWizard.Utils: Could not remove phone_switching capability: com.google.android.gms.common.api.ApiException: 4007: UNKNOWN_CAPABILITY
+10-28 13:01:38.822   871   871 D SetupWizard.Utils: Could not remove phone_switching capability: com.google.android.gms.common.api.ApiException: 4007: UNKNOWN_CAPABILITY
+10-28 13:01:38.992   464   505 W ProcessCpuTracker: Failed to stat(/proc/1609): android.system.ErrnoException: stat failed: ENOENT (No such file or directory)
+10-28 13:01:39.071   784   837 W WearServices: android.content.pm.PackageManager$NameNotFoundException: ComponentInfo{com.fitbit.FitbitMobile/com.fitbit.complications.offloadable.heartrate.OffloadableHeartRateComplicationDataSourceService}
+10-28 13:01:39.071   784   837 W WearServices: android.content.pm.PackageManager$NameNotFoundException: ComponentInfo{com.fitbit.FitbitMobile/com.fitbit.complications.heartrate.HeartRateComplicationDataSourceService}
+10-28 13:01:39.072   784   837 W WearServices: android.content.pm.PackageManager$NameNotFoundException: ComponentInfo{com.google.android.wearable.weather/com.google.android.wearable.weather.complications.WeatherProviderService}
+10-28 13:01:39.088   871  1306 W MessageQueue: java.lang.IllegalStateException: Handler (android.media.MediaPlayer$EventHandler) {d0e9328} sending message to a Handler on a dead thread
+10-28 13:01:39.257   871  1306 W MessageQueue: java.lang.IllegalStateException: Handler (android.media.MediaPlayer$EventHandler) {d0e9328} sending message to a Handler on a dead thread
+10-28 13:01:39.322   464   623 W ConnectivityService: Exception adding interface: android.os.ServiceSpecificException: Machine is not on the network (code 64)
+10-28 13:01:39.361   464   623 W BestClock: java.time.DateTimeException: Missing NTP fix
+10-28 13:01:39.467   464   623 W BestClock: java.time.DateTimeException: Missing NTP fix
+10-28 13:01:39.475   464   623 E ConnectivityService: Exception in networkAddRouteParcel for non-gateway: android.os.ServiceSpecificException: Machine is not on the network (code 64)
+10-28 13:01:39.475   464   623 E ConnectivityService: Exception in networkAddRouteParcel for gateway: android.os.ServiceSpecificException: Machine is not on the network (code 64)
+10-28 13:01:39.484  1309  1625 W DataFileManager: java.io.FileNotFoundException: /data/user/0/com.google.android.inputmethod.latin/files/data_file_manager.pb: open failed: ENOENT (No such file or directory)
+10-28 13:01:39.484  1309  1625 W DataFileManager: Caused by: android.system.ErrnoException: open failed: ENOENT (No such file or directory)
+10-28 13:01:39.486   464   623 W BestClock: java.time.DateTimeException: Missing NTP fix
+10-28 13:01:39.515   871  1306 W MessageQueue: java.lang.IllegalStateException: Handler (android.media.MediaPlayer$EventHandler) {d0e9328} sending message to a Handler on a dead thread
+10-28 13:01:39.523   784   837 W WearServices: android.content.pm.PackageManager$NameNotFoundException: ComponentInfo{com.google.android.wearable.weather/com.google.android.wearable.weather.complications.WeatherProviderService}
+10-28 13:01:39.524   784   837 W WearServices: android.content.pm.PackageManager$NameNotFoundException: ComponentInfo{com.fitbit.FitbitMobile/com.fitbit.complications.offloadable.heartrate.OffloadableHeartRateComplicationDataSourceService}

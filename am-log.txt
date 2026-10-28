@@ -1,0 +1,451 @@
+--------- beginning of main
+10-28 13:01:27.808   272   272 D AndroidRuntime: >>>>>> START com.android.internal.os.ZygoteInit uid 0 <<<<<<
+10-28 13:01:27.841   272   272 I AndroidRuntime: Using default boot image
+10-28 13:01:27.841   272   272 I AndroidRuntime: Leaving lock profiling enabled
+--------- beginning of system
+10-28 13:01:29.819   464   464 I ActivityManager: Memory class: 192
+10-28 13:01:30.563   464   496 I ActivityManager: Connection with lmkd established
+10-28 13:01:30.628   464   481 W ActivityTaskManager: Skip updateConfiguration because mWindowManager isn't set
+10-28 13:01:30.972   464   492 D ActivityManager: Freezer enabled
+10-28 13:01:30.972   464   492 D ActivityManager: freezer override set to false
+10-28 13:01:31.051   464   464 I ActivityTaskManager: Loaded persisted task ids for user 0
+10-28 13:01:31.222   464   464 I ActivityTaskManager: Config changes=20005df8 {1.0 ?mcc?mnc [en_US] ldltr sw227dp w227dp h227dp 320dpi smll port ?uimode ?night -touch qwerty/v/v -nav/h winConfig={ mBounds=Rect(0, 0 - 454, 454) mAppBounds=Rect(0, 0 - 454, 454) mMaxBounds=Rect(0, 0 - 454, 454) mDisplayRotation=ROTATION_0 mWindowingMode=fullscreen mDisplayWindowingMode=fullscreen mActivityType=undefined mAlwaysOnTop=undefined mRotation=ROTATION_0} s.2 ?fontWeightAdjustment}
+10-28 13:01:31.312   464   464 I ActivityTaskManager: Config changes=8 {1.0 ?mcc?mnc [en_US] ldltr sw227dp w227dp h227dp 320dpi smll port ?uimode ?night finger qwerty/v/v -nav/h winConfig={ mBounds=Rect(0, 0 - 454, 454) mAppBounds=Rect(0, 0 - 454, 454) mMaxBounds=Rect(0, 0 - 454, 454) mDisplayRotation=ROTATION_0 mWindowingMode=fullscreen mDisplayWindowingMode=fullscreen mActivityType=undefined mAlwaysOnTop=undefined mRotation=ROTATION_0} s.4 ?fontWeightAdjustment}
+10-28 13:01:33.384   464   464 W ActivityManager: Unable to start service Intent { act=android.service.notification.NotificationListenerService cmp=com.google.wear.services/.notification.stream.listener.NotificationCollectorService } U=0: not found
+10-28 13:01:33.385   464   464 W ActivityManager: Unable to start service Intent { act=android.service.notification.NotificationListenerService cmp=com.google.wear.services/.notification.stream.listener.NotificationCollectorService } U=0: not found
+10-28 13:01:33.385   464   464 W ActivityManager: Unable to start service Intent { act=android.service.notification.NotificationListenerService cmp=com.google.android.wearable.media.sessions/com.google.android.clockwork.media.sessionlistener.MediaNotificationListenerService } U=0: not found
+10-28 13:01:33.626   464   464 I ActivityTaskManager: Config changes=200 {1.0 ?mcc?mnc [en_US] ldltr sw227dp w227dp h227dp 320dpi smll port watch finger qwerty/v/v -nav/h winConfig={ mBounds=Rect(0, 0 - 454, 454) mAppBounds=Rect(0, 0 - 454, 454) mMaxBounds=Rect(0, 0 - 454, 454) mDisplayRotation=ROTATION_0 mWindowingMode=fullscreen mDisplayWindowingMode=fullscreen mActivityType=undefined mAlwaysOnTop=undefined mRotation=ROTATION_0} s.6 ?fontWeightAdjustment}
+10-28 13:01:34.002   464   464 I ActivityManager: System now ready
+10-28 13:01:34.004   464   464 I ActivityTaskManager: Config changes=10000000 {1.0 ?mcc?mnc [en_US] ldltr sw227dp w227dp h227dp 320dpi smll port watch finger qwerty/v/v -nav/h winConfig={ mBounds=Rect(0, 0 - 454, 454) mAppBounds=Rect(0, 0 - 454, 454) mMaxBounds=Rect(0, 0 - 454, 454) mDisplayRotation=ROTATION_0 mWindowingMode=fullscreen mDisplayWindowingMode=fullscreen mActivityType=undefined mAlwaysOnTop=undefined mRotation=ROTATION_0} s.8 fontWeightAdjustment=0}
+10-28 13:01:34.027   464   464 W ActivityManager: Too early to start/bind service in system_server: Phase=550 ComponentInfo{com.android.server.telecom/com.android.server.telecom.components.TelecomService}
+10-28 13:01:34.027   464   464 W ActivityManager: Too early to start/bind service in system_server: Phase=550 ComponentInfo{com.android.server.telecom/com.android.server.telecom.components.TelecomService}
+10-28 13:01:34.096   464   493 W ActivityManager: com.google.android.wearable.sysui inode == 0 (b/152760674)
+10-28 13:01:34.096   464   493 W ActivityManager: com.google.android.gms inode == 0 (b/152760674)
+10-28 13:01:34.099   464   493 I ActivityManager: Start proc 685:com.google.android.wearable.sysui/u0a43 for service {com.google.android.wearable.sysui/com.google.android.clockwork.sysui.experiences.defaultwatchface.DefaultWatchFace}
+10-28 13:01:34.113   464   493 W ActivityManager: com.google.android.permissioncontroller inode == 0 (b/152760674)
+10-28 13:01:34.113   464   493 W ActivityManager: com.google.android.gms inode == 0 (b/152760674)
+10-28 13:01:34.116   464   493 I ActivityManager: Start proc 697:com.google.android.permissioncontroller/u0a84 for service {com.google.android.permissioncontroller/com.android.permissioncontroller.permission.service.PermissionControllerServiceImpl}
+10-28 13:01:34.320   464   493 W ActivityManager: com.google.android.gsf inode == 0 (b/152760674)
+10-28 13:01:34.323   464   493 I ActivityManager: Start proc 740:com.google.android.gms.persistent/u0a68 for service {com.google.android.gms/com.google.android.gms.chimera.PersistentDirectBootAwareApiService}
+10-28 13:01:34.711   464   493 W ActivityManager: com.android.emulator.multidisplay inode == 0 (b/152760674)
+10-28 13:01:34.711   464   493 W ActivityManager: com.google.android.gms inode == 0 (b/152760674)
+10-28 13:01:34.715   464   493 I ActivityManager: Start proc 784:com.google.wear.services/1000 for service {com.google.wear.services/com.google.wear.services.api.WearService}
+10-28 13:01:34.912   464   493 W ActivityManager: com.android.networkstack inode == 0 (b/152760674)
+10-28 13:01:34.912   464   493 W ActivityManager: com.google.android.gms inode == 0 (b/152760674)
+10-28 13:01:34.917   464   493 I ActivityManager: Start proc 812:com.android.networkstack.process/1073 for service {com.android.networkstack/com.android.server.NetworkStackService}
+10-28 13:01:34.921   464   464 I ActivityManager: Current user:0
+10-28 13:01:35.145   464   493 W ActivityManager: com.google.android.bluetooth inode == 0 (b/152760674)
+10-28 13:01:35.145   464   493 W ActivityManager: com.google.android.gms inode == 0 (b/152760674)
+10-28 13:01:35.148   464   493 I ActivityManager: Start proc 840:com.google.android.bluetooth/1002 for service {com.google.android.bluetooth/com.android.bluetooth.btservice.AdapterService}
+10-28 13:01:35.176   464   493 W ActivityManager: com.google.android.apps.wearable.systemui inode == 0 (b/152760674)
+10-28 13:01:35.176   464   493 W ActivityManager: com.google.android.gms inode == 0 (b/152760674)
+10-28 13:01:35.187   464   464 I ActivityTaskManager: START u0 {act=android.intent.action.MAIN cat=[android.intent.category.HOME] flg=0x10000100 cmp=com.google.android.wearable.setupwizard/.core.SetupWizardActivity (has extras)} from uid 0
+10-28 13:01:35.215   464   464 D ActivityManager: Checking system ready errors async.
+10-28 13:01:35.220   464   493 I ActivityManager: Start proc 854:com.google.android.apps.wearable.systemui/u0a73 for added application com.google.android.apps.wearable.systemui
+10-28 13:01:35.220   464   493 W ActivityManager: com.android.se inode == 0 (b/152760674)
+10-28 13:01:35.220   464   493 W ActivityManager: com.google.android.gms inode == 0 (b/152760674)
+10-28 13:01:35.230   464   493 W ActivityManager: Slow operation: 53ms so far, now at startProcess: returned from zygote!
+10-28 13:01:35.235   464   493 W ActivityManager: Slow operation: 58ms so far, now at startProcess: done updating battery stats
+10-28 13:01:35.235   464   493 W ActivityManager: Slow operation: 58ms so far, now at startProcess: building log message
+10-28 13:01:35.235   464   493 I ActivityManager: Start proc 869:com.android.se/1068 for added application com.android.se
+10-28 13:01:35.235   464   493 W ActivityManager: Slow operation: 58ms so far, now at startProcess: starting to update pids map
+10-28 13:01:35.235   464   493 W ActivityManager: Slow operation: 58ms so far, now at startProcess: done updating pids map
+10-28 13:01:35.235   464   493 W ActivityManager: Slow operation: 58ms so far, now at startProcess: asking zygote to start proc
+10-28 13:01:35.235   464   493 W ActivityManager: com.android.mms.service inode == 0 (b/152760674)
+10-28 13:01:35.235   464   493 W ActivityManager: com.google.android.gms inode == 0 (b/152760674)
+10-28 13:01:35.235   464   464 W ActivityManager: Unable to start service Intent { flg=0x100 cmp=com.android.systemui/.SystemUIService } U=0: not found
+10-28 13:01:35.239   464   493 W ActivityManager: Slow operation: 62ms so far, now at startProcess: returned from zygote!
+10-28 13:01:35.242   464   493 W ActivityManager: Slow operation: 64ms so far, now at startProcess: done updating battery stats
+10-28 13:01:35.242   464   493 W ActivityManager: Slow operation: 65ms so far, now at startProcess: building log message
+10-28 13:01:35.242   464   493 I ActivityManager: Start proc 870:com.android.phone/1001 for added application com.android.phone
+10-28 13:01:35.242   464   493 W ActivityManager: Slow operation: 65ms so far, now at startProcess: starting to update pids map
+10-28 13:01:35.242   464   493 W ActivityManager: Slow operation: 65ms so far, now at startProcess: done updating pids map
+10-28 13:01:35.242   464   493 W ActivityManager: com.google.android.wearable.setupwizard inode == 0 (b/152760674)
+10-28 13:01:35.242   464   493 W ActivityManager: com.google.android.gms inode == 0 (b/152760674)
+10-28 13:01:35.249   464   493 I ActivityManager: Start proc 871:com.google.android.wearable.setupwizard/u0a40 for top-activity {com.google.android.wearable.setupwizard/com.google.android.wearable.setupwizard.core.SetupWizardActivity}
+10-28 13:01:35.249   464   493 W ActivityManager: com.google.android.gsf inode == 0 (b/152760674)
+10-28 13:01:35.254   464   493 I ActivityManager: Start proc 872:com.google.android.gms/u0a68 for service {com.google.android.gms/com.google.android.gms.chimera.GmsIntentOperationService}
+10-28 13:01:35.367   464   676 W ActivityManager: Slow operation: 64ms so far, now at attachApplicationLocked: after updateOomAdjLocked
+10-28 13:01:35.428   464   479 W ActivityManager: Unable to start service Intent { act=com.google.android.gms.wearable.BIND pkg=com.google.android.gms } U=0: not found
+10-28 13:01:35.428   464   537 W ActivityManager: Unbind failed: could not find connection for android.os.BinderProxy@5221518
+10-28 13:01:35.689   464   464 W ActivityManager: Unable to start service Intent { act=android.service.notification.NotificationListenerService cmp=com.google.wear.services/.notification.stream.listener.NotificationCollectorService } U=0: not found
+10-28 13:01:35.689   464   464 W ActivityManager: Unable to start service Intent { act=android.service.notification.NotificationListenerService cmp=com.google.android.wearable.media.sessions/com.google.android.clockwork.media.sessionlistener.MediaNotificationListenerService } U=0: not found
+10-28 13:01:35.868   464   922 D ActivityTaskManager: Top Process State changed to PROCESS_STATE_TOP_SLEEPING
+10-28 13:01:35.941   464   537 W ActivityManager: Unable to start service Intent { act=com.google.android.gms.wearable.BIND pkg=com.google.android.gms } U=0: not found
+10-28 13:01:35.941   464   537 W ActivityManager: Unbind failed: could not find connection for android.os.BinderProxy@8b7945c
+10-28 13:01:35.961   464   484 I ActivityManager: About to commit checkpoint
+10-28 13:01:35.963   464   922 D ActivityTaskManager: Top Process State changed to PROCESS_STATE_TOP
+10-28 13:01:36.060   464   484 I ActivityManager: User 0 state changed from BOOTING to RUNNING_LOCKED
+10-28 13:01:36.060   464   484 W ActivityManager: UserLifecycleEvent 4 received without an active userJourneySession.
+10-28 13:01:36.061   464   484 W ActivityManager: UserLifecycleEvent 5 received without an active userJourneySession.
+10-28 13:01:36.061   464   484 D ActivityManager: Started unlocking user 0
+10-28 13:01:36.061   464   484 D ActivityManager: Unlocking user 0 progress 0
+10-28 13:01:36.061   464   484 D ActivityManager: Unlocking user 0 progress 5
+10-28 13:01:36.087   464   493 W ActivityManager: com.google.android.ext.services inode == 0 (b/152760674)
+10-28 13:01:36.087   464   493 W ActivityManager: com.google.android.gms inode == 0 (b/152760674)
+10-28 13:01:36.127   464   493 W ActivityManager: Slow operation: 69ms so far, now at startProcess: returned from zygote!
+10-28 13:01:36.139   464   493 W ActivityManager: Slow operation: 81ms so far, now at startProcess: done updating battery stats
+10-28 13:01:36.139   464   493 W ActivityManager: Slow operation: 81ms so far, now at startProcess: building log message
+10-28 13:01:36.139   464   493 I ActivityManager: Start proc 1098:com.google.android.ext.services/u0a87 for on-hold
+10-28 13:01:36.139   464   493 W ActivityManager: Slow operation: 81ms so far, now at startProcess: starting to update pids map
+10-28 13:01:36.139   464   493 W ActivityManager: Slow operation: 81ms so far, now at startProcess: done updating pids map
+10-28 13:01:36.139   464   493 W ActivityManager: Slow operation: 73ms so far, now at startProcess: asking zygote to start proc
+10-28 13:01:36.139   464   493 W ActivityManager: com.android.emulator.multidisplay inode == 0 (b/152760674)
+10-28 13:01:36.139   464   493 W ActivityManager: com.google.android.gms inode == 0 (b/152760674)
+10-28 13:01:36.154   464   493 W ActivityManager: Slow operation: 87ms so far, now at startProcess: returned from zygote!
+10-28 13:01:36.154   464   493 W ActivityManager: Slow operation: 88ms so far, now at startProcess: done updating battery stats
+10-28 13:01:36.154   464   493 W ActivityManager: Slow operation: 88ms so far, now at startProcess: building log message
+10-28 13:01:36.154   464   493 I ActivityManager: Start proc 1104:com.google.android.apps.wearable.settings/1000 for broadcast {com.google.android.apps.wearable.settings/com.google.android.clockwork.settings.BootReceiver}
+10-28 13:01:36.154   464   493 W ActivityManager: Slow operation: 88ms so far, now at startProcess: starting to update pids map
+10-28 13:01:36.154   464   493 W ActivityManager: Slow operation: 88ms so far, now at startProcess: done updating pids map
+10-28 13:01:36.277   464   481 I ActivityManager: User 0 state changed from RUNNING_LOCKED to RUNNING_UNLOCKING
+10-28 13:01:36.277   464   481 D ActivityManager: Unlocking user 0 progress 20
+10-28 13:01:36.291   464   493 I ActivityManager: Start proc 1149:com.google.process.gservices/u0a68 for content provider {com.google.android.gsf/com.google.android.gsf.gservices.GservicesProvider}
+10-28 13:01:36.363   464   493 I ActivityManager: Start proc 1170:com.android.providers.media.module/u0a86 for service {com.android.providers.media.module/com.android.providers.media.fuse.ExternalStorageServiceImpl}
+10-28 13:01:36.366   464   492 W ActivityManager: UserLifecycleEvent 5 received without an active userJourneySession.
+10-28 13:01:36.366   464   481 I ActivityTaskManager: Loading recents for user 0 into memory.
+10-28 13:01:36.367   464   492 W ActivityManager: UserLifecycleEvent 6 received without an active userJourneySession.
+10-28 13:01:36.367   464   492 I ActivityManager: User 0 state changed from RUNNING_UNLOCKING to RUNNING_UNLOCKED
+10-28 13:01:36.421   464   493 W ActivityManager: Slow operation: 52ms so far, now at startProcess: returned from zygote!
+10-28 13:01:36.421   464   493 W ActivityManager: Slow operation: 52ms so far, now at startProcess: done updating battery stats
+10-28 13:01:36.421   464   493 W ActivityManager: Slow operation: 52ms so far, now at startProcess: building log message
+10-28 13:01:36.421   464   493 I ActivityManager: Start proc 1178:com.android.emulator.multidisplay/1000 for added application com.android.emulator.multidisplay
+10-28 13:01:36.421   464   493 W ActivityManager: Slow operation: 52ms so far, now at startProcess: starting to update pids map
+10-28 13:01:36.421   464   493 W ActivityManager: Slow operation: 52ms so far, now at startProcess: done updating pids map
+10-28 13:01:36.434   464   493 I ActivityManager: Start proc 1185:com.google.android.wearable.media.sessions/u0a36 for service {com.google.android.wearable.media.sessions/com.google.android.clockwork.media.sessionlistener.MediaNotificationListenerService}
+10-28 13:01:36.512   464  1213 W ActivityManager: Unable to start service Intent { act=com.google.android.gms.gservices.START pkg=com.google.android.gms } U=0: not found
+10-28 13:01:36.515   464   932 W ActivityManager: Unbind failed: could not find connection for android.os.BinderProxy@8ea4a84
+10-28 13:01:36.565   464   932 I ActivityTaskManager: START u0 {act=com.android.setupwizard.POSTPAIR flg=0x4000000 cmp=com.google.android.wearable.setupwizard/.steps.PostPairActivity (has extras)} from uid 10040
+10-28 13:01:36.602   464  1184 W ActivityTaskManager: Tried to set launchTime (0) < mLastActivityLaunchTime (15616)
+10-28 13:01:36.636   464   493 I ActivityManager: Start proc 1256:com.google.android.marvin.talkback/u0a64 for broadcast {com.google.android.marvin.talkback/com.google.android.accessibility.talkback.BootReceiver}
+10-28 13:01:36.642   464   491 W ActivityManager: Unable to start service Intent { cmp=com.android.printspooler/.model.PrintSpoolerService } U=0: not found
+10-28 13:01:36.682   464   478 I ActivityTaskManager: START u0 {act=com.android.wizard.NEXT cmp=com.google.android.wearable.setupwizard/.WizardManagerActivity (has extras)} from uid 10040
+10-28 13:01:36.733   464   565 W ActivityTaskManager: Tried to set launchTime (0) < mLastActivityLaunchTime (16919)
+10-28 13:01:36.740   464  1184 I ActivityTaskManager: START u0 {act=com.android.setupwizard.EMULATOR_STATUS flg=0x4000000 cmp=com.google.android.wearable.setupwizard/.steps.status.EmulatorStatusActivity (has extras)} from uid 10040
+10-28 13:01:36.750   464   565 W ActivityTaskManager: Tried to set launchTime (0) < mLastActivityLaunchTime (17051)
+10-28 13:01:37.011   464   493 I ActivityManager: Start proc 1309:com.google.android.inputmethod.latin/u0a50 for service {com.google.android.inputmethod.latin/com.android.inputmethod.latin.LatinIME}
+10-28 13:01:37.068   464   493 I ActivityManager: Start proc 1321:android.process.acore/u0a37 for content provider {com.android.providers.contacts/com.android.providers.contacts.ContactsProvider2}
+10-28 13:01:37.106   464   493 I ActivityManager: Start proc 1344:com.google.android.wearable.watchface.rwf/u0a38 for service {com.google.android.wearable.watchface.rwf/androidx.wear.watchface.control.WatchFaceControlService}
+10-28 13:01:37.211   464   493 I ActivityManager: Start proc 1387:com.google.android.deskclock/u0a47 for service {com.google.android.deskclock/com.google.android.wearable.deskclock.timer.tile.prototile.TimerProtoTileProviderService}
+10-28 13:01:37.423   464  1227 I ActivityTaskManager: START u0 {act=com.android.wizard.NEXT cmp=com.google.android.wearable.setupwizard/.WizardManagerActivity (has extras)} from uid 10040
+10-28 13:01:37.437   464   932 W ActivityTaskManager: Tried to set launchTime (0) < mLastActivityLaunchTime (17067)
+10-28 13:01:37.462   464   932 I ActivityTaskManager: START u0 {act=com.android.setupwizard.EXIT flg=0x4000000 cmp=com.google.android.wearable.setupwizard/.steps.ExitActivity (has extras)} from uid 10040
+10-28 13:01:37.467   464   565 W ActivityManager: Unable to start service Intent { act=com.google.android.wearable.action.BIND_WATCH_FACE pkg=com.google.android.apps.wearable.systemui } U=0: not found
+10-28 13:01:37.478   464   478 W ActivityTaskManager: Tried to set launchTime (0) < mLastActivityLaunchTime (17755)
+10-28 13:01:37.502   464  1230 W WindowManager: Failed looking up window session=Session{8b72d56 871:u0a10040} callers=com.android.server.wm.WindowManagerService.windowForClientLocked:5954 com.android.server.wm.Session.updateRequestedVisibilities:705 android.view.IWindowSession$Stub.onTransact:1096 
+10-28 13:01:37.560   464   481 I ActivityTaskManager: Displayed com.google.android.wearable.setupwizard/.steps.ExitActivity: +104ms
+10-28 13:01:37.626   464  1184 I ActivityTaskManager: START u0 {act=android.intent.action.MAIN cat=[android.intent.category.HOME] flg=0x10000100 cmp=com.android.sdksetup/.DefaultActivity (has extras)} from uid 0
+10-28 13:01:37.644   464   478 I ActivityTaskManager: START u0 {act=com.android.wizard.NEXT cmp=com.google.android.wearable.setupwizard/.WizardManagerActivity (has extras)} from uid 10040
+10-28 13:01:37.645   464   478 W ActivityTaskManager: startActivity called from finishing ActivityRecord{ef411ff u0 com.google.android.wearable.setupwizard/.steps.ExitActivity} t2 f}}; forcing Intent.FLAG_ACTIVITY_NEW_TASK for: Intent { act=com.android.wizard.NEXT flg=0x800000 cmp=com.google.android.wearable.setupwizard/.WizardManagerActivity (has extras) }
+10-28 13:01:37.651   464   493 I ActivityManager: Start proc 1462:com.android.sdksetup/u0a72 for top-activity {com.android.sdksetup/com.android.sdksetup.DefaultActivity}
+10-28 13:01:37.659   464   478 W ActivityTaskManager: Tried to set launchTime (0) < mLastActivityLaunchTime (17799)
+10-28 13:01:37.671   464   676 W ActivityTaskManager: Finishing task with all activities already finished
+10-28 13:01:37.671   464   676 W ActivityTaskManager: Duplicate finish request for r=ActivityRecord{ef411ff u0 com.google.android.wearable.setupwizard/.steps.ExitActivity} t2 f}}
+10-28 13:01:37.904   464   493 I ActivityManager: Start proc 1508:android.process.media/u0a32 for content provider {com.android.providers.media/com.android.providers.media.LegacyMediaProvider}
+10-28 13:01:37.913   464   518 I ActivityManager: Killing 1462:com.android.sdksetup/u0a72 (adj 0): change com.android.sdksetup
+10-28 13:01:37.955   464   518 I ActivityTaskManager: START u0 {act=android.intent.action.MAIN cat=[android.intent.category.HOME] flg=0x10000100 cmp=com.google.android.wearable.sysui/.mainui.activity.SysUiActivity (has extras)} from uid 0
+10-28 13:01:37.978   464   484 W ActivityManager: ProcessRecord{7ef678 0:com.android.sdksetup/u0a72} is attached to a previous process 1462
+10-28 13:01:37.985   464   676 V ActivityManager: Got obituary of 1462:com.android.sdksetup
+10-28 13:01:38.026   464   493 I ActivityManager: Start proc 1540:com.android.sdksetup/u0a72 for top-activity {com.android.sdksetup/com.android.sdksetup.DefaultActivity}
+10-28 13:01:38.034   464   493 W ActivityManager: Slow operation: 56ms so far, now at startProcess: done updating pids map
+10-28 13:01:38.334   464   481 I ActivityTaskManager: Displayed com.google.android.wearable.sysui/.mainui.activity.SysUiActivity: +356ms
+10-28 13:01:38.334   464   481 I ActivityTaskManager: Fully drawn com.google.android.wearable.sysui/.mainui.activity.SysUiActivity: +356ms
+10-28 13:01:38.819   464   493 I ActivityManager: Start proc 1616:com.google.process.gapps/u0a68 for content provider {com.google.android.gsf/com.google.android.gsf.settings.GoogleSettingsProvider}
+10-28 13:01:39.499   464   493 I ActivityManager: Start proc 1671:com.android.localtransport/1000 for service {com.android.localtransport/com.android.localtransport.LocalTransportService}
+10-28 13:01:39.707   464  1212 W WindowManager: App com.google.android.wearable.sysui has a system alert window (type = 2038) with FLAG_NOT_TOUCHABLE and LayoutParams.alpha = 1.00 > 0.80, setting alpha to 0.80 to let touches pass through (if this is isn't desirable, remove flag FLAG_NOT_TOUCHABLE).
+10-28 13:01:39.768   464  1227 W ActivityTaskManager: Current config: {1.0 ?mcc?mnc [en_US] ldltr sw227dp w227dp h227dp 320dpi smll port watch finger qwerty/v/v -nav/h winConfig={ mBounds=Rect(0, 0 - 454, 454) mAppBounds=Rect(0, 0 - 454, 454) mMaxBounds=Rect(0, 0 - 454, 454) mDisplayRotation=ROTATION_0 mWindowingMode=fullscreen mDisplayWindowingMode=fullscreen mActivityType=undefined mAlwaysOnTop=undefined mRotation=ROTATION_0} s.8 fontWeightAdjustment=0} unchanged for IME proc com.google.android.inputmethod.latin
+10-28 13:01:39.768   464  1227 W ActivityTaskManager: Current config: {1.0 ?mcc?mnc [en_US] ldltr sw227dp w227dp h227dp 320dpi smll port watch finger qwerty/v/v -nav/h winConfig={ mBounds=Rect(0, 0 - 454, 454) mAppBounds=Rect(0, 0 - 454, 454) mMaxBounds=Rect(0, 0 - 454, 454) mDisplayRotation=ROTATION_0 mWindowingMode=fullscreen mDisplayWindowingMode=fullscreen mActivityType=undefined mAlwaysOnTop=undefined mRotation=ROTATION_0} s.8 fontWeightAdjustment=0} unchanged for IME proc com.google.android.inputmethod.latin
+10-28 13:01:39.893   464  1720 W WindowManager: App com.google.android.wearable.sysui has a system alert window (type = 2038) with FLAG_NOT_TOUCHABLE and LayoutParams.alpha = 1.00 > 0.80, setting alpha to 0.80 to let touches pass through (if this is isn't desirable, remove flag FLAG_NOT_TOUCHABLE).
+10-28 13:01:39.924   464   551 E ActivityManager: Sending non-protected broadcast com.android.bluetooth.btservice.BLUETOOTH_COUNTER_METRICS_ACTION from system uid 1002 pkg com.google.android.bluetooth
+10-28 13:01:39.924   464   551 E ActivityManager: java.lang.Throwable
+10-28 13:01:39.924   464   551 E ActivityManager: 	at com.android.server.am.ActivityManagerService.checkBroadcastFromSystem(ActivityManagerService.java:13607)
+10-28 13:01:39.924   464   551 E ActivityManager: 	at com.android.server.am.ActivityManagerService.broadcastIntentLocked(ActivityManagerService.java:14325)
+10-28 13:01:39.924   464   551 E ActivityManager: 	at com.android.server.am.ActivityManagerService.broadcastIntentInPackage(ActivityManagerService.java:14523)
+10-28 13:01:39.924   464   551 E ActivityManager: 	at com.android.server.am.ActivityManagerService$LocalService.broadcastIntentInPackage(ActivityManagerService.java:17060)
+10-28 13:01:39.924   464   551 E ActivityManager: 	at com.android.server.am.PendingIntentRecord.sendInner(PendingIntentRecord.java:526)
+10-28 13:01:39.924   464   551 E ActivityManager: 	at com.android.server.am.PendingIntentRecord.sendWithResult(PendingIntentRecord.java:311)
+10-28 13:01:39.924   464   551 E ActivityManager: 	at com.android.server.am.ActivityManagerService.sendIntentSender(ActivityManagerService.java:5434)
+10-28 13:01:39.924   464   551 E ActivityManager: 	at android.app.PendingIntent.sendAndReturnResult(PendingIntent.java:1012)
+10-28 13:01:39.924   464   551 E ActivityManager: 	at android.app.PendingIntent.send(PendingIntent.java:983)
+10-28 13:01:39.924   464   551 E ActivityManager: 	at com.android.server.alarm.AlarmManagerService$DeliveryTracker.deliverLocked(AlarmManagerService.java:5540)
+10-28 13:01:39.924   464   551 E ActivityManager: 	at com.android.server.alarm.AlarmManagerService.deliverAlarmsLocked(AlarmManagerService.java:4442)
+10-28 13:01:39.924   464   551 E ActivityManager: 	at com.android.server.alarm.AlarmManagerService$AlarmThread.run(AlarmManagerService.java:4753)
+10-28 13:01:40.107   464   493 I ActivityManager: Start proc 1756:com.google.android.wearable.healthservices/u0a41 for service {com.google.android.wearable.healthservices/com.google.android.wearable.healthservices.background.service.RecordingService}
+10-28 13:01:41.018   464   493 W ActivityManager: Slow operation: 191ms so far, now at startProcess: returned from zygote!
+10-28 13:01:41.076   464   493 W ActivityManager: Slow operation: 249ms so far, now at startProcess: done updating battery stats
+10-28 13:01:41.076   464   493 W ActivityManager: Slow operation: 249ms so far, now at startProcess: building log message
+10-28 13:01:41.076   464   493 I ActivityManager: Start proc 1832:com.google.android.wearable.app/u0a42 for content provider {com.google.android.wearable.app/com.google.android.clockwork.wcs.service.calendar.WearableCalendarProvider}
+10-28 13:01:41.076   464   493 W ActivityManager: Slow operation: 249ms so far, now at startProcess: starting to update pids map
+10-28 13:01:41.076   464   493 W ActivityManager: Slow operation: 249ms so far, now at startProcess: done updating pids map
+10-28 13:01:42.593   464  1850 W ActivityManager: Unable to start service Intent { cmp=com.google.android.gms/.fido.fido2.pollux.CableAuthenticatorService } U=0: not found
+10-28 13:01:42.744   464   493 I ActivityManager: Start proc 1944:com.google.android.dialer/u0a49 for broadcast {com.google.android.dialer/com.google.android.wearable.googledialer.voicemailnotification.VoicemailNotificationReceiver_Receiver}
+10-28 13:01:42.894   464   922 W ActivityManager: Unable to start service Intent { cmp=com.google.android.gms/.fido.fido2.pollux.CableAuthenticatorService } U=0: not found
+10-28 13:01:43.056   464  1854 I ActivityManager: com.android.vending is exempt from freezer
+10-28 13:01:43.063   464   493 I ActivityManager: Start proc 2024:com.android.vending:background/u0a51 for broadcast {com.android.vending/com.google.android.finsky.backgroundbroadcast.receiver.SimReceiver}
+10-28 13:01:43.065   464   565 I ActivityTaskManager: Config changes=3 {1.0 310mcc260mnc [en_US] ldltr sw227dp w227dp h227dp 320dpi smll port watch finger qwerty/v/v -nav/h winConfig={ mBounds=Rect(0, 0 - 454, 454) mAppBounds=Rect(0, 0 - 454, 454) mMaxBounds=Rect(0, 0 - 454, 454) mDisplayRotation=ROTATION_0 mWindowingMode=fullscreen mDisplayWindowingMode=fullscreen mActivityType=undefined mAlwaysOnTop=undefined mRotation=ROTATION_0} s.10 fontWeightAdjustment=0}
+10-28 13:01:43.069   464   565 V ActivityTaskManager: Sending to IME proc com.google.android.inputmethod.latin new config {1.0 310mcc260mnc [en_US] ldltr sw227dp w227dp h227dp 320dpi smll port watch finger qwerty/v/v -nav/h winConfig={ mBounds=Rect(0, 0 - 454, 454) mAppBounds=Rect(0, 0 - 454, 454) mMaxBounds=Rect(0, 0 - 454, 454) mDisplayRotation=ROTATION_0 mWindowingMode=fullscreen mDisplayWindowingMode=fullscreen mActivityType=undefined mAlwaysOnTop=undefined mRotation=ROTATION_0} s.10 fontWeightAdjustment=0}
+10-28 13:01:43.077   464   565 W ActivityTaskManager: Current config: {1.0 310mcc260mnc [en_US] ldltr sw227dp w227dp h227dp 320dpi smll port watch finger qwerty/v/v -nav/h winConfig={ mBounds=Rect(0, 0 - 454, 454) mAppBounds=Rect(0, 0 - 454, 454) mMaxBounds=Rect(0, 0 - 454, 454) mDisplayRotation=ROTATION_0 mWindowingMode=fullscreen mDisplayWindowingMode=fullscreen mActivityType=undefined mAlwaysOnTop=undefined mRotation=ROTATION_0} s.10 fontWeightAdjustment=0} unchanged for IME proc com.google.android.inputmethod.latin
+10-28 13:01:43.537   464   493 I ActivityManager: Start proc 2084:com.google.android.apps.messaging/u0a60 for broadcast {com.google.android.apps.messaging/com.google.android.apps.messaging.shared.receiver.DefaultSmsSubscriptionChangeReceiver}
+10-28 13:01:44.626   464  1214 I ActivityManager: com.android.managedprovisioning is exempt from freezer
+10-28 13:01:44.692   464   493 W ActivityManager: Slow operation: 65ms so far, now at startProcess: done updating battery stats
+10-28 13:01:44.692   464   493 W ActivityManager: Slow operation: 65ms so far, now at startProcess: building log message
+10-28 13:01:44.692   464   493 I ActivityManager: Start proc 2158:com.android.managedprovisioning/u0a35 for broadcast {com.android.managedprovisioning/com.android.managedprovisioning.ota.PreBootListener}
+10-28 13:01:44.692   464   493 W ActivityManager: Slow operation: 66ms so far, now at startProcess: starting to update pids map
+10-28 13:01:44.692   464   493 W ActivityManager: Slow operation: 66ms so far, now at startProcess: done updating pids map
+10-28 13:01:44.697  2155  2155 D AndroidRuntime: >>>>>> START com.android.internal.os.RuntimeInit uid 0 <<<<<<
+10-28 13:01:44.705  2155  2155 I AndroidRuntime: Using default boot image
+10-28 13:01:44.705  2155  2155 I AndroidRuntime: Leaving lock profiling enabled
+10-28 13:01:44.887   464  1730 W ActivityManager: Slow operation: 81ms so far, now at attachApplicationLocked: after sendPendingBroadcastsLocked
+10-28 13:01:45.036  2155  2155 D AndroidRuntime: Calling main entry com.android.commands.svc.Svc
+10-28 13:01:45.040  2155  2155 D AndroidRuntime: Shutting down VM
+10-28 13:01:45.210   464   493 I ActivityManager: Start proc 2250:com.android.carrierconfig/u0a70 for service {com.android.carrierconfig/com.android.carrierconfig.DefaultCarrierConfigService}
+10-28 13:01:45.505   464   478 W ActivityManager: Unable to start service Intent { act=com.google.android.ims.JibeService cmp=com.google.android.apps.messaging/com.google.android.ims.service.JibeService } U=0: not found
+10-28 13:01:45.505   464  2269 W ActivityManager: Unable to start service Intent { act=com.google.android.ims.rcs.engine.IRcsEngineTemporaryController cmp=com.google.android.apps.messaging/com.google.android.ims.service.JibeService (has extras) } U=0: not found
+10-28 13:01:45.619   464   478 I ActivityManager: Background started FGS: Allowed [callingPackage: com.google.android.apps.messaging; callingUid: 10060; uidState: SVC ; intent: Intent { cmp=com.google.android.apps.messaging/com.google.apps.tiktok.concurrent.InternalForegroundService (has extras) }; code:SYSTEM_ALLOW_LISTED; tempAllowListReason:<,reasonCode:SYSTEM_ALLOW_LISTED,duration:9223372036854775807,callingUid:-1>; targetSdkVersion:34; callerTargetSdkVersion:34; startForegroundCount:0; bindFromPackage:null]
+10-28 13:01:45.626   464  1212 W ActivityManager: Foreground service started from background can not have location/camera/microphone access: service com.google.android.apps.messaging/com.google.apps.tiktok.concurrent.InternalForegroundService
+10-28 13:01:45.706   464   492 I ActivityManager: com.google.android.packageinstaller is exempt from freezer
+10-28 13:01:45.726   464   493 I ActivityManager: Start proc 2297:com.google.android.packageinstaller/u0a39 for broadcast {com.google.android.packageinstaller/com.android.packageinstaller.PackageInstalledReceiver}
+10-28 13:01:45.818   464   537 I ActivityManager: com.android.vending is exempt from freezer
+10-28 13:01:45.824   464   493 I ActivityManager: Start proc 2321:com.android.vending/u0a51 for broadcast {com.android.vending/com.google.android.finsky.packagemonitor.impl.PackageMonitorReceiverImpl$RegisteredReceiver}
+10-28 13:01:46.643   464   491 W ActivityManager: Unable to start service Intent { cmp=com.android.printspooler/.model.PrintSpoolerService } U=0: not found
+10-28 13:01:46.776   464   493 I ActivityManager: Start proc 2469:com.google.android.gms.unstable/u0a68 for service {com.google.android.gms/com.google.android.gms.droidguard.DroidGuardService}
+10-28 13:01:47.775   464   493 I ActivityManager: Start proc 2599:com.android.providers.calendar/u0a44 for broadcast {com.android.providers.calendar/com.android.providers.calendar.CalendarUpgradeReceiver}
+10-28 13:01:48.185   464  1851 I ActivityManager: Posting BOOT_COMPLETED user #0
+10-28 13:01:48.185   464  1851 I ActivityManager: BOOT_COMPLETED should be sent here
+10-28 13:01:48.188   464   492 W ActivityManager: UserLifecycleEvent 6 received without an active userJourneySession.
+10-28 13:01:48.208   464   493 I ActivityManager: Start proc 2644:com.android.traceur/u0a61 for broadcast {com.android.traceur/com.android.traceur.Receiver}
+10-28 13:01:48.503   464  1851 W ActivityManager: Unable to start service Intent { cmp=com.google.android.gms/.dck.service.DckPersistentService } U=0: not found
+10-28 13:01:48.830   464   493 I ActivityManager: Start proc 2719:com.android.dynsystem/1000 for broadcast {com.android.dynsystem/com.android.dynsystem.BootCompletedReceiver}
+10-28 13:01:49.049   464   493 I ActivityManager: Start proc 2739:com.hawlalaalam.quran/u0a88 for broadcast {com.hawlalaalam.quran/com.hawlalaalam.quran.wear.Alarms$Receiver}
+10-28 13:01:49.065   464   493 I ActivityManager: Start proc 2741:com.android.dynsystem:dynsystem/1000 for service {com.android.dynsystem/com.android.dynsystem.DynamicSystemInstallationService}
+10-28 13:01:49.383   464   493 I ActivityManager: Start proc 2788:com.android.remoteprovisioner/u0a74 for broadcast {com.android.remoteprovisioner/com.android.remoteprovisioner.BootReceiver}
+10-28 13:01:49.501   464  1212 I ActivityManager: com.android.shell is exempt from freezer
+10-28 13:01:49.512   464   493 I ActivityManager: Start proc 2813:com.android.shell/2000 for broadcast {com.android.shell/com.android.shell.HeapDumpReceiver}
+10-28 13:01:49.854   464   493 I ActivityManager: Start proc 2847:com.android.statementservice/u0a34 for broadcast {com.android.statementservice/com.android.statementservice.domain.BootCompletedReceiver}
+10-28 13:01:51.232   464   493 I ActivityManager: Start proc 2912:com.google.android.configupdater/u0a66 for broadcast {com.google.android.configupdater/com.google.android.configupdater.MainReceiver}
+10-28 13:01:51.527   464  2269 W ActivityManager: Permission Denial: Accessing service com.android.vending/com.google.android.finsky.externalreferrer.GetInstallReferrerService from pid=2084, uid=10060 requires com.google.android.finsky.permission.BIND_GET_INSTALL_REFERRER_SERVICE
+10-28 13:01:51.529   464  1213 W ActivityManager: Unbind failed: could not find connection for android.os.BinderProxy@dd70ed
+10-28 13:01:51.597   464   478 I ActivityManager: Finished processing BOOT_COMPLETED for u0
+10-28 13:01:52.041   464   676 W ActivityManager: Unable to start service Intent { cmp=com.google.android.gms/.dck.service.DckPersistentService } U=0: not found
+10-28 13:01:52.055   464  1835 W ActivityManager: Unable to start service Intent { cmp=com.google.android.gms/.fido.authenticator.service.AuthenticatorService } U=0: not found
+10-28 13:01:52.364   464  1102 W ActivityManager: Unable to start service Intent { act=com.google.android.gms.nearby.discovery:ACTION_INIT_MESSAGES_PATH cmp=com.google.android.gms/.nearby.discovery.service.DiscoveryService } U=0: not found
+10-28 13:01:52.897   464  1184 I ActivityManager: Background started FGS: Allowed [callingPackage: com.android.vending; callingUid: 10051; uidState: TRNB; intent: Intent { dat=vpaservice://startvpafordeferredsetupnotification/... cmp=com.android.vending/com.google.android.finsky.setup.VpaService }; code:BACKGROUND_ACTIVITY_PERMISSION; tempAllowListReason:<,reasonCode:SYSTEM_ALLOW_LISTED,duration:9223372036854775807,callingUid:-1>; targetSdkVersion:33; callerTargetSdkVersion:33; startForegroundCount:0; bindFromPackage:null]
+10-28 13:01:52.962   464   492 I ActivityManager: reportOnUserCompletedEvent(0): stored=10, eligible=111
+10-28 13:01:53.392   464   779 I ActivityManager: com.android.vending is exempt from freezer
+10-28 13:01:53.427   464   493 I ActivityManager: Start proc 3061:com.android.vending:quick_launch/u0a51 for service {com.android.vending/com.google.android.finsky.ipcservers.quicklaunch.QuickLaunchGrpcServerAndroidService}
+10-28 13:01:56.444   464   493 I ActivityManager: Start proc 3168:com.android.keychain/1000 for service {com.android.keychain/com.android.keychain.KeyChainService}
+10-28 13:01:59.261   464  1230 I ActivityManager: Background started FGS: Allowed [callingPackage: com.google.android.apps.messaging; callingUid: 10060; uidState: CEM ; intent: Intent { cmp=com.google.android.apps.messaging/com.google.apps.tiktok.concurrent.InternalForegroundService (has extras) }; code:SYSTEM_ALLOW_LISTED; tempAllowListReason:<,reasonCode:SYSTEM_ALLOW_LISTED,duration:9223372036854775807,callingUid:-1>; targetSdkVersion:34; callerTargetSdkVersion:34; startForegroundCount:0; bindFromPackage:null]
+10-28 13:01:59.279   464   676 W ActivityManager: Foreground service started from background can not have location/camera/microphone access: service com.google.android.apps.messaging/com.google.apps.tiktok.concurrent.InternalForegroundService
+10-28 13:02:01.363   464   492 I ActivityManager: Force stopping com.android.vending appid=10051 user=-1: installPackageLI
+10-28 13:02:01.364   464   492 I ActivityManager: Killing 2321:com.android.vending/u0a51 (adj 225): stop com.android.vending due to installPackageLI
+10-28 13:02:01.368   464   492 I ActivityManager: Killing 2024:com.android.vending:background/u0a51 (adj 0): stop com.android.vending due to installPackageLI
+10-28 13:02:01.372   464   492 I ActivityManager: Killing 3061:com.android.vending:quick_launch/u0a51 (adj 0): stop com.android.vending due to installPackageLI
+10-28 13:02:01.374   464   492 I ActivityManager:   Force stopping service ServiceRecord{fc93747 u0 com.android.vending/com.google.android.finsky.externalreferrer.GetInstallReferrerService}
+10-28 13:02:01.410   464  1212 W ActivityManager: Service done with onDestroy, but not inDestroying: ServiceRecord{2fc6cf0 u0 com.android.vending/com.google.android.finsky.ipcservers.background.BackgroundGrpcServerAndroidService}, app=ProcessRecord{891dc0a 0:com.android.vending:background/u0a51}
+10-28 13:02:01.412   464  2991 V ActivityManager: Got obituary of 3061:com.android.vending:quick_launch
+10-28 13:02:01.412   464   662 V ActivityManager: Got obituary of 2321:com.android.vending
+10-28 13:02:01.415   464  1852 V ActivityManager: Got obituary of 2024:com.android.vending:background
+10-28 13:02:01.531   464   518 I ActivityManager: Force stopping com.android.vending appid=10051 user=0: pkg removed
+10-28 13:02:01.566   464  2991 E ActivityManager: Sending non-protected broadcast android.support.wearable.complications.ACTION_REQUEST_UPDATE_ALL from system 784:com.google.wear.services/1000 pkg com.google.wear.services
+10-28 13:02:01.566   464  2991 E ActivityManager: java.lang.Throwable
+10-28 13:02:01.566   464  2991 E ActivityManager: 	at com.android.server.am.ActivityManagerService.checkBroadcastFromSystem(ActivityManagerService.java:13603)
+10-28 13:02:01.566   464  2991 E ActivityManager: 	at com.android.server.am.ActivityManagerService.broadcastIntentLocked(ActivityManagerService.java:14230)
+10-28 13:02:01.566   464  2991 E ActivityManager: 	at com.android.server.am.ActivityManagerService.broadcastIntentLocked(ActivityManagerService.java:13621)
+10-28 13:02:01.566   464  2991 E ActivityManager: 	at com.android.server.am.ActivityManagerService.broadcastIntentWithFeature(ActivityManagerService.java:14497)
+10-28 13:02:01.566   464  2991 E ActivityManager: 	at android.app.IActivityManager$Stub.onTransact(IActivityManager.java:2296)
+10-28 13:02:01.566   464  2991 E ActivityManager: 	at com.android.server.am.ActivityManagerService.onTransact(ActivityManagerService.java:2637)
+10-28 13:02:01.566   464  2991 E ActivityManager: 	at android.os.Binder.execTransactInternal(Binder.java:1280)
+10-28 13:02:01.566   464  2991 E ActivityManager: 	at android.os.Binder.execTransact(Binder.java:1244)
+10-28 13:02:01.917   464   492 I ActivityManager: com.android.vending is exempt from freezer
+10-28 13:02:01.944   464   493 I ActivityManager: Start proc 3327:com.android.vending/u0a51 for broadcast {com.android.vending/com.google.android.finsky.packagemonitor.impl.PackageMonitorReceiverImpl$RegisteredReceiver}
+10-28 13:02:03.217   464   492 I ActivityManager: Waited long enough for: ServiceRecord{d96ec52 u0 com.google.android.apps.wearable.settings/com.google.android.clockwork.settings.TimeDebugService}
+10-28 13:02:03.444   464  1230 I ActivityManager: com.android.vending is exempt from freezer
+10-28 13:02:03.452   464   493 I ActivityManager: Start proc 3423:com.android.vending:background/u0a51 for broadcast {com.android.vending/com.google.android.finsky.packagemonitor.backgroundimpl.BackgroundPackageMonitorReceiverImpl$RegisteredReceiver}
+10-28 13:02:04.189   464  1230 W ActivityManager: Unable to start service Intent { cmp=com.google.android.gms/.fido.fido2.pollux.CableAuthenticatorService } U=0: not found
+10-28 13:02:05.926   464  1212 I ActivityManager: Process com.google.android.gms (pid 872) has died: fg  BTOP
+10-28 13:02:05.928   464  1212 W ActivityManager: Scheduling restart of crashed service com.google.android.gms/.chimera.GmsIntentOperationService in 1000ms for start-requested
+10-28 13:02:05.928   464  1212 W ActivityManager: Scheduling restart of crashed service com.google.android.gms/.chimera.GmsBoundBrokerService in 11000ms for connection
+10-28 13:02:05.947   464   491 W ActivityManager: Rescheduling restart of crashed service com.google.android.gms/.chimera.GmsIntentOperationService in 19980ms for mem-pressure-event
+10-28 13:02:05.947   464   491 W ActivityManager: Rescheduling restart of crashed service com.google.android.gms/.chimera.GmsBoundBrokerService in 49980ms for mem-pressure-event
+10-28 13:02:05.978   464   493 I ActivityManager: Start proc 3564:com.google.android.gms/u0a68 for service {com.google.android.gms/com.google.android.gms.checkin.CheckinService}
+10-28 13:02:07.518   464   565 I ActivityManager: com.android.vending is exempt from freezer
+10-28 13:02:07.529   464   493 I ActivityManager: Start proc 3686:com.android.vending:quick_launch/u0a51 for service {com.android.vending/com.google.frameworks.client.data.android.server.play.QuickLaunchProcessEndpointService}
+10-28 13:02:07.580   464   932 W ActivityManager: Unable to start service Intent { cmp=com.google.android.gms/.fido.fido2.pollux.CableAuthenticatorService } U=0: not found
+10-28 13:02:07.590   464   932 W ActivityManager: Unable to start service Intent { cmp=com.google.android.gms/.fido.authenticator.service.AuthenticatorService } U=0: not found
+10-28 13:02:07.680   464   932 W ActivityManager: Unable to start service Intent { cmp=com.google.android.gms/.dck.service.DckPersistentService } U=0: not found
+10-28 13:02:07.864   464   478 W ActivityManager: Unable to start service Intent { act=com.google.android.gms.nearby.discovery:ACTION_INIT_MESSAGES_PATH cmp=com.google.android.gms/.nearby.discovery.service.DiscoveryService } U=0: not found
+10-28 13:02:09.450   464  1851 W ActivityManager: Unable to start service Intent { act=com.google.android.gms.securitystate.provider.api.SecurityStateUpdateInfoRegistrationApiService.START pkg=com.google.android.gms } U=0: not found
+10-28 13:02:09.451   464  1851 W ActivityManager: Unbind failed: could not find connection for android.os.BinderProxy@383fc8e
+10-28 13:02:25.741   464  1851 I ActivityTaskManager: START u0 {flg=0x10000000 cmp=com.hawlalaalam.quran/.wear.MainActivity} from uid 0
+10-28 13:02:25.863   464  3106 W WindowManager: Failed looking up window session=Session{5866717 2739:u0a10088} callers=com.android.server.wm.WindowManagerService.windowForClientLocked:5954 com.android.server.wm.Session.updateRequestedVisibilities:705 android.view.IWindowSession$Stub.onTransact:1096 
+10-28 13:02:26.276   464   481 I ActivityTaskManager: Displayed com.hawlalaalam.quran/.wear.MainActivity: +387ms
+10-28 13:02:26.307   464  1102 W WindowManager: Failed looking up window session=Session{940a405 854:u0a10073} callers=com.android.server.wm.WindowManagerService.windowForClientLocked:5954 com.android.server.wm.Session.setOnBackInvokedCallbackInfo:958 android.view.IWindowSession$Stub.onTransact:1201 
+10-28 13:02:26.307   464  1102 E WindowManager: setOnBackInvokedCallback(): No window state for package:com.google.android.apps.wearable.systemui
+10-28 13:02:34.453   464  1184 I ActivityManager: Force stopping com.hawlalaalam.quran appid=10088 user=0: from pid 3950
+10-28 13:02:34.453   464  1184 I ActivityManager: Killing 2739:com.hawlalaalam.quran/u0a88 (adj 0): stop com.hawlalaalam.quran due to from pid 3950
+10-28 13:02:34.454   464  1184 W ActivityTaskManager: Force removing ActivityRecord{1a922f8 u0 com.hawlalaalam.quran/.wear.MainActivity} t6 f}}: app died, no saved state
+10-28 13:02:34.464   464  1184 W WindowManager: Exception thrown during dispatchAppVisibility Window{e269f70 u0 com.hawlalaalam.quran/com.hawlalaalam.quran.wear.MainActivity}
+10-28 13:02:34.464   464  1184 W WindowManager: android.os.DeadObjectException
+10-28 13:02:34.464   464  1184 W WindowManager: 	at android.os.BinderProxy.transactNative(Native Method)
+10-28 13:02:34.464   464  1184 W WindowManager: 	at android.os.BinderProxy.transact(BinderProxy.java:584)
+10-28 13:02:34.464   464  1184 W WindowManager: 	at android.view.IWindow$Stub$Proxy.dispatchAppVisibility(IWindow.java:536)
+10-28 13:02:34.464   464  1184 W WindowManager: 	at com.android.server.wm.WindowState.sendAppVisibilityToClients(WindowState.java:3467)
+10-28 13:02:34.464   464  1184 W WindowManager: 	at com.android.server.wm.WindowContainer.sendAppVisibilityToClients(WindowContainer.java:1199)
+10-28 13:02:34.464   464  1184 W WindowManager: 	at com.android.server.wm.WindowToken.setClientVisible(WindowToken.java:398)
+10-28 13:02:34.464   464  1184 W WindowManager: 	at com.android.server.wm.ActivityRecord.setClientVisible(ActivityRecord.java:6577)
+10-28 13:02:34.464   464  1184 W WindowManager: 	at com.android.server.wm.ActivityRecord.onAnimationFinished(ActivityRecord.java:7365)
+10-28 13:02:34.464   464  1184 W WindowManager: 	at com.android.server.wm.ActivityRecord.postApplyAnimation(ActivityRecord.java:5273)
+10-28 13:02:34.464   464  1184 W WindowManager: 	at com.android.server.wm.ActivityRecord.commitVisibility(ActivityRecord.java:5245)
+10-28 13:02:34.464   464  1184 W WindowManager: 	at com.android.server.wm.ActivityRecord.commitVisibility(ActivityRecord.java:5249)
+10-28 13:02:34.464   464  1184 W WindowManager: 	at com.android.server.wm.ActivityRecord.onRemovedFromDisplay(ActivityRecord.java:4106)
+10-28 13:02:34.464   464  1184 W WindowManager: 	at com.android.server.wm.DisplayContent.removeAppToken(DisplayContent.java:1332)
+10-28 13:02:34.464   464  1184 W WindowManager: 	at com.android.server.wm.ActivityRecord.removeFromHistory(ActivityRecord.java:3798)
+10-28 13:02:34.464   464  1184 W WindowManager: 	at com.android.server.wm.ActivityRecord.handleAppDied(ActivityRecord.java:4037)
+10-28 13:02:34.464   464  1184 W WindowManager: 	at com.android.server.wm.WindowProcessController.handleAppDied(WindowProcessController.java:1247)
+10-28 13:02:34.464   464  1184 W WindowManager: 	at com.android.server.wm.ActivityTaskManagerService$LocalService.handleAppDied(ActivityTaskManagerService.java:6060)
+10-28 13:02:34.464   464  1184 W WindowManager: 	at com.android.server.am.ActivityManagerService.handleAppDiedLocked(ActivityManagerService.java:3263)
+10-28 13:02:34.464   464  1184 W WindowManager: 	at com.android.server.am.ProcessList.removeProcessLocked(ProcessList.java:2864)
+10-28 13:02:34.464   464  1184 W WindowManager: 	at com.android.server.am.ProcessList.killPackageProcessesLSP(ProcessList.java:2809)
+10-28 13:02:34.464   464  1184 W WindowManager: 	at com.android.server.am.ActivityManagerService.forceStopPackageLocked(ActivityManagerService.java:4541)
+10-28 13:02:34.464   464  1184 W WindowManager: 	at com.android.server.am.ActivityManagerService.forceStopPackageLocked(ActivityManagerService.java:4339)
+10-28 13:02:34.464   464  1184 W WindowManager: 	at com.android.server.am.ActivityManagerService.forceStopPackage(ActivityManagerService.java:4071)
+10-28 13:02:34.464   464  1184 W WindowManager: 	at com.android.server.am.ActivityManagerShellCommand.runForceStop(ActivityManagerShellCommand.java:1175)
+10-28 13:02:34.464   464  1184 W WindowManager: 	at com.android.server.am.ActivityManagerShellCommand.onCommand(ActivityManagerShellCommand.java:248)
+10-28 13:02:34.464   464  1184 W WindowManager: 	at com.android.modules.utils.BasicShellCommandHandler.exec(BasicShellCommandHandler.java:97)
+10-28 13:02:34.464   464  1184 W WindowManager: 	at android.os.ShellCommand.exec(ShellCommand.java:38)
+10-28 13:02:34.464   464  1184 W WindowManager: 	at com.android.server.am.ActivityManagerService.onShellCommand(ActivityManagerService.java:9247)
+10-28 13:02:34.464   464  1184 W WindowManager: 	at android.os.Binder.shellCommand(Binder.java:1049)
+10-28 13:02:34.464   464  1184 W WindowManager: 	at android.os.Binder.onTransact(Binder.java:877)
+10-28 13:02:34.464   464  1184 W WindowManager: 	at android.app.IActivityManager$Stub.onTransact(IActivityManager.java:4731)
+10-28 13:02:34.464   464  1184 W WindowManager: 	at com.android.server.am.ActivityManagerService.onTransact(ActivityManagerService.java:2637)
+10-28 13:02:34.464   464  1184 W WindowManager: 	at android.os.Binder.execTransactInternal(Binder.java:1285)
+10-28 13:02:34.464   464  1184 W WindowManager: 	at android.os.Binder.execTransact(Binder.java:1244)
+10-28 13:02:34.479   464  1102 W WindowManager: Failed looking up window session=Session{5866717 2739:u0a10088} callers=com.android.server.wm.WindowManagerService.windowForClientLocked:5954 com.android.server.wm.WindowState$DeathRecipient.binderDied:3104 android.os.IBinder$DeathRecipient.binderDied:317 
+10-28 13:02:34.493   464   779 V ActivityManager: Got obituary of 2739:com.hawlalaalam.quran
+10-28 13:02:34.495   464   484 W ActivityManager: setHasOverlayUi called on unknown pid: 2739
+10-28 13:02:34.626   464  1184 I ActivityManager: Force stopping com.hawlalaalam.quran appid=10088 user=0: from pid 3967
+10-28 13:02:34.643   464  1184 I ActivityTaskManager: START u0 {flg=0x10000000 cmp=com.hawlalaalam.quran/.wear.MainActivity} from uid 0
+10-28 13:02:34.672   464   493 I ActivityManager: Start proc 3975:com.hawlalaalam.quran/u0a88 for next-top-activity {com.hawlalaalam.quran/com.hawlalaalam.quran.wear.MainActivity}
+10-28 13:02:34.850   464   478 W WindowManager: Failed looking up window session=Session{56aceb6 3975:u0a10088} callers=com.android.server.wm.WindowManagerService.windowForClientLocked:5954 com.android.server.wm.Session.updateRequestedVisibilities:705 android.view.IWindowSession$Stub.onTransact:1096 
+10-28 13:02:35.048   464   481 I ActivityTaskManager: Displayed com.hawlalaalam.quran/.wear.MainActivity: +403ms
+10-28 13:02:46.118   464  1184 I ActivityManager: Force stopping com.hawlalaalam.quran appid=10088 user=0: from pid 4035
+10-28 13:02:46.119   464  1184 I ActivityManager: Killing 3975:com.hawlalaalam.quran/u0a88 (adj 0): stop com.hawlalaalam.quran due to from pid 4035
+10-28 13:02:46.120   464  1184 W ActivityTaskManager: Force removing ActivityRecord{ddffe39 u0 com.hawlalaalam.quran/.wear.MainActivity} t7 f}}: app died, no saved state
+10-28 13:02:46.133   464  1214 V ActivityManager: Got obituary of 3975:com.hawlalaalam.quran
+10-28 13:02:46.134   464   484 W ActivityManager: setHasOverlayUi called on unknown pid: 3975
+10-28 13:02:46.172   464  1184 I ActivityTaskManager: START u0 {flg=0x10000000 cmp=com.hawlalaalam.quran/.wear.TimesActivity} from uid 0
+10-28 13:02:46.190   464   493 I ActivityManager: Start proc 4048:com.hawlalaalam.quran/u0a88 for next-top-activity {com.hawlalaalam.quran/com.hawlalaalam.quran.wear.TimesActivity}
+10-28 13:02:46.338   464   478 W WindowManager: Failed looking up window session=Session{78b2c6c 4048:u0a10088} callers=com.android.server.wm.WindowManagerService.windowForClientLocked:5954 com.android.server.wm.Session.updateRequestedVisibilities:705 android.view.IWindowSession$Stub.onTransact:1096 
+10-28 13:02:46.544   464   481 I ActivityTaskManager: Displayed com.hawlalaalam.quran/.wear.TimesActivity: +370ms
+10-28 13:02:52.637   464  1720 I ActivityManager: Force stopping com.hawlalaalam.quran appid=10088 user=0: from pid 4086
+10-28 13:02:52.639   464  1720 I ActivityManager: Killing 4048:com.hawlalaalam.quran/u0a88 (adj 0): stop com.hawlalaalam.quran due to from pid 4086
+10-28 13:02:52.640   464  1720 W ActivityTaskManager: Force removing ActivityRecord{bb5d647 u0 com.hawlalaalam.quran/.wear.TimesActivity} t8 f}}: app died, no saved state
+10-28 13:02:52.656   464   478 V ActivityManager: Got obituary of 4048:com.hawlalaalam.quran
+10-28 13:02:52.661   464   484 W ActivityManager: setHasOverlayUi called on unknown pid: 4048
+10-28 13:02:52.700   464  1214 I ActivityTaskManager: START u0 {flg=0x10000000 cmp=com.hawlalaalam.quran/.wear.TasbeehActivity} from uid 0
+10-28 13:02:52.734   464   493 I ActivityManager: Start proc 4099:com.hawlalaalam.quran/u0a88 for next-top-activity {com.hawlalaalam.quran/com.hawlalaalam.quran.wear.TasbeehActivity}
+10-28 13:02:52.882   464  1184 W WindowManager: Failed looking up window session=Session{c5fd854 4099:u0a10088} callers=com.android.server.wm.WindowManagerService.windowForClientLocked:5954 com.android.server.wm.Session.updateRequestedVisibilities:705 android.view.IWindowSession$Stub.onTransact:1096 
+10-28 13:02:53.115   464   481 I ActivityTaskManager: Displayed com.hawlalaalam.quran/.wear.TasbeehActivity: +413ms
+10-28 13:02:59.206   464   478 I ActivityManager: Force stopping com.hawlalaalam.quran appid=10088 user=0: from pid 4135
+10-28 13:02:59.207   464   478 I ActivityManager: Killing 4099:com.hawlalaalam.quran/u0a88 (adj 0): stop com.hawlalaalam.quran due to from pid 4135
+10-28 13:02:59.208   464   478 W ActivityTaskManager: Force removing ActivityRecord{6743373 u0 com.hawlalaalam.quran/.wear.TasbeehActivity} t9 f}}: app died, no saved state
+10-28 13:02:59.225   464  2225 V ActivityManager: Got obituary of 4099:com.hawlalaalam.quran
+10-28 13:02:59.225   464   484 W ActivityManager: setHasOverlayUi called on unknown pid: 4099
+10-28 13:02:59.278   464  2225 I ActivityTaskManager: START u0 {flg=0x10000000 cmp=com.hawlalaalam.quran/.wear.VerseActivity} from uid 0
+10-28 13:02:59.298   464   493 I ActivityManager: Start proc 4147:com.hawlalaalam.quran/u0a88 for next-top-activity {com.hawlalaalam.quran/com.hawlalaalam.quran.wear.VerseActivity}
+10-28 13:02:59.437   464  1184 W WindowManager: Failed looking up window session=Session{f07bf0e 4147:u0a10088} callers=com.android.server.wm.WindowManagerService.windowForClientLocked:5954 com.android.server.wm.Session.updateRequestedVisibilities:705 android.view.IWindowSession$Stub.onTransact:1096 
+10-28 13:02:59.607   464   481 I ActivityTaskManager: Displayed com.hawlalaalam.quran/.wear.VerseActivity: +328ms
+10-28 13:03:05.697   464   478 I ActivityManager: Force stopping com.hawlalaalam.quran appid=10088 user=0: from pid 4193
+10-28 13:03:05.700   464   478 I ActivityManager: Killing 4147:com.hawlalaalam.quran/u0a88 (adj 0): stop com.hawlalaalam.quran due to from pid 4193
+10-28 13:03:05.703   464   478 W ActivityTaskManager: Force removing ActivityRecord{c60bf7b u0 com.hawlalaalam.quran/.wear.VerseActivity} t10 f}}: app died, no saved state
+10-28 13:03:05.708   464   478 W WindowManager: Exception thrown during dispatchAppVisibility Window{1a284c5 u0 com.hawlalaalam.quran/com.hawlalaalam.quran.wear.VerseActivity}
+10-28 13:03:05.708   464   478 W WindowManager: android.os.DeadObjectException
+10-28 13:03:05.708   464   478 W WindowManager: 	at android.os.BinderProxy.transactNative(Native Method)
+10-28 13:03:05.708   464   478 W WindowManager: 	at android.os.BinderProxy.transact(BinderProxy.java:584)
+10-28 13:03:05.708   464   478 W WindowManager: 	at android.view.IWindow$Stub$Proxy.dispatchAppVisibility(IWindow.java:536)
+10-28 13:03:05.708   464   478 W WindowManager: 	at com.android.server.wm.WindowState.sendAppVisibilityToClients(WindowState.java:3467)
+10-28 13:03:05.708   464   478 W WindowManager: 	at com.android.server.wm.WindowContainer.sendAppVisibilityToClients(WindowContainer.java:1199)
+10-28 13:03:05.708   464   478 W WindowManager: 	at com.android.server.wm.WindowToken.setClientVisible(WindowToken.java:398)
+10-28 13:03:05.708   464   478 W WindowManager: 	at com.android.server.wm.ActivityRecord.setClientVisible(ActivityRecord.java:6577)
+10-28 13:03:05.708   464   478 W WindowManager: 	at com.android.server.wm.ActivityRecord.onAnimationFinished(ActivityRecord.java:7365)
+10-28 13:03:05.708   464   478 W WindowManager: 	at com.android.server.wm.ActivityRecord.postApplyAnimation(ActivityRecord.java:5273)
+10-28 13:03:05.708   464   478 W WindowManager: 	at com.android.server.wm.ActivityRecord.commitVisibility(ActivityRecord.java:5245)
+10-28 13:03:05.708   464   478 W WindowManager: 	at com.android.server.wm.ActivityRecord.commitVisibility(ActivityRecord.java:5249)
+10-28 13:03:05.708   464   478 W WindowManager: 	at com.android.server.wm.ActivityRecord.onRemovedFromDisplay(ActivityRecord.java:4106)
+10-28 13:03:05.708   464   478 W WindowManager: 	at com.android.server.wm.DisplayContent.removeAppToken(DisplayContent.java:1332)
+10-28 13:03:05.708   464   478 W WindowManager: 	at com.android.server.wm.ActivityRecord.removeFromHistory(ActivityRecord.java:3798)
+10-28 13:03:05.708   464   478 W WindowManager: 	at com.android.server.wm.ActivityRecord.handleAppDied(ActivityRecord.java:4037)
+10-28 13:03:05.708   464   478 W WindowManager: 	at com.android.server.wm.WindowProcessController.handleAppDied(WindowProcessController.java:1247)
+10-28 13:03:05.708   464   478 W WindowManager: 	at com.android.server.wm.ActivityTaskManagerService$LocalService.handleAppDied(ActivityTaskManagerService.java:6060)
+10-28 13:03:05.708   464   478 W WindowManager: 	at com.android.server.am.ActivityManagerService.handleAppDiedLocked(ActivityManagerService.java:3263)
+10-28 13:03:05.708   464   478 W WindowManager: 	at com.android.server.am.ProcessList.removeProcessLocked(ProcessList.java:2864)
+10-28 13:03:05.708   464   478 W WindowManager: 	at com.android.server.am.ProcessList.killPackageProcessesLSP(ProcessList.java:2809)
+10-28 13:03:05.708   464   478 W WindowManager: 	at com.android.server.am.ActivityManagerService.forceStopPackageLocked(ActivityManagerService.java:4541)
+10-28 13:03:05.708   464   478 W WindowManager: 	at com.android.server.am.ActivityManagerService.forceStopPackageLocked(ActivityManagerService.java:4339)
+10-28 13:03:05.708   464   478 W WindowManager: 	at com.android.server.am.ActivityManagerService.forceStopPackage(ActivityManagerService.java:4071)
+10-28 13:03:05.708   464   478 W WindowManager: 	at com.android.server.am.ActivityManagerShellCommand.runForceStop(ActivityManagerShellCommand.java:1175)
+10-28 13:03:05.708   464   478 W WindowManager: 	at com.android.server.am.ActivityManagerShellCommand.onCommand(ActivityManagerShellCommand.java:248)
+10-28 13:03:05.708   464   478 W WindowManager: 	at com.android.modules.utils.BasicShellCommandHandler.exec(BasicShellCommandHandler.java:97)
+10-28 13:03:05.708   464   478 W WindowManager: 	at android.os.ShellCommand.exec(ShellCommand.java:38)
+10-28 13:03:05.708   464   478 W WindowManager: 	at com.android.server.am.ActivityManagerService.onShellCommand(ActivityManagerService.java:9247)
+10-28 13:03:05.708   464   478 W WindowManager: 	at android.os.Binder.shellCommand(Binder.java:1049)
+10-28 13:03:05.708   464   478 W WindowManager: 	at android.os.Binder.onTransact(Binder.java:877)
+10-28 13:03:05.708   464   478 W WindowManager: 	at android.app.IActivityManager$Stub.onTransact(IActivityManager.java:4731)
+10-28 13:03:05.708   464   478 W WindowManager: 	at com.android.server.am.ActivityManagerService.onTransact(ActivityManagerService.java:2637)
+10-28 13:03:05.708   464   478 W WindowManager: 	at android.os.Binder.execTransactInternal(Binder.java:1285)
+10-28 13:03:05.708   464   478 W WindowManager: 	at android.os.Binder.execTransact(Binder.java:1244)
+10-28 13:03:05.714   464   676 W WindowManager: Failed looking up window session=Session{f07bf0e 4147:u0a10088} callers=com.android.server.wm.WindowManagerService.windowForClientLocked:5954 com.android.server.wm.WindowState$DeathRecipient.binderDied:3104 android.os.IBinder$DeathRecipient.binderDied:317 
+10-28 13:03:05.717   464  2225 V ActivityManager: Got obituary of 4147:com.hawlalaalam.quran
+10-28 13:03:05.718   464   484 W ActivityManager: setHasOverlayUi called on unknown pid: 4147
+10-28 13:03:05.757   464  1720 I ActivityTaskManager: START u0 {flg=0x10000000 cmp=com.hawlalaalam.quran/.wear.AzkarActivity} from uid 0
+10-28 13:03:05.795   464   493 I ActivityManager: Start proc 4206:com.hawlalaalam.quran/u0a88 for next-top-activity {com.hawlalaalam.quran/com.hawlalaalam.quran.wear.AzkarActivity}
+10-28 13:03:05.927   464  1214 W WindowManager: Failed looking up window session=Session{c35accb 4206:u0a10088} callers=com.android.server.wm.WindowManagerService.windowForClientLocked:5954 com.android.server.wm.Session.updateRequestedVisibilities:705 android.view.IWindowSession$Stub.onTransact:1096 
+10-28 13:03:06.174   464   481 I ActivityTaskManager: Displayed com.hawlalaalam.quran/.wear.AzkarActivity: +417ms
+10-28 13:03:07.305   464  2225 W ActivityManager: Unable to start service Intent { cmp=com.google.android.gms/.fido.fido2.pollux.CableAuthenticatorService } U=0: not found
+10-28 13:03:07.305   464  2225 W ActivityManager: Unable to start service Intent { cmp=com.google.android.gms/.fido.authenticator.service.AuthenticatorService } U=0: not found
+10-28 13:03:07.354   464  2225 W ActivityManager: Unable to start service Intent { act=com.google.android.gms.nearby.discovery:ACTION_INIT_MESSAGES_PATH cmp=com.google.android.gms/.nearby.discovery.service.DiscoveryService } U=0: not found
+10-28 13:03:12.265   464   809 I ActivityManager: Force stopping com.hawlalaalam.quran appid=10088 user=0: from pid 4349
+10-28 13:03:12.265   464   809 I ActivityManager: Killing 4206:com.hawlalaalam.quran/u0a88 (adj 0): stop com.hawlalaalam.quran due to from pid 4349
+10-28 13:03:12.266   464   809 W ActivityTaskManager: Force removing ActivityRecord{3e4befb u0 com.hawlalaalam.quran/.wear.AzkarActivity} t11 f}}: app died, no saved state
+10-28 13:03:12.279   464   479 V ActivityManager: Got obituary of 4206:com.hawlalaalam.quran
+10-28 13:03:12.281   464   484 W ActivityManager: setHasOverlayUi called on unknown pid: 4206
+10-28 13:03:12.326   464  1213 I ActivityTaskManager: START u0 {flg=0x10000000 cmp=com.hawlalaalam.quran/.wear.AzkarActivity (has extras)} from uid 0
+10-28 13:03:12.375   464   493 I ActivityManager: Start proc 4360:com.hawlalaalam.quran/u0a88 for next-top-activity {com.hawlalaalam.quran/com.hawlalaalam.quran.wear.AzkarActivity}
+10-28 13:03:12.711   464   481 I ActivityTaskManager: Displayed com.hawlalaalam.quran/.wear.AzkarActivity: +383ms
+10-28 13:03:18.804   464  1854 I ActivityManager: Force stopping com.hawlalaalam.quran appid=10088 user=0: from pid 4400
+10-28 13:03:18.804   464  1854 I ActivityManager: Killing 4360:com.hawlalaalam.quran/u0a88 (adj 0): stop com.hawlalaalam.quran due to from pid 4400
+10-28 13:03:18.806   464  1854 W ActivityTaskManager: Force removing ActivityRecord{7ac1e66 u0 com.hawlalaalam.quran/.wear.AzkarActivity} t12 f}}: app died, no saved state
+10-28 13:03:18.822   464   484 W ActivityManager: setHasOverlayUi called on unknown pid: 4360
+10-28 13:03:18.823   464  1213 V ActivityManager: Got obituary of 4360:com.hawlalaalam.quran
+10-28 13:03:18.859   464  1230 I ActivityTaskManager: START u0 {flg=0x10000000 cmp=com.hawlalaalam.quran/.wear.AzkarActivity (has extras)} from uid 0
+10-28 13:03:18.892   464   493 I ActivityManager: Start proc 4413:com.hawlalaalam.quran/u0a88 for next-top-activity {com.hawlalaalam.quran/com.hawlalaalam.quran.wear.AzkarActivity}
+10-28 13:03:19.079   464   478 W WindowManager: Failed looking up window session=Session{756e6a6 4413:u0a10088} callers=com.android.server.wm.WindowManagerService.windowForClientLocked:5954 com.android.server.wm.Session.updateRequestedVisibilities:705 android.view.IWindowSession$Stub.onTransact:1096 
+10-28 13:03:19.265   464   481 I ActivityTaskManager: Displayed com.hawlalaalam.quran/.wear.AzkarActivity: +405ms
+10-28 13:03:25.371   464   478 I ActivityManager: Force stopping com.hawlalaalam.quran appid=10088 user=0: from pid 4452
+10-28 13:03:25.372   464   478 I ActivityManager: Killing 4413:com.hawlalaalam.quran/u0a88 (adj 0): stop com.hawlalaalam.quran due to from pid 4452
+10-28 13:03:25.373   464   478 W ActivityTaskManager: Force removing ActivityRecord{ca71296 u0 com.hawlalaalam.quran/.wear.AzkarActivity} t13 f}}: app died, no saved state
+10-28 13:03:25.387   464   922 V ActivityManager: Got obituary of 4413:com.hawlalaalam.quran
+10-28 13:03:25.393   464   484 W ActivityManager: setHasOverlayUi called on unknown pid: 4413
+10-28 13:03:25.421   464  1213 I ActivityTaskManager: START u0 {flg=0x10000000 cmp=com.hawlalaalam.quran/.wear.SettingsActivity} from uid 0
+10-28 13:03:25.447   464   493 I ActivityManager: Start proc 4464:com.hawlalaalam.quran/u0a88 for next-top-activity {com.hawlalaalam.quran/com.hawlalaalam.quran.wear.SettingsActivity}
+10-28 13:03:25.685   464   537 W WindowManager: Failed looking up window session=Session{f3a0449 4464:u0a10088} callers=com.android.server.wm.WindowManagerService.windowForClientLocked:5954 com.android.server.wm.Session.updateRequestedVisibilities:705 android.view.IWindowSession$Stub.onTransact:1096 
+10-28 13:03:25.944   464   481 I ActivityTaskManager: Displayed com.hawlalaalam.quran/.wear.SettingsActivity: +521ms
+10-28 13:03:32.035   464  1730 I ActivityManager: Force stopping com.hawlalaalam.quran appid=10088 user=0: from pid 4501
+10-28 13:03:32.037   464  1730 I ActivityManager: Killing 4464:com.hawlalaalam.quran/u0a88 (adj 0): stop com.hawlalaalam.quran due to from pid 4501
+10-28 13:03:32.039   464  1730 W ActivityTaskManager: Force removing ActivityRecord{82b58bb u0 com.hawlalaalam.quran/.wear.SettingsActivity} t14 f}}: app died, no saved state
+10-28 13:03:32.057   464   484 W ActivityManager: setHasOverlayUi called on unknown pid: 4464
+10-28 13:03:32.061   464  2269 V ActivityManager: Got obituary of 4464:com.hawlalaalam.quran
+10-28 13:03:32.095   464  2269 I ActivityTaskManager: START u0 {flg=0x10000000 cmp=com.hawlalaalam.quran/.wear.MainActivity} from uid 0
+10-28 13:03:32.131   464   493 I ActivityManager: Start proc 4513:com.hawlalaalam.quran/u0a88 for next-top-activity {com.hawlalaalam.quran/com.hawlalaalam.quran.wear.MainActivity}
+10-28 13:03:32.544   464   481 I ActivityTaskManager: Displayed com.hawlalaalam.quran/.wear.MainActivity: +445ms
+10-28 13:03:41.137   464   478 I ActivityManager: Force stopping com.hawlalaalam.quran appid=10088 user=0: from pid 4563
+10-28 13:03:41.138   464   478 I ActivityManager: Killing 4513:com.hawlalaalam.quran/u0a88 (adj 0): stop com.hawlalaalam.quran due to from pid 4563
+10-28 13:03:41.140   464   478 W ActivityTaskManager: Force removing ActivityRecord{286ee6 u0 com.hawlalaalam.quran/.wear.MainActivity} t15 f}}: app died, no saved state
+10-28 13:03:41.149   464  1230 V ActivityManager: Got obituary of 4513:com.hawlalaalam.quran
+10-28 13:03:41.149   464   484 W ActivityManager: setHasOverlayUi called on unknown pid: 4513
+10-28 13:03:41.184   464  2269 I ActivityTaskManager: START u0 {flg=0x10000000 cmp=com.hawlalaalam.quran/.wear.TimesActivity} from uid 0
+10-28 13:03:41.213   464   493 I ActivityManager: Start proc 4575:com.hawlalaalam.quran/u0a88 for next-top-activity {com.hawlalaalam.quran/com.hawlalaalam.quran.wear.TimesActivity}
+10-28 13:03:41.345   464  1720 W WindowManager: Failed looking up window session=Session{5a76c4e 4575:u0a10088} callers=com.android.server.wm.WindowManagerService.windowForClientLocked:5954 com.android.server.wm.Session.updateRequestedVisibilities:705 android.view.IWindowSession$Stub.onTransact:1096 
+10-28 13:03:41.581   464   481 I ActivityTaskManager: Displayed com.hawlalaalam.quran/.wear.TimesActivity: +396ms
+10-28 13:03:47.693   464   482 I ActivityTaskManager: START u0 {act=android.intent.action.MAIN cat=[android.intent.category.HOME] flg=0x10000100 cmp=com.google.android.wearable.sysui/.mainui.activity.SysUiActivity (has extras)} from uid 0
+10-28 13:03:48.773   464  1854 I ActivityTaskManager: START u0 {act=android.intent.action.MAIN cat=[android.intent.category.HOME] flg=0x10000000 cmp=com.google.android.wearable.sysui/.mainui.activity.SysUiActivity (has extras)} from uid 10043

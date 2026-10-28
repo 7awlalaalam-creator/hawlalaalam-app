@@ -1,0 +1,30 @@
+=== 01-main
+    topResumedActivity=ActivityRecord{ddffe39 u0 com.hawlalaalam.quran/.wear.MainActivity} t7}
+  ResumedActivity: ActivityRecord{ddffe39 u0 com.hawlalaalam.quran/.wear.MainActivity} t7}
+=== 03-times
+    topResumedActivity=ActivityRecord{bb5d647 u0 com.hawlalaalam.quran/.wear.TimesActivity} t8}
+  ResumedActivity: ActivityRecord{bb5d647 u0 com.hawlalaalam.quran/.wear.TimesActivity} t8}
+=== 04-tasbeeh
+    topResumedActivity=ActivityRecord{6743373 u0 com.hawlalaalam.quran/.wear.TasbeehActivity} t9}
+  ResumedActivity: ActivityRecord{6743373 u0 com.hawlalaalam.quran/.wear.TasbeehActivity} t9}
+=== 05-verse
+    topResumedActivity=ActivityRecord{c60bf7b u0 com.hawlalaalam.quran/.wear.VerseActivity} t10}
+  ResumedActivity: ActivityRecord{c60bf7b u0 com.hawlalaalam.quran/.wear.VerseActivity} t10}
+=== 06-azkar-menu
+    topResumedActivity=ActivityRecord{3e4befb u0 com.hawlalaalam.quran/.wear.AzkarActivity} t11}
+  ResumedActivity: ActivityRecord{3e4befb u0 com.hawlalaalam.quran/.wear.AzkarActivity} t11}
+=== 07-azkar
+    topResumedActivity=ActivityRecord{7ac1e66 u0 com.hawlalaalam.quran/.wear.AzkarActivity} t12}
+  ResumedActivity: ActivityRecord{7ac1e66 u0 com.hawlalaalam.quran/.wear.AzkarActivity} t12}
+=== 07c-azkar-sleep
+    topResumedActivity=ActivityRecord{ca71296 u0 com.hawlalaalam.quran/.wear.AzkarActivity} t13}
+  ResumedActivity: ActivityRecord{ca71296 u0 com.hawlalaalam.quran/.wear.AzkarActivity} t13}
+=== 08-settings
+    topResumedActivity=ActivityRecord{82b58bb u0 com.hawlalaalam.quran/.wear.SettingsActivity} t14}
+  ResumedActivity: ActivityRecord{82b58bb u0 com.hawlalaalam.quran/.wear.SettingsActivity} t14}
+=== 01b-main
+    topResumedActivity=ActivityRecord{286ee6 u0 com.hawlalaalam.quran/.wear.MainActivity} t15}
+  ResumedActivity: ActivityRecord{286ee6 u0 com.hawlalaalam.quran/.wear.MainActivity} t15}
+=== 03b-times
+    topResumedActivity=ActivityRecord{ab9031 u0 com.hawlalaalam.quran/.wear.TimesActivity} t16}
+  ResumedActivity: ActivityRecord{ab9031 u0 com.hawlalaalam.quran/.wear.TimesActivity} t16}
