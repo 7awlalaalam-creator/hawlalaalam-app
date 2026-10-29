@@ -1,0 +1,1 @@
+{"error": "{\n  \"errors\" : [ {\n    \"id\" : \"5945478c-f38c-4daf-8d90-a201f73d83f4\",\n    \"status\" : \"404\",\n    \"code\" : \"NOT_FOUND\",\n    \"title\" : \"The specified resource does not exist\",\n    \"detail\" : \"There is no resource of type 'betaCrashLogs' with id 'ABTOxPBnSiiM64e2WobI6HE'\"\n  } ]\n}"}

@@ -1,0 +1,161 @@
+{
+ "data": [
+  {
+   "type": "betaFeedbackCrashSubmissions",
+   "id": "ACNnaiE-q3_tKhbMJIEkQCE",
+   "attributes": {
+    "createdDate": "2026-10-29T04:30:37.443Z",
+    "comment": "تعطل بداية التشغيل",
+    "email": "7awlalaalam@gmail.com",
+    "deviceModel": "iPhone14_2",
+    "osVersion": "27.0.1",
+    "locale": "ar-SA",
+    "timeZone": "Asia/Riyadh",
+    "architecture": "arm64e",
+    "connectionType": "WIFI",
+    "pairedAppleWatch": null,
+    "appUptimeInMilliseconds": null,
+    "diskBytesAvailable": 214313218048,
+    "diskBytesTotal": 240667348992,
+    "batteryPercentage": 75,
+    "screenWidthInPoints": 390,
+    "screenHeightInPoints": 844,
+    "appPlatform": "IOS",
+    "devicePlatform": "IOS",
+    "deviceFamily": "IPHONE",
+    "buildBundleId": "com.hawlalaalam.quran"
+   },
+   "relationships": {
+    "crashLog": {
+     "links": {
+      "self": "https://api.appstoreconnect.apple.com/v1/betaFeedbackCrashSubmissions/ACNnaiE-q3_tKhbMJIEkQCE/relationships/crashLog",
+      "related": "https://api.appstoreconnect.apple.com/v1/betaFeedbackCrashSubmissions/ACNnaiE-q3_tKhbMJIEkQCE/crashLog"
+     }
+    }
+   },
+   "links": {
+    "self": "https://api.appstoreconnect.apple.com/v1/betaFeedbackCrashSubmissions/ACNnaiE-q3_tKhbMJIEkQCE"
+   }
+  },
+  {
+   "type": "betaFeedbackCrashSubmissions",
+   "id": "ABTOxPBnSiiM64e2WobI6HE",
+   "attributes": {
+    "createdDate": "2026-10-25T14:41:14.438Z",
+    "comment": "تعطل التطبيق ",
+    "email": "7awlalaalam@gmail.com",
+    "deviceModel": "iPhone14_2",
+    "osVersion": "27.0.1",
+    "locale": "ar-SA",
+    "timeZone": "Asia/Riyadh",
+    "architecture": "arm64e",
+    "connectionType": "MOBILE_DATA",
+    "pairedAppleWatch": null,
+    "appUptimeInMilliseconds": 21000,
+    "diskBytesAvailable": 214468702208,
+    "diskBytesTotal": 240630870016,
+    "batteryPercentage": 50,
+    "screenWidthInPoints": 390,
+    "screenHeightInPoints": 844,
+    "appPlatform": "IOS",
+    "devicePlatform": "IOS",
+    "deviceFamily": "IPHONE",
+    "buildBundleId": "com.hawlalaalam.quran"
+   },
+   "relationships": {
+    "crashLog": {
+     "links": {
+      "self": "https://api.appstoreconnect.apple.com/v1/betaFeedbackCrashSubmissions/ABTOxPBnSiiM64e2WobI6HE/relationships/crashLog",
+      "related": "https://api.appstoreconnect.apple.com/v1/betaFeedbackCrashSubmissions/ABTOxPBnSiiM64e2WobI6HE/crashLog"
+     }
+    }
+   },
+   "links": {
+    "self": "https://api.appstoreconnect.apple.com/v1/betaFeedbackCrashSubmissions/ABTOxPBnSiiM64e2WobI6HE"
+   }
+  },
+  {
+   "type": "betaFeedbackCrashSubmissions",
+   "id": "AOUL7pRp8kwO3-UOq3i7pn8",
+   "attributes": {
+    "createdDate": "2026-10-22T11:30:45.211Z",
+    "comment": "تعطل",
+    "email": null,
+    "deviceModel": "iPhone18_2",
+    "osVersion": "27.0.1",
+    "locale": "ar-SA",
+    "timeZone": "Asia/Riyadh",
+    "architecture": "arm64e",
+    "connectionType": "MOBILE_DATA",
+    "pairedAppleWatch": null,
+    "appUptimeInMilliseconds": null,
+    "diskBytesAvailable": 68128051200,
+    "diskBytesTotal": 255360323584,
+    "batteryPercentage": 85,
+    "screenWidthInPoints": 440,
+    "screenHeightInPoints": 956,
+    "appPlatform": "IOS",
+    "devicePlatform": "IOS",
+    "deviceFamily": "IPHONE",
+    "buildBundleId": "com.hawlalaalam.quran"
+   },
+   "relationships": {
+    "crashLog": {
+     "links": {
+      "self": "https://api.appstoreconnect.apple.com/v1/betaFeedbackCrashSubmissions/AOUL7pRp8kwO3-UOq3i7pn8/relationships/crashLog",
+      "related": "https://api.appstoreconnect.apple.com/v1/betaFeedbackCrashSubmissions/AOUL7pRp8kwO3-UOq3i7pn8/crashLog"
+     }
+    }
+   },
+   "links": {
+    "self": "https://api.appstoreconnect.apple.com/v1/betaFeedbackCrashSubmissions/AOUL7pRp8kwO3-UOq3i7pn8"
+   }
+  },
+  {
+   "type": "betaFeedbackCrashSubmissions",
+   "id": "ALPw8jbU3BGWdGuHXnfqLmU",
+   "attributes": {
+    "createdDate": "2026-10-22T11:27:44.205Z",
+    "comment": "تعطل التطبيق",
+    "email": null,
+    "deviceModel": "iPhone18_2",
+    "osVersion": "27.0.1",
+    "locale": "ar-SA",
+    "timeZone": "Asia/Riyadh",
+    "architecture": "arm64e",
+    "connectionType": "MOBILE_DATA",
+    "pairedAppleWatch": null,
+    "appUptimeInMilliseconds": null,
+    "diskBytesAvailable": 68122705920,
+    "diskBytesTotal": 255360323584,
+    "batteryPercentage": 85,
+    "screenWidthInPoints": 440,
+    "screenHeightInPoints": 956,
+    "appPlatform": "IOS",
+    "devicePlatform": "IOS",
+    "deviceFamily": "IPHONE",
+    "buildBundleId": "com.hawlalaalam.quran"
+   },
+   "relationships": {
+    "crashLog": {
+     "links": {
+      "self": "https://api.appstoreconnect.apple.com/v1/betaFeedbackCrashSubmissions/ALPw8jbU3BGWdGuHXnfqLmU/relationships/crashLog",
+      "related": "https://api.appstoreconnect.apple.com/v1/betaFeedbackCrashSubmissions/ALPw8jbU3BGWdGuHXnfqLmU/crashLog"
+     }
+    }
+   },
+   "links": {
+    "self": "https://api.appstoreconnect.apple.com/v1/betaFeedbackCrashSubmissions/ALPw8jbU3BGWdGuHXnfqLmU"
+   }
+  }
+ ],
+ "links": {
+  "self": "https://api.appstoreconnect.apple.com/v1/apps/6823910862/betaFeedbackCrashSubmissions?limit=10"
+ },
+ "meta": {
+  "paging": {
+   "total": 4,
+   "limit": 10
+  }
+ }
+}
