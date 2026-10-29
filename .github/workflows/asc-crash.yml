@@ -1,0 +1,45 @@
+name: سجلات أعطال الآيفون
+# قراءة فقط: بلاغات الأعطال من TestFlight وسجلاتها، تُحفظ ملفًا مرفقًا بالتشغيل
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  crash:
+    runs-on: ubuntu-latest
+    env:
+      ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
+      ASC_ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
+      ASC_KEY_P8: ${{ secrets.ASC_KEY_P8 }}
+    steps:
+      - name: الأعطال
+        run: |
+          pip install -q pyjwt cryptography requests
+          mkdir -p out
+          python3 - <<'PY'
+          import os, time, jwt, requests, json
+          B = "https://api.appstoreconnect.apple.com"; APP = "6823910862"
+          def tok():
+              return jwt.encode({"iss": os.environ["ASC_ISSUER_ID"], "iat": int(time.time()), "exp": int(time.time()) + 900, "aud": "appstoreconnect-v1"},
+                                os.environ["ASC_KEY_P8"], algorithm="ES256", headers={"kid": os.environ["ASC_KEY_ID"], "typ": "JWT"})
+          def get(p):
+              r = requests.get(B + p, headers={"Authorization": "Bearer " + tok()})
+              print(p.split('?')[0], r.status_code)
+              return r.json() if r.status_code < 400 else {"error": r.text[:800]}
+          subs = get(f"/v1/apps/{APP}/betaFeedbackCrashSubmissions?limit=10")
+          json.dump(subs, open("out/crash-submissions.json", "w"), ensure_ascii=False, indent=1)
+          for s in subs.get("data", [])[:5]:
+              a = s["attributes"]
+              print(f"::notice title=crash {a.get('createdDate','')[:16]}::{a.get('deviceModel')} {a.get('osVersion')} {(a.get('comment') or '')[:100]}")
+              log = get(f"/v1/betaFeedbackCrashSubmissions/{s['id']}/crashLog")
+              d = log.get("data")
+              txt = d.get("attributes", {}).get("logText", "") if isinstance(d, dict) else ""
+              open(f"out/crash-{s['id']}.txt", "w").write(txt or json.dumps(log)[:5000])
+          shots = get(f"/v1/apps/{APP}/betaFeedbackScreenshotSubmissions?limit=5")
+          json.dump(shots, open("out/screenshot-submissions.json", "w"), ensure_ascii=False, indent=1)
+          PY
+          ls -la out
+      - uses: actions/upload-artifact@v4
+        with:
+          name: crash
+          path: out/
