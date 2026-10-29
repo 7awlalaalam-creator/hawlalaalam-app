@@ -31,7 +31,10 @@ jobs:
           for s in subs.get("data", [])[:5]:
               a = s["attributes"]
               print(f"::notice title=crash {a.get('createdDate','')[:16]}::{a.get('deviceModel')} {a.get('osVersion')} {(a.get('comment') or '')[:100]}")
-              log = get(f"/v1/betaFeedbackCrashSubmissions/{s['id']}/crashLog")
+              rel = get(f"/v1/betaFeedbackCrashSubmissions/{s['id']}/relationships/crashLog")
+              cid = (rel.get("data") or {}).get("id") if isinstance(rel.get("data"), dict) else None
+              print("crashLog id", cid, json.dumps(rel)[:300])
+              log = get(f"/v1/betaCrashLogs/{cid}") if cid else get(f"/v1/betaFeedbackCrashSubmissions/{s['id']}/crashLog")
               d = log.get("data")
               txt = d.get("attributes", {}).get("logText", "") if isinstance(d, dict) else ""
               open(f"out/crash-{s['id']}.txt", "w").write(txt or json.dumps(log)[:5000])
