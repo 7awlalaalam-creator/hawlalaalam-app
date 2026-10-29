@@ -12,7 +12,21 @@ import WidgetKit
 final class LocationService: NSObject, ObservableObject, CLLocationManagerDelegate {
     static let shared = LocationService()
 
-    private let manager = CLLocationManager()
+    /**
+     * لا ننشئ مدير الموقع ولا نسأل عن الإذن أثناء رسم الشاشة الأولى: الاستعلام يتصل بخدمة الموقع في النظام اتصالًا
+     * متزامنًا، وإذا تأخرت (بعد تشغيل الجوال أو عند فتح التطبيق في الخلفية) يتجاوز التطبيق مهلة العشر ثوانٍ فيغلقه iOS
+     * (0x8BADF00D). يُنشأ عند أول استخدام، أو بعد ظهور الشاشة بقليل، وتصلنا حالة الإذن من الدالة المفوّضة.
+     */
+    private var made: CLLocationManager?
+    private var status: CLAuthorizationStatus = .notDetermined
+    private var manager: CLLocationManager {
+        if let m = made { return m }
+        let m = CLLocationManager()
+        m.delegate = self
+        m.desiredAccuracy = kCLLocationAccuracyKilometer
+        made = m
+        return m
+    }
     @Published var heading: Double?
     /** نفس الاتجاه دون قفز من ٣٥٩ إلى ٠ (لتدوير القرص بسلاسة دون لفّة كاملة) */
     @Published var headingTurn: Double = 0
@@ -23,12 +37,11 @@ final class LocationService: NSObject, ObservableObject, CLLocationManagerDelega
 
     private override init() {
         super.init()
-        manager.delegate = self
-        manager.desiredAccuracy = kCLLocationAccuracyKilometer
-        denied = [.denied, .restricted].contains(manager.authorizationStatus)
+        DispatchQueue.main.asyncAfter(deadline: .now() + 2) { [weak self] in _ = self?.manager }
     }
 
-    var authorized: Bool { [.authorizedWhenInUse, .authorizedAlways].contains(manager.authorizationStatus) }
+    /** من الحالة المحفوظة (تحدّثها الدالة المفوّضة) حتى لا ننتظر خدمة الموقع */
+    var authorized: Bool { [.authorizedWhenInUse, .authorizedAlways].contains(status) }
 
     /** يطلب الإذن عند الحاجة ثم يحدّث الموقع مرة واحدة */
     func requestLocation() {
@@ -62,13 +75,14 @@ final class LocationService: NSObject, ObservableObject, CLLocationManagerDelega
         manager.desiredAccuracy = on ? kCLLocationAccuracyNearestTenMeters : kCLLocationAccuracyKilometer
     }
 
-    func stopHeading() { manager.stopUpdatingHeading(); heading = nil }
+    func stopHeading() { made?.stopUpdatingHeading(); heading = nil }
 
     var headingAvailable: Bool { CLLocationManager.headingAvailable() }
 
     nonisolated func locationManagerDidChangeAuthorization(_ m: CLLocationManager) {
         let status = m.authorizationStatus
         Task { @MainActor in
+            self.status = status
             self.denied = [.denied, .restricted].contains(status)
             if self.busy && (status == .authorizedWhenInUse || status == .authorizedAlways) { self.manager.requestLocation() }
             if self.denied { self.busy = false }
