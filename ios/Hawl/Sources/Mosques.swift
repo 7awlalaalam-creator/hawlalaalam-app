@@ -12,7 +12,7 @@ enum SiteAPI {
         let ok = path.range(of: "^[A-Za-z0-9_\\-./?=&%:+]*$", options: .regularExpression) != nil
         guard ok, !path.contains(".."), !path.contains("://"), let url = URL(string: base + path) else { return (0, "") }
         var req = URLRequest(url: url, timeoutInterval: method == "POST" ? 60 : 20)
-        if path.hasPrefix("mosques/") { req.cachePolicy = .reloadRevalidatingCacheData }   // المعتمدة حديثًا تظهر فورًا
+        if path.hasPrefix("mosques/") { req.cachePolicy = .reloadIgnoringLocalCacheData }   // المعتمدة حديثًا تظهر فورًا
         req.httpMethod = method
         req.setValue("application/json", forHTTPHeaderField: "Accept")
         req.setValue("HawlalaalamApp/2 (iOS)", forHTTPHeaderField: "User-Agent")
