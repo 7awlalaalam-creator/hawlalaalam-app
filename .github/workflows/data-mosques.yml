@@ -1,0 +1,64 @@
+name: بيانات المساجد (OpenStreetMap)
+# ملفات صغيرة بالمساجد لكل مربع ٠٫٢٥° في دول الخليج ومصر والأردن من OpenStreetMap (ODbL)،
+# يقرؤها التطبيق مباشرة بدل خوادم Overpass البطيئة، ويُعاد توليدها شهريًا
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '17 3 1 * *'
+permissions:
+  contents: write
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: تحميل وتصفية
+        run: |
+          sudo apt-get -qq update && sudo apt-get -qq install -y osmium-tool >/dev/null
+          mkdir -p /tmp/o && cd /tmp/o
+          for r in asia/gcc-states africa/egypt asia/jordan; do
+            n=$(basename $r)
+            curl -sSL -o $n.pbf https://download.geofabrik.de/$r-latest.osm.pbf
+            osmium tags-filter -O -o $n-f.pbf $n.pbf nwr/amenity=place_of_worship nwr/building=mosque
+            osmium export -O -f geojsonseq --geometry-types=point,polygon -o $n.geojsonseq $n-f.pbf
+            ls -la $n.pbf $n.geojsonseq
+          done
+          python3 - <<'PY'
+          import json, glob, os, re, math, collections
+          out = collections.defaultdict(list); seen = set(); n = 0
+          for f in glob.glob('/tmp/o/*.geojsonseq'):
+              for line in open(f, encoding='utf-8'):
+                  line = line.strip().lstrip('\x1e')
+                  if not line: continue
+                  g = json.loads(line); p = g.get('properties') or {}; geo = g.get('geometry') or {}
+                  name = p.get('name:ar') or p.get('name') or ''
+                  rel = p.get('religion')
+                  ok = rel == 'muslim' or p.get('building') == 'mosque' or re.search(r'مسجد|جامع|مصلى|masjid|mosque', name, re.I)
+                  if not ok or rel in ('christian', 'jewish', 'hindu', 'buddhist', 'sikh'): continue
+                  if geo.get('type') == 'Point': lo, la = geo['coordinates'][:2]
+                  else:
+                      ring = geo['coordinates'][0] if geo.get('type') == 'Polygon' else geo['coordinates'][0][0]
+                      lo = sum(c[0] for c in ring) / len(ring); la = sum(c[1] for c in ring) / len(ring)
+                  key = (round(la, 4), round(lo, 4))
+                  if key in seen: continue
+                  seen.add(key)
+                  en = p.get('name:en') or ''
+                  k = re.search(r'جامع|jami', name + ' ' + en, re.I) or p.get('mosque') == 'jami' or p.get('friday_prayer') == 'yes'
+                  m = re.search(r'مصلى|مصلّى|musalla|prayer room', name + ' ' + en, re.I)
+                  out[(math.floor(la * 4), math.floor(lo * 4))].append([round(la, 5), round(lo, 5), name, en if en != name else '', 1 if k else (2 if m else 0)])
+                  n += 1
+          d = 'data/mosques'
+          if os.path.isdir(d):
+              for x in glob.glob(d + '/*.json'): os.remove(x)
+          os.makedirs(d, exist_ok=True)
+          for (a, b), L in out.items():
+              json.dump(L, open(f'{d}/{a}_{b}.json', 'w', encoding='utf-8'), ensure_ascii=False, separators=(',', ':'))
+          json.dump({'tiles': sorted(f'{a}_{b}' for a, b in out), 'count': n}, open(f'{d}/index.json', 'w'), separators=(',', ':'))
+          print('::notice::mosques', n, 'tiles', len(out))
+          PY
+          du -sh data/mosques
+      - name: حفظ
+        run: |
+          git -c user.name=ci -c user.email=ci@users.noreply.github.com add data/mosques
+          git -c user.name=ci -c user.email=ci@users.noreply.github.com commit -qm "data: mosques (OSM)" || exit 0
+          git pull -q --rebase && git push -q
