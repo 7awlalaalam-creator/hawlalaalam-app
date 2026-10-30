@@ -40,7 +40,16 @@ jobs:
             WHERE bbox.xmin BETWEEN 24 AND 61 AND bbox.ymin BETWEEN 12 AND 33
               AND (categories.primary = 'mosque' OR list_contains(categories.alternate, 'mosque'))
           '''
-          rows = con.execute(q).fetchall()
+          src = f"read_parquet('s3://overturemaps-us-west-2/release/{rel}/theme=places/type=place/*', filename=true, hive_partitioning=1)"
+          try:
+              cols = con.execute(f"DESCRIBE SELECT * FROM {src} LIMIT 1").fetchall()
+              print('::notice::cols ' + ' | '.join(f'{c[0]}:{str(c[1])[:120]}' for c in cols)[:3000])
+          except Exception as e:
+              print('::notice::describe err ' + str(e)[:800])
+          try:
+              rows = con.execute(q).fetchall()
+          except Exception as e:
+              print('::notice::query err ' + str(e)[:800]); raise
           json.dump(rows, open('/tmp/o/overture.json', 'w'), ensure_ascii=False)
           print('::notice::overture mosques', len(rows))
           PY
