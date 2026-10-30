@@ -1,0 +1,124 @@
+<!doctype html><html lang="ar" dir="rtl"><head><meta charset="utf-8">
+<style>
+@font-face{font-family:T;src:url(file:///home/claude/android/HawlalaalamApp/app/src/main/res/font/tajawal_regular.ttf)}
+@font-face{font-family:T;font-weight:500;src:url(file:///home/claude/android/HawlalaalamApp/app/src/main/res/font/tajawal_medium.ttf)}
+@font-face{font-family:T;font-weight:700;src:url(file:///home/claude/android/HawlalaalamApp/app/src/main/res/font/tajawal_bold.ttf)}
+@font-face{font-family:A;src:url(file:///home/claude/android/HawlalaalamApp/app/src/main/res/font/amiri_quran.ttf)}
+*{box-sizing:border-box;margin:0}
+body{background:#e9eef0;font-family:T;color:#16353d;padding:40px 30px;width:1240px}
+h1{font-size:30px;text-align:center;margin-bottom:6px}
+.sub{text-align:center;color:#5f7479;margin-bottom:30px;font-size:17px}
+.row{display:flex;gap:34px;justify-content:center;align-items:flex-start}
+.col{display:flex;flex-direction:column;align-items:center;gap:14px}
+.cap{font-weight:700;font-size:17px}.cap small{display:block;font-weight:400;color:#5f7479;font-size:14px;text-align:center}
+.phone{width:360px;height:760px;border-radius:44px;background:#0b1f25;padding:10px;box-shadow:0 20px 50px #0003}
+.scr{width:100%;height:100%;border-radius:36px;overflow:hidden;position:relative;background:#0f2a31}
+.status{position:absolute;top:0;left:0;right:0;height:40px;display:flex;justify-content:space-between;align-items:center;padding:0 26px;color:#cfe0e3;font-size:13px;z-index:5}
+.map{position:absolute;inset:0}
+.top{position:absolute;top:46px;left:14px;right:14px;display:flex;gap:10px;align-items:center;z-index:4}
+.back{width:42px;height:42px;border-radius:50%;background:#123640ee;display:grid;place-items:center;color:#e4c58a;font-size:20px;border:1px solid #ffffff18}
+.title{flex:1;background:#123640ee;border:1px solid #ffffff18;border-radius:22px;height:42px;display:flex;align-items:center;justify-content:space-between;padding:0 16px;color:#fff;font-weight:700}
+.title span{font-weight:400;color:#e4c58a;font-size:13px}
+.pin{position:absolute;width:26px;height:32px;transform:translate(-50%,-100%)}
+.me{position:absolute;width:18px;height:18px;border-radius:50%;background:#4aa3ff;border:3px solid #fff;box-shadow:0 0 0 12px #4aa3ff33;transform:translate(-50%,-50%)}
+.fab{position:absolute;left:14px;width:46px;height:46px;border-radius:50%;background:#123640;border:1px solid #ffffff22;display:grid;place-items:center;color:#e4c58a;z-index:4}
+.near{position:absolute;right:14px;bottom:222px;background:#e4c58a;color:#163942;font-weight:700;border-radius:23px;padding:11px 16px;font-size:14px;z-index:4;box-shadow:0 6px 16px #0005}
+.card{position:absolute;left:12px;right:12px;bottom:14px;background:#fff;border-radius:22px;padding:16px 16px 14px;z-index:4;box-shadow:0 10px 30px #0006}
+.card .h{display:flex;gap:12px;align-items:center}
+.ic{width:46px;height:46px;border-radius:14px;background:#123640;display:grid;place-items:center;flex-shrink:0}
+.card b{font-size:18px;display:block}.card .m{color:#5f7479;font-size:13px;margin-top:2px}
+.chips{display:flex;gap:8px;margin:12px 0}
+.chip{background:#eef3f4;border-radius:10px;padding:6px 10px;font-size:13px;color:#2c4d55}
+.btns{display:flex;gap:8px}
+.b1{flex:1;background:#123640;color:#fff;border-radius:12px;padding:12px;text-align:center;font-weight:700;font-size:15px}
+.b2{width:48px;border:1px solid #d7e1e3;border-radius:12px;display:grid;place-items:center;color:#123640}
+.sheet{position:absolute;left:0;right:0;bottom:0;top:300px;background:#fff;border-radius:26px 26px 0 0;z-index:4;padding:10px 16px}
+.grab{width:44px;height:5px;border-radius:3px;background:#d4dddf;margin:0 auto 12px}
+.sh{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
+.sh b{font-size:18px}.sh span{font-size:13px;color:#5f7479}
+.seg{display:flex;background:#eef3f4;border-radius:10px;padding:3px;margin:8px 0 6px;font-size:13px}
+.seg div{flex:1;text-align:center;padding:7px;border-radius:8px;color:#5f7479}.seg .on{background:#fff;color:#123640;font-weight:700;box-shadow:0 1px 3px #0001}
+.it{display:flex;align-items:center;gap:12px;padding:11px 0;border-bottom:1px solid #edf1f2}
+.it .ic{width:38px;height:38px;border-radius:11px}
+.it b{font-size:15px;display:block}.it small{color:#5f7479;font-size:12px}
+.it .d{margin-right:auto;text-align:left;font-weight:700;font-size:14px;color:#123640}.it .d small{display:block;font-weight:400}
+.home{background:#f6f8f9}
+.hh{padding:52px 18px 10px;font-weight:800;font-size:22px}
+.tools{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;padding:8px 16px}
+.tool{background:#fff;border:1px solid #e3eaec;border-radius:16px;height:96px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;font-size:14px;font-weight:500;position:relative}
+.tool.new{border:2px solid #e4c58a;background:#fffaf0}
+.tool .tag{position:absolute;top:6px;left:6px;background:#e4c58a;color:#163942;font-size:10px;font-weight:700;border-radius:6px;padding:1px 6px}
+.tool svg{width:30px;height:30px}
+.adhan{margin:18px 16px;background:#123640;color:#fff;border-radius:18px;padding:14px}
+.adhan .t{font-size:12px;color:#b7c9cc}.adhan b{display:block;margin:4px 0 2px;font-size:16px}
+.adhan .a{display:flex;gap:8px;margin-top:10px}.adhan .a div{flex:1;border-radius:10px;padding:8px;text-align:center;font-size:13px;background:#ffffff14}.adhan .a .g{background:#e4c58a;color:#163942;font-weight:700}
+.note{font-size:12px;color:#5f7479;padding:0 18px}
+</style></head><body>
+<h1>المساجد القريبة — تصميم مقترح</h1>
+<div class="sub">خريطة بألوان التطبيق · بيانات OpenStreetMap مجانية · بلا شراء ولا تبرعات</div>
+<div class="row">
+
+<div class="col"><div class="phone"><div class="scr home">
+<div class="status" style="color:#16353d"><span>9:41</span><span>●●● 5G</span></div>
+<div class="hh">الأدوات</div>
+<div class="tools">
+ <div class="tool"><svg viewBox="0 0 24 24" fill="none" stroke="#557b83" stroke-width="1.6"><circle cx="12" cy="12" r="9"/><path d="M12 5l2.5 7L12 19l-2.5-7z" fill="#e4c58a" stroke="#123640"/></svg>القبلة</div>
+ <div class="tool new"><span class="tag">جديد</span><svg viewBox="0 0 24 24" fill="none" stroke="#123640" stroke-width="1.6"><path d="M12 3c-3 2.5-5 4.2-5 7h10c0-2.8-2-4.5-5-7z" fill="#e4c58a"/><path d="M6 10h12v10H6z"/><path d="M10 20v-4a2 2 0 014 0v4"/><path d="M3 20h18"/><path d="M12 1.5v1.5"/></svg>مساجد قريبة</div>
+ <div class="tool"><svg viewBox="0 0 24 24" fill="none" stroke="#557b83" stroke-width="1.6"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l3 2M9 2h6"/></svg>المواقيت</div>
+ <div class="tool"><svg viewBox="0 0 24 24" fill="none" stroke="#557b83" stroke-width="1.6"><circle cx="12" cy="5" r="2"/><circle cx="6" cy="10" r="2"/><circle cx="18" cy="10" r="2"/><circle cx="8" cy="17" r="2"/><circle cx="16" cy="17" r="2"/></svg>المسبحة</div>
+ <div class="tool"><svg viewBox="0 0 24 24" fill="none" stroke="#557b83" stroke-width="1.6"><path d="M4 5h11a3 3 0 013 3v11H7a3 3 0 01-3-3z"/><path d="M8 9h6M8 13h6"/></svg>الأذكار</div>
+ <div class="tool"><svg viewBox="0 0 24 24" fill="none" stroke="#557b83" stroke-width="1.6"><path d="M4 19V5l8 4 8-4v14l-8 4z"/></svg>الختمة</div>
+</div>
+<div class="adhan"><div class="t">إشعار الأذان</div><b>حان الآن موعد أذان العشاء</b><div class="t">التالية: الفجر ٤:٥٨</div>
+<div class="a"><div class="g">أقرب مسجد</div><div>أذكار بعد الصلاة</div></div></div>
+<div class="note">زر «أقرب مسجد» في إشعار الأذان يفتح الاتجاهات مباشرة — مفيد خارج البيت والسفر.</div>
+</div></div><div class="cap">١ · نقطة الدخول<small>بجانب القبلة + زر في إشعار الأذان</small></div></div>
+
+<div class="col"><div class="phone"><div class="scr">
+<div class="status"><span>9:41</span><span>●●● 5G</span></div>
+<svg class="map" id="m1" viewBox="0 0 340 740"></svg>
+<div class="top"><div class="title">المساجد القريبة <span>ضمن ٢ كم</span></div><div class="back">›</div></div>
+<div class="fab" style="bottom:222px">◎</div>
+<div class="near">أقرب مسجد</div>
+<div class="card"><div class="h"><div class="ic"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#e4c58a" stroke-width="1.6"><path d="M12 3c-3 2.5-5 4.2-5 7h10c0-2.8-2-4.5-5-7z"/><path d="M6 10h12v10H6zM10 20v-4a2 2 0 014 0v4M3 20h18"/></svg></div>
+<div><b>جامع الملك سعود</b><div class="m">حي البغدادية · مسجد جامع</div></div></div>
+<div class="chips"><div class="chip">🚶 ٦ دقائق</div><div class="chip">٤٥٠ م</div><div class="chip">🚗 دقيقتان</div></div>
+<div class="btns"><div class="b1">الاتجاهات</div><div class="b2">⤴</div></div></div>
+</div></div><div class="cap">٢ · الخريطة<small>اضغط أي مسجد ← بطاقة واتجاهات</small></div></div>
+
+<div class="col"><div class="phone"><div class="scr">
+<div class="status"><span>9:41</span><span>●●● 5G</span></div>
+<svg class="map" id="m2" viewBox="0 0 340 740"></svg>
+<div class="top"><div class="title">المساجد القريبة <span>ضمن ٢ كم</span></div><div class="back">›</div></div>
+<div class="sheet"><div class="grab"></div>
+<div class="sh"><b>٢٤ مسجدًا قريبًا</b><span>مرتبة بالمسافة</span></div>
+<div class="seg"><div class="on">الكل</div><div>الجوامع</div><div>المصليات</div></div>
+<div class="it"><div class="ic"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#e4c58a" stroke-width="1.8"><path d="M12 3c-3 2.5-5 4.2-5 7h10c0-2.8-2-4.5-5-7z"/><path d="M6 10h12v10H6z"/></svg></div><div><b>جامع الملك سعود</b><small>مسجد جامع</small></div><div class="d">٤٥٠ م<small>٦ د مشيًا</small></div></div>
+<div class="it"><div class="ic"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#e4c58a" stroke-width="1.8"><path d="M12 3c-3 2.5-5 4.2-5 7h10c0-2.8-2-4.5-5-7z"/><path d="M6 10h12v10H6z"/></svg></div><div><b>مسجد الرحمة</b><small>مسجد</small></div><div class="d">٦٢٠ م<small>٨ د مشيًا</small></div></div>
+<div class="it"><div class="ic"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#e4c58a" stroke-width="1.8"><path d="M12 3c-3 2.5-5 4.2-5 7h10c0-2.8-2-4.5-5-7z"/><path d="M6 10h12v10H6z"/></svg></div><div><b>جامع الأمير متعب</b><small>مسجد جامع</small></div><div class="d">٩٠٠ م<small>١١ د مشيًا</small></div></div>
+<div class="it"><div class="ic"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#e4c58a" stroke-width="1.8"><path d="M12 3c-3 2.5-5 4.2-5 7h10c0-2.8-2-4.5-5-7z"/><path d="M6 10h12v10H6z"/></svg></div><div><b>مسجد التقوى</b><small>مسجد</small></div><div class="d">١٫١ كم<small>٢ د بالسيارة</small></div></div>
+<div class="it" style="border:0"><div class="ic"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#e4c58a" stroke-width="1.8"><path d="M12 3c-3 2.5-5 4.2-5 7h10c0-2.8-2-4.5-5-7z"/><path d="M6 10h12v10H6z"/></svg></div><div><b>مصلى السوق</b><small>مصلى</small></div><div class="d">١٫٣ كم<small>٣ د بالسيارة</small></div></div>
+</div>
+</div></div><div class="cap">٣ · القائمة<small>اسحب للأعلى: الأقرب أولًا</small></div></div>
+
+</div>
+<script>
+function rnd(s){return()=>{s=(s*9301+49297)%233280;return s/233280}}
+const pin='<path d="M13 31c-5-7-12-12-12-19a12 12 0 0124 0c0 7-7 12-12 19z" fill="#c9a24f" stroke="#123640" stroke-width="1.4"/><path d="M13 5c-2 1.7-3.4 2.8-3.4 4.6h6.8C16.4 7.8 15 6.7 13 5z" fill="#123640"/><rect x="9" y="9.6" width="8" height="6" fill="#123640"/>';
+function draw(id,seed,sel){
+ const r=rnd(seed),s=document.getElementById(id);let h='<rect width="340" height="740" fill="#13303a"/>';
+ for(let i=0;i<9;i++){h+=`<rect x="${r()*300}" y="${r()*700}" width="${40+r()*70}" height="${30+r()*60}" rx="6" fill="#16363f"/>`}
+ h+='<path d="M-10 210 C120 230 200 160 360 190" stroke="#24505b" stroke-width="10" fill="none"/>';
+ h+='<path d="M60 -10 C80 200 40 420 110 760" stroke="#24505b" stroke-width="8" fill="none"/>';
+ h+='<path d="M-10 520 C140 470 220 560 360 500" stroke="#1f4650" stroke-width="7" fill="none"/>';
+ h+='<path d="M250 -10 L230 760" stroke="#1f4650" stroke-width="6" fill="none"/>';
+ for(let i=0;i<22;i++){h+=`<path d="M${r()*340} ${r()*740} l${(r()-.5)*160} ${(r()-.5)*160}" stroke="#1b3f48" stroke-width="3"/>`}
+ h+='<text x="150" y="330" fill="#6f9099" font-size="13" font-family="T">البغدادية</text><text x="30" y="160" fill="#6f9099" font-size="12" font-family="T">شارع الملك عبدالعزيز</text>';
+ const pts=[];for(let i=0;i<34;i++)pts.push([20+r()*300,140+r()*560]);
+ if(sel)pts.push(sel);
+ pts.forEach((p,i)=>{const big=sel&&i==pts.length-1;h+=`<g transform="translate(${p[0]-(big?17:13)},${p[1]-(big?42:32)}) scale(${big?1.35:1})">${pin.replace(big?'#c9a24f':'@@','#e4c58a')}</g>`});
+ h+='<circle cx="175" cy="380" r="22" fill="#4aa3ff33"/><circle cx="175" cy="380" r="8" fill="#4aa3ff" stroke="#fff" stroke-width="3"/>';
+ if(sel)h+=`<path d="M175 380 Q190 330 ${sel[0]} ${sel[1]+2}" stroke="#e4c58a" stroke-width="3" stroke-dasharray="5 5" fill="none"/>`;
+ s.innerHTML=h}
+draw('m1',7,[205,315]);draw('m2',7,null);
+</script></body></html>
