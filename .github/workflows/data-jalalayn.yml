@@ -11,8 +11,8 @@ jobs:
       - uses: actions/checkout@v4
       - name: تحميل وتحويل
         run: |
-          curl -sSL -o /tmp/T.json https://huggingface.co/datasets/riotu-lab/Quran-Tafseers/resolve/main/Tafseer.json
-          ls -la /tmp/T.json
+          curl -sSL -w '%{http_code}' -o /tmp/T.json https://huggingface.co/datasets/riotu-lab/Quran-Tafseers/resolve/main/Tafseer.json
+          echo "::notice::size $(wc -c < /tmp/T.json) head $(head -c 300 /tmp/T.json | tr -d '\n\r' | tr -c '[:print:]' ' ')"
           python3 - <<'PY'
           import json, gzip, re, collections
           raw = open('/tmp/T.json', encoding='utf-8').read()
@@ -21,10 +21,10 @@ jobs:
           except Exception:
               d = [json.loads(l) for l in raw.splitlines() if l.strip()]
           if isinstance(d, dict):
-              print('dict keys', list(d)[:20])
+              print('::notice::dict keys', list(d)[:20])
               for k in ('data', 'train', 'rows'):
                   if k in d: d = d[k]; break
-          print('records', len(d)); print('first', json.dumps(d[0], ensure_ascii=False)[:600])
+          print('::notice::records', len(d)); print('::notice::first', json.dumps(d[0], ensure_ascii=False)[:600].replace('\n',' '))
           keys = list(d[0].keys())
           # حقول محتملة
           def pick(names):
@@ -35,9 +35,9 @@ jobs:
           ks = pick(['surah','sura','surah_number','sura_no','chapter'])
           ka = pick(['ayah','aya','ayah_number','aya_no','verse','verse_number'])
           kx = pick(['tafsir_content','tafseer_text','text','content','tafsir','tafseer_content'])
-          print('fields', kt, ks, ka, kx)
+          print('::notice::fields', kt, ks, ka, kx)
           names = collections.Counter(str(r.get(kt)) for r in d)
-          print('books', names.most_common(20))
+          print('::notice::books', names.most_common(20))
           J = [n for n in names if 'جلال' in n or 'jalal' in n.lower()]
           print('jalalayn names', J)
           t = {}
@@ -45,7 +45,7 @@ jobs:
               if str(r.get(kt)) not in J: continue
               s, a, x = int(r[ks]), int(r[ka]), (r.get(kx) or '').strip()
               if x: t[f'{s}:{a}'] = x
-          print('ayat', len(t))
+          print('::notice::ayat', len(t))
           assert len(t) > 6000, 'too few'
           o = {'id': 'jalalayn', 'name': 'تفسير الجلالين', 'src': 'riotu-lab/Quran-Tafseers (Apache-2.0)', 't': t, 'g': {}}
           with gzip.open('data/tafsir-jalalayn.json.gz', 'wt', encoding='utf-8', compresslevel=9) as f:
