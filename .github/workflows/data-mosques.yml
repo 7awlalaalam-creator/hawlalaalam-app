@@ -49,7 +49,7 @@ jobs:
                   m = re.search(r'مصلى|مصلّى|musalla|prayer room', name + ' ' + en, re.I)
                   out[(math.floor(la * 4), math.floor(lo * 4))].append([round(la, 5), round(lo, 5), name, en if en != name else '', 1 if k else (2 if m else 0)])
                   n += 1
-          d = 'data/mosques'
+          d = os.path.join(os.environ['GITHUB_WORKSPACE'], 'data/mosques')
           if os.path.isdir(d):
               for x in glob.glob(d + '/*.json'): os.remove(x)
           os.makedirs(d, exist_ok=True)
@@ -58,7 +58,7 @@ jobs:
           json.dump({'tiles': sorted(f'{a}_{b}' for a, b in out), 'count': n}, open(f'{d}/index.json', 'w'), separators=(',', ':'))
           print('::notice::mosques', n, 'tiles', len(out))
           PY
-          du -sh data/mosques
+          du -sh $GITHUB_WORKSPACE/data/mosques
       - name: حفظ
         run: |
           git config user.name ci; git config user.email ci@users.noreply.github.com
