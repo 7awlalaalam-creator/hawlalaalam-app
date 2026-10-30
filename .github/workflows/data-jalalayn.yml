@@ -1,0 +1,59 @@
+name: بيانات تفسير الجلالين
+# ينشئ data/tafsir-jalalayn.json.gz من مجموعة riotu-lab/Quran-Tafseers (Apache-2.0) — المصدر نفسه الذي يعتمده الموقع
+on:
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: تحميل وتحويل
+        run: |
+          curl -sSL -o /tmp/T.json https://huggingface.co/datasets/riotu-lab/Quran-Tafseers/resolve/main/Tafseer.json
+          ls -la /tmp/T.json
+          python3 - <<'PY'
+          import json, gzip, re, collections
+          raw = open('/tmp/T.json', encoding='utf-8').read()
+          try:
+              d = json.loads(raw)
+          except Exception:
+              d = [json.loads(l) for l in raw.splitlines() if l.strip()]
+          if isinstance(d, dict):
+              print('dict keys', list(d)[:20])
+              for k in ('data', 'train', 'rows'):
+                  if k in d: d = d[k]; break
+          print('records', len(d)); print('first', json.dumps(d[0], ensure_ascii=False)[:600])
+          keys = list(d[0].keys())
+          # حقول محتملة
+          def pick(names):
+              for n in names:
+                  for k in keys:
+                      if k.lower() == n: return k
+          kt = pick(['tafsir_book','book','tafseer_name','tafsir_name','source','name','tafseer'])
+          ks = pick(['surah','sura','surah_number','sura_no','chapter'])
+          ka = pick(['ayah','aya','ayah_number','aya_no','verse','verse_number'])
+          kx = pick(['tafsir_content','tafseer_text','text','content','tafsir','tafseer_content'])
+          print('fields', kt, ks, ka, kx)
+          names = collections.Counter(str(r.get(kt)) for r in d)
+          print('books', names.most_common(20))
+          J = [n for n in names if 'جلال' in n or 'jalal' in n.lower()]
+          print('jalalayn names', J)
+          t = {}
+          for r in d:
+              if str(r.get(kt)) not in J: continue
+              s, a, x = int(r[ks]), int(r[ka]), (r.get(kx) or '').strip()
+              if x: t[f'{s}:{a}'] = x
+          print('ayat', len(t))
+          assert len(t) > 6000, 'too few'
+          o = {'id': 'jalalayn', 'name': 'تفسير الجلالين', 'src': 'riotu-lab/Quran-Tafseers (Apache-2.0)', 't': t, 'g': {}}
+          with gzip.open('data/tafsir-jalalayn.json.gz', 'wt', encoding='utf-8', compresslevel=9) as f:
+              json.dump(o, f, ensure_ascii=False, separators=(',', ':'))
+          PY
+          ls -la data/tafsir-jalalayn.json.gz
+      - name: حفظ
+        run: |
+          git -c user.name=ci -c user.email=ci@users.noreply.github.com add data/tafsir-jalalayn.json.gz
+          git -c user.name=ci -c user.email=ci@users.noreply.github.com commit -qm "data: tafsir-jalalayn.json.gz"
+          git pull -q --rebase && git push -q
