@@ -49,6 +49,15 @@ jobs:
           except Exception as e:
               print('::notice::describe err ' + str(e)[:800])
           try:
+              dq = f'''SELECT basic_category, taxonomy.primary, count(*) c FROM {src}
+                WHERE bbox.xmin BETWEEN 39.1 AND 39.35 AND bbox.ymin BETWEEN 21.4 AND 21.7
+                  AND (lower(coalesce(names.primary,'')) LIKE '%mosque%' OR coalesce(names.primary,'') LIKE '%مسجد%' OR coalesce(names.primary,'') LIKE '%جامع%'
+                       OR lower(coalesce(basic_category,'')) LIKE '%worship%' OR lower(coalesce(taxonomy.primary,'')) LIKE '%mosq%' OR lower(coalesce(taxonomy.primary,'')) LIKE '%islam%')
+                GROUP BY 1,2 ORDER BY c DESC LIMIT 25'''
+              print('::notice::cats ' + ' ; '.join(f'{a}/{b}={c}' for a, b, c in con.execute(dq).fetchall())[:3000])
+          except Exception as e:
+              print('::notice::cats err ' + str(e)[:500])
+          try:
               rows = con.execute(q).fetchall()
           except Exception as e:
               print('::notice::query err ' + str(e)[:800]); raise
