@@ -125,7 +125,8 @@ final class MosqueFinder: NSObject, ObservableObject, CLLocationManagerDelegate 
         async let a = appleSearch(c)
         async let t = tiles(c)
         let (apple, tiled) = await (a, t)
-        let osm = tiled ?? (await overpass(c))
+        var osm: [NearMosque]
+        if let t = tiled { osm = t } else { osm = await overpass(c) }
         var all = osm
         for m in apple where !all.contains(where: { Self.near($0.coord, m.coord, 45) }) { all.append(m) }
         loading = false
