@@ -1,0 +1,28 @@
+10-30 20:55:17.517  4850  4850 D AndroidRuntime: >>>>>> START com.android.internal.os.RuntimeInit uid 2000 <<<<<<
+10-30 20:55:17.554  4850  4850 I AndroidRuntime: Using default boot image
+10-30 20:55:17.555  4850  4850 I AndroidRuntime: Leaving lock profiling enabled
+10-30 20:55:17.781  4850  4850 D nativeloader: InitDefaultPublicLibraries for_preload=1: libandroid.so:libaaudio.so:libamidi.so:libbinder_ndk.so:libc.so:libcamera2ndk.so:libdl.so:libEGL.so:libGLESv1_CM.so:libGLESv2.so:libGLESv3.so:libicu.so:libicui18n.so:libicuuc.so:libjnigraphics.so:liblog.so:libmediandk.so:libm.so:libnativehelper.so:libnativewindow.so:libOpenMAXAL.so:libOpenSLES.so:libRS.so:libstdc++.so:libsync.so:libvulkan.so:libwebviewchromium_plat_support.so:libz.so
+10-30 20:55:17.881  4850  4850 D AndroidRuntime: Calling main entry com.android.commands.uiautomator.Launcher
+10-30 20:55:18.943  4850  4850 D AndroidRuntime: Shutting down VM
+10-30 20:55:19.969  4913  4913 D AndroidRuntime: >>>>>> START com.android.internal.os.RuntimeInit uid 2000 <<<<<<
+10-30 20:55:19.978  4913  4913 I AndroidRuntime: Using default boot image
+10-30 20:55:19.978  4913  4913 I AndroidRuntime: Leaving lock profiling enabled
+10-30 20:55:20.109  4913  4913 D nativeloader: InitDefaultPublicLibraries for_preload=1: libandroid.so:libaaudio.so:libamidi.so:libbinder_ndk.so:libc.so:libcamera2ndk.so:libdl.so:libEGL.so:libGLESv1_CM.so:libGLESv2.so:libGLESv3.so:libicu.so:libicui18n.so:libicuuc.so:libjnigraphics.so:liblog.so:libmediandk.so:libm.so:libnativehelper.so:libnativewindow.so:libOpenMAXAL.so:libOpenSLES.so:libRS.so:libstdc++.so:libsync.so:libvulkan.so:libwebviewchromium_plat_support.so:libz.so
+10-30 20:55:20.165  4913  4913 D AndroidRuntime: Calling main entry com.android.commands.uiautomator.Launcher
+10-30 20:55:21.198  4913  4913 D AndroidRuntime: Shutting down VM
+10-30 20:55:21.795   521   575 I AppsFilter: interaction: PackageSetting{5d3dee2 com.hawlalaalam.quran/10192} -> PackageSetting{ab7b31a com.google.android.youtube/10138} BLOCKED
+10-30 20:55:21.795   521   575 I AppsFilter: interaction: PackageSetting{5d3dee2 com.hawlalaalam.quran/10192} -> PackageSetting{8e55e4b com.google.android.apps.messaging/10130} BLOCKED
+10-30 20:55:21.795   521   575 I AppsFilter: interaction: PackageSetting{5d3dee2 com.hawlalaalam.quran/10192} -> PackageSetting{52d6ba3 com.google.android.apps.maps/10155} BLOCKED
+10-30 20:55:21.796   521   575 I AppsFilter: interaction: PackageSetting{5d3dee2 com.hawlalaalam.quran/10192} -> PackageSetting{5663028 com.google.android.contacts/10153} BLOCKED
+10-30 20:55:27.551   521   575 I AppsFilter: interaction: PackageSetting{5d3dee2 com.hawlalaalam.quran/10192} -> PackageSetting{a16e8f3 com.google.android.apps.messaging/10130} BLOCKED
+10-30 20:55:27.551   521   575 I AppsFilter: interaction: PackageSetting{5d3dee2 com.hawlalaalam.quran/10192} -> PackageSetting{5ad69b0 com.google.android.contacts/10153} BLOCKED
+10-30 20:55:29.289   521   575 I AppsFilter: interaction: PackageSetting{5d3dee2 com.hawlalaalam.quran/10192} -> PackageSetting{f450825 com.google.android.apps.messaging/10130} BLOCKED
+10-30 20:55:30.316   521  1941 E AppOps  : 	at com.android.server.wm.ActivityTaskManagerService.hasSystemAlertWindowPermission(ActivityTaskManagerService.java:1076)
+10-30 20:55:30.316   521  1941 E AppOps  : 	at com.android.server.wm.ActivityTaskManagerService$LocalService.hasSystemAlertWindowPermission(ActivityTaskManagerService.java:7006)
+10-30 20:55:30.651  4592  5125 I cr_CronetUrlRequestContext: destroyNativeStreamLocked org.chromium.net.impl.CronetBidirectionalStream@a9dab95
+10-30 20:55:32.005   521   575 I AppsFilter: interaction: PackageSetting{5d3dee2 com.hawlalaalam.quran/10192} -> PackageSetting{49c8fa1 com.google.android.gm/10145} BLOCKED
+10-30 20:55:33.769   521   820 I AppsFilter: interaction: PackageSetting{5d3dee2 com.hawlalaalam.quran/10192} -> PackageSetting{48be28d com.google.android.settings.intelligence/10118} BLOCKED
+10-30 20:55:34.609   521   602 E AppOps  : 	at com.android.server.wm.ActivityTaskManagerService.hasSystemAlertWindowPermission(ActivityTaskManagerService.java:1076)
+10-30 20:55:34.609   521   602 E AppOps  : 	at com.android.server.wm.ActivityTaskManagerService$LocalService.hasSystemAlertWindowPermission(ActivityTaskManagerService.java:7006)
+10-30 20:55:35.797   521  1553 E AppOps  : 	at com.android.server.wm.ActivityTaskManagerService.hasSystemAlertWindowPermission(ActivityTaskManagerService.java:1076)
+10-30 20:55:35.797   521  1553 E AppOps  : 	at com.android.server.wm.ActivityTaskManagerService$LocalService.hasSystemAlertWindowPermission(ActivityTaskManagerService.java:7006)
