@@ -282,6 +282,7 @@ struct MosquesView: View {
     @State private var filter = 0                 // ٠ الكل، ١ الجوامع، ٢ المصليات
     @State private var showList = false
     @State private var showAdd = false
+    @AppStorage("mosq_sat") private var satellite = false
     @Environment(\.colorScheme) private var scheme
 
     private var shown: [NearMosque] {
@@ -294,7 +295,7 @@ struct MosquesView: View {
 
     var body: some View {
         ZStack(alignment: .bottom) {
-            MosqueMap(center: finder.center, items: finder.list, selected: $selected)
+            MosqueMap(satellite: satellite, center: finder.center, items: finder.list, selected: $selected)
                 .ignoresSafeArea(edges: .bottom)
             if finder.loading && finder.list.isEmpty {
                 VStack { ProgressView(); Text(L("نبحث عن المساجد حولك…")).font(AppFont.ui(13)).foregroundColor(Palette.muted) }
@@ -334,7 +335,9 @@ struct MosquesView: View {
         .sheet(isPresented: $showList) { listSheet }
         .sheet(isPresented: $showAdd) { AddMosqueView(start: finder.center ?? CLLocationCoordinate2D(latitude: Geo.lat, longitude: Geo.lng)) }
         .toolbar {
-            ToolbarItem(placement: .navigationBarTrailing) {
+            ToolbarItemGroup(placement: .navigationBarTrailing) {
+                Button { satellite.toggle() } label: { Image(systemName: satellite ? "map" : "globe.americas.fill") }
+                    .accessibilityLabel(satellite ? L("الخريطة") : L("القمر الصناعي"))
                 Button { showAdd = true } label: { Image(systemName: "plus.circle") }
                     .accessibilityLabel(L("أضف مسجدًا ناقصًا"))
             }
@@ -442,6 +445,7 @@ struct MosquesView: View {
 
 /** الخريطة: داكنة بألوان التطبيق، وعلامات ذهبية للمساجد */
 struct MosqueMap: UIViewRepresentable {
+    var satellite = false
     var center: CLLocationCoordinate2D?
     var items: [NearMosque]
     @Binding var selected: NearMosque?
@@ -461,6 +465,8 @@ struct MosqueMap: UIViewRepresentable {
 
     func updateUIView(_ v: MKMapView, context: Context) {
         context.coordinator.parent = self
+        let type: MKMapType = satellite ? .hybrid : .standard
+        if v.mapType != type { v.mapType = type }
         if let c = center, !context.coordinator.centered {
             context.coordinator.centered = true
             v.setRegion(MKCoordinateRegion(center: c, latitudinalMeters: 2200, longitudinalMeters: 2200), animated: false)
@@ -530,7 +536,7 @@ struct AddMosqueView: View {
         NavigationStack {
             VStack(spacing: 0) {
                 ZStack {
-                    Map(coordinateRegion: $region, showsUserLocation: true)
+                    CenterMap(region: $region)
                     Image(systemName: "mappin").font(.system(size: 40, weight: .bold)).foregroundColor(Color(hex: 0xC9A24F))
                         .shadow(radius: 4).offset(y: -20).allowsHitTesting(false)
                 }
@@ -582,5 +588,33 @@ struct AddMosqueView: View {
         if code == 200, (o?["ok"] as? Bool) == true { done = true }
         else if code == 0 { error = L("لا يوجد اتصال بالإنترنت.") }
         else { error = o?["error"] as? String ?? L("تعذّر الإرسال، حاول لاحقًا.") }
+    }
+}
+
+/** خريطة صفحة الإضافة: صور القمر الصناعي مع الأسماء ليظهر مبنى المسجد ومنارته بوضوح */
+struct CenterMap: UIViewRepresentable {
+    @Binding var region: MKCoordinateRegion
+
+    func makeCoordinator() -> Coord { Coord(self) }
+
+    func makeUIView(context: Context) -> MKMapView {
+        let v = MKMapView()
+        v.mapType = .hybrid
+        v.showsUserLocation = true
+        v.pointOfInterestFilter = .excludingAll
+        v.delegate = context.coordinator
+        v.setRegion(region, animated: false)
+        return v
+    }
+
+    func updateUIView(_ v: MKMapView, context: Context) { context.coordinator.parent = self }
+
+    final class Coord: NSObject, MKMapViewDelegate {
+        var parent: CenterMap
+        init(_ p: CenterMap) { parent = p }
+        func mapView(_ v: MKMapView, regionDidChangeAnimated animated: Bool) {
+            let r = v.region
+            DispatchQueue.main.async { self.parent.region = r }
+        }
     }
 }
