@@ -38,8 +38,8 @@ jobs:
             SELECT coalesce(names.common['ar'], names.primary) AS name, (bbox.ymin + bbox.ymax) / 2 AS lat, (bbox.xmin + bbox.xmax) / 2 AS lon, taxonomy.primary AS cat
             FROM read_parquet('s3://overturemaps-us-west-2/release/{rel}/theme=places/type=place/*', filename=true, hive_partitioning=1)
             WHERE bbox.xmin BETWEEN 24 AND 61 AND bbox.ymin BETWEEN 12 AND 33
-              AND (basic_category = 'mosque' OR taxonomy.primary = 'mosque'
-                   OR list_contains(taxonomy.hierarchy, 'mosque') OR list_contains(taxonomy.alternates, 'mosque'))
+              AND (basic_category IN ('muslim_place_of_worship', 'mosque') OR taxonomy.primary IN ('muslim_place_of_worship', 'mosque')
+                   OR list_contains(taxonomy.alternates, 'muslim_place_of_worship') OR list_contains(taxonomy.alternates, 'mosque'))
               AND coalesce(operating_status, 'open') <> 'permanently_closed'
           '''
           src = f"read_parquet('s3://overturemaps-us-west-2/release/{rel}/theme=places/type=place/*', filename=true, hive_partitioning=1)"
