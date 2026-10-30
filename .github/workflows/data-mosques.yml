@@ -61,6 +61,11 @@ jobs:
           du -sh data/mosques
       - name: حفظ
         run: |
-          git -c user.name=ci -c user.email=ci@users.noreply.github.com add data/mosques
-          git -c user.name=ci -c user.email=ci@users.noreply.github.com commit -qm "data: mosques (OSM)" || exit 0
-          git pull -q --rebase && git push -q
+          git config user.name ci; git config user.email ci@users.noreply.github.com
+          git add data/mosques 2>&1 | sed 's/^/::notice::add /'
+          git commit -qm "data: mosques (OSM)" 2>&1 | sed 's/^/::notice::commit /' || true
+          for i in 1 2 3; do
+            if git push 2>&1 | sed 's/^/::notice::push /'; [ ${PIPESTATUS[0]} -eq 0 ]; then echo "::notice::pushed"; exit 0; fi
+            git pull --rebase 2>&1 | sed 's/^/::notice::pull /'
+          done
+          exit 1
