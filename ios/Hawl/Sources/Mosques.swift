@@ -118,7 +118,10 @@ final class MosqueFinder: NSObject, ObservableObject, CLLocationManagerDelegate 
         if !force, let d = try? Data(contentsOf: Self.cacheURL), let k = try? JSONDecoder().decode(Cached.self, from: d),
            Date().timeIntervalSince1970 - k.at < 86400 * 7,
            here.distance(from: CLLocation(latitude: k.lat, longitude: k.lng)) < 1000 {
-            apply(k.items.compactMap(Self.decode), here)
+            var items = k.items.compactMap(Self.decode)
+            let ap = await approved()                    // ما اعتمده الموقع حديثًا يظهر فورًا ولو كانت المنطقة محفوظة
+            for m in ap where !items.contains(where: { Self.near($0.coord, m.coord, 30) }) { items.append(m) }
+            apply(items, here)
             return
         }
         loading = true; failed = false
