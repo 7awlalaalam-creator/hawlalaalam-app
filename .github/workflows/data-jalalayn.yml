@@ -9,6 +9,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - name: تحميل وتحويل
         run: |
           curl -sSL -w '%{http_code}' -o /tmp/T.json https://huggingface.co/datasets/riotu-lab/Quran-Tafseers/resolve/main/Tafseer.json
