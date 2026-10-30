@@ -2,6 +2,10 @@ name: لقطات شاشات أندرويد
 # بناء نسخة للمعاينة وتشغيلها على محاكي أندرويد وتصوير الشاشات الجديدة (للمراجعة فقط، لا يُنشر شيء للمستخدمين)
 on:
   workflow_dispatch:
+    inputs:
+      script:
+        description: 'سكربت التصوير'
+        default: 'shots.sh'
 permissions:
   contents: write
 jobs:
@@ -37,7 +41,7 @@ jobs:
           arch: x86_64
           profile: pixel_6
           disable-animations: true
-          script: bash shots.sh
+          script: bash ${{ inputs.script || 'shots.sh' }}
       - name: نشر اللقطات في فرع ci-shots-android
         if: always()
         run: |
