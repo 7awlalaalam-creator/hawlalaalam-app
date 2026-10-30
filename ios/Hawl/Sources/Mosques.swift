@@ -123,8 +123,9 @@ final class MosqueFinder: NSObject, ObservableObject, CLLocationManagerDelegate 
         }
         loading = true; failed = false
         async let a = appleSearch(c)
-        async let o = overpass(c)
-        let (apple, osm) = await (a, o)
+        async let t = tiles(c)
+        let (apple, tiled) = await (a, t)
+        let osm = tiled ?? (await overpass(c))
         var all = osm
         for m in apple where !all.contains(where: { Self.near($0.coord, m.coord, 45) }) { all.append(m) }
         loading = false
@@ -182,13 +183,43 @@ final class MosqueFinder: NSObject, ObservableObject, CLLocationManagerDelegate 
         return out
     }
 
+    /** ملفات المساجد الجاهزة (الخليج ومصر والأردن) من مستودع التطبيق؛ nil = المنطقة غير مغطاة فنسأل Overpass */
+    private func tiles(_ c: CLLocationCoordinate2D) async -> [NearMosque]? {
+        let dLa = Self.radius / 111000, dLo = Self.radius / (111000 * cos(c.latitude * .pi / 180))
+        var keys = Set<String>()
+        for a in [-1.0, 1.0] { for b in [-1.0, 1.0] {
+            keys.insert("\(Int(floor((c.latitude + a * dLa) * 4)))_\(Int(floor((c.longitude + b * dLo) * 4)))")
+        } }
+        var out: [NearMosque] = [], covered = false
+        for k in keys {
+            for base in ["https://raw.githubusercontent.com/7awlalaalam-creator/hawlalaalam-app/main/data/mosques/",
+                         "https://cdn.jsdelivr.net/gh/7awlalaalam-creator/hawlalaalam-app@main/data/mosques/"] {
+                guard let u = URL(string: base + k + ".json"),
+                      let (d, r) = try? await URLSession.shared.data(for: URLRequest(url: u, timeoutInterval: 15)),
+                      let code = (r as? HTTPURLResponse)?.statusCode else { continue }
+                if code == 404 { break }
+                guard code == 200, let arr = try? JSONSerialization.jsonObject(with: d) as? [[Any]] else { continue }
+                covered = true
+                for e in arr {
+                    guard e.count >= 5, let la = e[0] as? Double, let lo = e[1] as? Double else { continue }
+                    let nAr = e[2] as? String ?? "", nEn = e[3] as? String ?? ""
+                    let kind = e[4] as? Int ?? 0
+                    out.append(NearMosque(id: "t\(la),\(lo)", name: Lang.en ? (nEn.isEmpty ? nAr : nEn) : (nAr.isEmpty ? nEn : nAr),
+                                          coord: .init(latitude: la, longitude: lo), jami: kind == 1, musalla: kind == 2))
+                }
+                break
+            }
+        }
+        return covered ? out : nil
+    }
+
     /** OpenStreetMap: الموقع يُقرّب إلى ~١٠٠ م قبل الإرسال */
     private func overpass(_ c: CLLocationCoordinate2D) async -> [NearMosque] {
         let lat = (c.latitude * 1000).rounded() / 1000, lng = (c.longitude * 1000).rounded() / 1000
-        let q = "[out:json][timeout:20];(nwr[\"amenity\"=\"place_of_worship\"][\"religion\"=\"muslim\"](around:\(Int(Self.radius)),\(lat),\(lng)););out center 200;"
-        for host in ["https://overpass-api.de/api/interpreter", "https://overpass.kumi.systems/api/interpreter"] {
+        let q = "[out:json][timeout:45];(nwr[\"amenity\"=\"place_of_worship\"][\"religion\"=\"muslim\"](around:\(Int(Self.radius)),\(lat),\(lng)););out center 200;"
+        for host in ["https://overpass-api.de/api/interpreter", "https://overpass.private.coffee/api/interpreter"] {
             guard let u = URL(string: host) else { continue }
-            var req = URLRequest(url: u, timeoutInterval: 25)
+            var req = URLRequest(url: u, timeoutInterval: 50)
             req.httpMethod = "POST"
             req.setValue("HawlalaalamApp/2 (iOS)", forHTTPHeaderField: "User-Agent")
             req.setValue("application/x-www-form-urlencoded", forHTTPHeaderField: "Content-Type")
