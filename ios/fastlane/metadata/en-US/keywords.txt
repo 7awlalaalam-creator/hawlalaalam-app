@@ -1,1 +1,1 @@
-quran,koran,mushaf,adhan,azan,prayer,salah,khatma,adhkar,qibla,tafsir,islam,ramadan,muslim
+quran,koran,azan,athan,salah,namaz,qibla,tafsir,islam,ramadan,muslim,dua,tasbih,surah,holy
