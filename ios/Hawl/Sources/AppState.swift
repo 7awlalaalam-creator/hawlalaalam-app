@@ -34,6 +34,7 @@ enum Screen: Hashable {
     case adhanCheck
     case impact
     case worldMap
+    case mosques
 }
 
 /** حالة التطبيق: التنقّل، وآية اليوم، ومرآة للإعدادات المحفوظة في Store (المشتركة مع الويدجت) */
@@ -252,6 +253,7 @@ final class AppState: ObservableObject {
         case "adhancheck": show(.adhanCheck)
         case "impact": show(.impact)
         case "world": show(.worldMap)
+        case "mosques": show(.mosques)
         case "tools": tab = .tools
         case "downloads": show(.downloads)
         case "dedicate": show(.dedicate)

@@ -184,6 +184,21 @@ final class HawlBridge: NSObject, WKScriptMessageHandler {
             guard Store.d.bool(forKey: "web_restore_pending"), let s = Store.d.string(forKey: "web_state") else { return }
             Store.d.set(false, forKey: "web_restore_pending")
             web?.evaluateJavaScript("window.__hawlRestore&&window.__hawlRestore(\(s))", completionHandler: nil)
+        case "net":
+            // واجهة الموقع (api/v1): الطلب من التطبيق فلا يعيقه CORS، والرد يعود للصفحة
+            let id = o["id"] as? String ?? ""
+            let path = o["path"] as? String ?? ""
+            let method = o["method"] as? String ?? "GET"
+            let body = o["body"] as? String
+            Task {
+                let (code, txt) = await SiteAPI.request(path, method: method, body: body)
+                let q = (try? JSONSerialization.data(withJSONObject: [id, txt])).flatMap { String(data: $0, encoding: .utf8) } ?? "[\"\",\"\"]"
+                await MainActor.run {
+                    self.web?.evaluateJavaScript("(function(a){window.__hawlNet&&window.__hawlNet(a[0],\(code),a[1])})(\(q))", completionHandler: nil)
+                }
+            }
+        case "open":
+            if (o["what"] as? String) == "mosques" { AppState.shared.show(.mosques) }
         default: break                                    // media: التحكم من شاشة القفل يتولاه النظام في iOS
         }
     }

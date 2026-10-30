@@ -144,7 +144,7 @@ targets:
             UIApplicationShortcutItemTitle: "القبلة"
             UIApplicationShortcutItemSubtitle: "بوصلة اتجاه القبلة"
             UIApplicationShortcutItemIconSymbolName: location.north.circle
-        NSLocationWhenInUseUsageDescription: "نستخدم موقعك لحساب مواقيت الصلاة واتجاه القبلة في مدينتك، ولا يُرسل إلى أي جهة."
+        NSLocationWhenInUseUsageDescription: "نستخدم موقعك لحساب مواقيت الصلاة واتجاه القبلة في مدينتك ولإظهار المساجد القريبة منك. لا نحفظه على أي خادم."
         NSMicrophoneUsageDescription: "للتسميع: تقرأ من حفظك فيتابعك التطبيق كلمة بكلمة. لا يُسجَّل صوتك ولا يُحفظ."
         NSSpeechRecognitionUsageDescription: "للتسميع: نحوّل تلاوتك إلى نص لنقارنه بالآيات ونريك ما تجاوزته. لا يُحفظ صوتك."
         NSPhotoLibraryAddUsageDescription: "لحفظ بطاقات الآيات التي تختار حفظها في الصور."

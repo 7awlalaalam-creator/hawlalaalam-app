@@ -155,6 +155,7 @@ struct ScreenView: View {
         case .adhanCheck: AdhanCheckView()
         case .impact: ImpactView()
         case .worldMap: WorldMapView()
+        case .mosques: MosquesView()
         }
     }
 }

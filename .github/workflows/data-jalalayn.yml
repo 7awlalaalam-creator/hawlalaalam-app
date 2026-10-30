@@ -32,8 +32,8 @@ jobs:
                   for k in keys:
                       if k.lower() == n: return k
           kt = pick(['tafsir_book','book','tafseer_name','tafsir_name','source','name','tafseer'])
-          ks = pick(['surah','sura','surah_number','sura_no','chapter'])
-          ka = pick(['ayah','aya','ayah_number','aya_no','verse','verse_number'])
+          ks = pick(['sura_number','surah_number','surah','sura','sura_no','chapter'])
+          ka = pick(['ayah_number','aya_number','aya_no','verse_number'])
           kx = pick(['tafsir_content','tafseer_text','text','content','tafsir','tafseer_content'])
           print('::notice::fields', kt, ks, ka, kx)
           names = collections.Counter(str(r.get(kt)) for r in d)

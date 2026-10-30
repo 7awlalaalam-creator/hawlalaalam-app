@@ -31,6 +31,7 @@ struct ToolsView: View {
                 LazyVGrid(columns: columns, spacing: 8) {
                     NavigationLink(value: Screen.prayerTimes) { ToolTile(title: L("المواقيت"), systemImage: "clock") }
                     NavigationLink(value: Screen.qibla) { ToolTile(title: L("القبلة"), systemImage: "location.north.circle") }
+                    NavigationLink(value: Screen.mosques) { ToolTile(title: L("مساجد قريبة"), systemImage: "building.columns") }
                     NavigationLink(value: Screen.azkar(nil)) { ToolTile(title: L("الأذكار"), systemImage: "sun.and.horizon") }
                     NavigationLink(value: Screen.tasbeeh) { ToolTile(title: L("المسبحة"), systemImage: "circle.grid.cross") }
                     NavigationLink(value: Screen.prayerAzkar) { ToolTile(title: L("أذكار الصلاة"), systemImage: "moon.stars") }
