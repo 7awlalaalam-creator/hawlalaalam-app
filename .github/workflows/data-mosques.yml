@@ -25,6 +25,25 @@ jobs:
             osmium export -O -f geojsonseq --geometry-types=point,polygon -o $n.geojsonseq $n-f.pbf
             ls -la $n.pbf $n.geojsonseq
           done
+          # Overture Maps (أماكن مفتوحة CDLA-Permissive-2.0): تغطية أوسع للمساجد من OpenStreetMap وحده
+          pip install -q duckdb
+          REL=$(aws s3 ls --no-sign-request s3://overturemaps-us-west-2/release/ | awk '{print $2}' | sed 's#/##' | sort | tail -1)
+          echo "::notice::overture $REL"
+          python3 - "$REL" <<'PY' || echo "::warning::overture failed"
+          import duckdb, json, sys
+          rel = sys.argv[1]
+          con = duckdb.connect()
+          con.execute("INSTALL httpfs; LOAD httpfs; SET s3_region='us-west-2';")
+          q = f'''
+            SELECT names.primary AS name, (bbox.ymin + bbox.ymax) / 2 AS lat, (bbox.xmin + bbox.xmax) / 2 AS lon, categories.primary AS cat
+            FROM read_parquet('s3://overturemaps-us-west-2/release/{rel}/theme=places/type=place/*', filename=true, hive_partitioning=1)
+            WHERE bbox.xmin BETWEEN 24 AND 61 AND bbox.ymin BETWEEN 12 AND 33
+              AND (categories.primary = 'mosque' OR list_contains(categories.alternate, 'mosque'))
+          '''
+          rows = con.execute(q).fetchall()
+          json.dump(rows, open('/tmp/o/overture.json', 'w'), ensure_ascii=False)
+          print('::notice::overture mosques', len(rows))
+          PY
           python3 - <<'PY'
           import json, glob, os, re, math, collections
           out = collections.defaultdict(list); seen = set(); n = 0
@@ -49,6 +68,27 @@ jobs:
                   m = re.search(r'مصلى|مصلّى|musalla|prayer room', name + ' ' + en, re.I)
                   out[(math.floor(la * 4), math.floor(lo * 4))].append([round(la, 5), round(lo, 5), name, en if en != name else '', 1 if k else (2 if m else 0)])
                   n += 1
+          # دمج Overture: نضيف ما لا يبعد ٤٠ م عن مسجد موجود
+          grid = collections.defaultdict(list)
+          for (a, b), L in out.items():
+              for e in L: grid[(round(e[0], 3), round(e[1], 3))].append(e)
+          def near(la, lo):
+              for da in (-0.001, 0, 0.001):
+                  for db in (-0.001, 0, 0.001):
+                      for e in grid.get((round(la + da, 3), round(lo + db, 3)), []):
+                          if abs(e[0] - la) < 0.0004 and abs(e[1] - lo) < 0.0004: return True
+              return False
+          added = 0
+          if os.path.exists('/tmp/o/overture.json'):
+              for name, la, lo, cat in json.load(open('/tmp/o/overture.json')):
+                  if la is None or lo is None or near(la, lo): continue
+                  name = name or ''
+                  isar = re.search(r'[\u0600-\u06FF]', name)
+                  k = re.search(r'جامع|jami', name, re.I); m = re.search(r'مصلى|مصلّى|musalla|prayer room', name, re.I)
+                  e = [round(la, 5), round(lo, 5), name if isar else '', '' if isar else name, 1 if k else (2 if m else 0)]
+                  out[(math.floor(la * 4), math.floor(lo * 4))].append(e); grid[(round(la, 3), round(lo, 3))].append(e)
+                  added += 1; n += 1
+          print('::notice::overture added', added)
           d = os.path.join(os.environ['GITHUB_WORKSPACE'], 'data/mosques')
           if os.path.isdir(d):
               for x in glob.glob(d + '/*.json'): os.remove(x)
