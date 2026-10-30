@@ -3,7 +3,7 @@
 set -x
 P=com.hawlalaalam.quran
 curl -sSL -o rel.apk https://github.com/7awlalaalam-creator/hawlalaalam-app/releases/latest/download/hawlalaalam-quran.apk
-adb install -r -g rel.apk || adb install -r -g $(ls app/build/outputs/apk/debug/*.apk | head -1)
+adb install -r -g $(ls app/build/outputs/apk/debug/*.apk | head -1)
 mkdir -p shots
 adb emu geo fix 39.1925 21.4858
 tapText() {   # tapText "نص"
@@ -31,6 +31,6 @@ adb logcat -c
 tapText "Nearby mosques"; tapText "مساجد قريبة"; sleep 9; adb exec-out screencap -p > shots/f3a.png; sleep 5
 adb exec-out screencap -p > shots/f3-mosques.png
 adb logcat -d > /tmp/all.txt
-grep -E "AndroidRuntime|FATAL|$P|chromium|Console|ActivityTaskManager" /tmp/all.txt | tail -200 > shots/f3-log.txt
+grep -E "AndroidRuntime|FATAL|$P|chromium|Console|MosqJS|ActivityTaskManager" /tmp/all.txt | tail -200 > shots/f3-log.txt
 grep -A40 "FATAL EXCEPTION" /tmp/all.txt > shots/f3-fatal.txt || true
 ls -la shots
