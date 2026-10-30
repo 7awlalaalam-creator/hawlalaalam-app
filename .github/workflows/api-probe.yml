@@ -1,0 +1,44 @@
+name: فحص واجهة الموقع
+# قراءة فقط: عينات من كل روابط api/v1 مع الترويسات، تُحفظ في فرع ci-api
+on:
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    steps:
+      - name: العينات
+        run: |
+          mkdir -p out && cd out
+          B=https://7awlalaalam.com/quran/api/v1
+          get(){ n=$1; shift; curl -sS -m 60 -D "$n.h" -H "Origin: hawl://app" "$@" -o "$n.json"; echo "$n $(head -1 $n.h) $(wc -c < $n.json)"; }
+          get index "$B/"
+          get surahs "$B/surahs"
+          get surah1 "$B/surah/1"
+          get surah108e "$B/surah/108?emlaey=1"
+          get ayah "$B/ayah/2/255"
+          get page1 "$B/page/1"
+          get page604 "$B/page/604"
+          get juz30 "$B/juz/30"
+          get tafsirs "$B/tafsirs"
+          for s in muyassar saadi ibn-kathir jalalayn tabari qurtubi; do get "taf_$s" "$B/tafsir/2/255?src=$s"; done
+          get gharib_s "$B/gharib/112"
+          get gharib_a "$B/gharib/2/255"
+          get related "$B/related/2/255"
+          get smart1 "$B/smart-search?q=%D8%A2%D9%8A%D8%A9%20%D8%A7%D9%84%D9%83%D8%B1%D8%B3%D9%8A"
+          get smart2 "$B/smart-search?q=%D8%A7%D9%84%D8%B5%D8%A8%D8%B1%20%D8%B9%D9%84%D9%89%20%D8%A7%D9%84%D8%A8%D9%84%D8%A7%D8%A1"
+          get smart3 "$B/smart-search?q=2:255"
+          get search "$B/search?q=%D8%A7%D9%84%D8%B5%D8%A7%D8%A8%D8%B1%D9%8A%D9%86&limit=3"
+          get notice "$B/notice"
+          get articles "$B/articles?limit=2"
+          get ask "$B/ask.php" -X POST -H 'Content-Type: application/json' --data '{"s":112,"a":1,"q":"ما معنى أحد؟"}'
+          get ask_bad "$B/ask.php" -X POST -H 'Content-Type: application/json' --data '{"s":112,"a":1,"q":""}'
+          get opt "$B/ask.php" -X OPTIONS -H 'Access-Control-Request-Method: POST' -H 'Access-Control-Request-Headers: content-type'
+          get docs "$B/docs.html"
+      - name: حفظ في فرع ci-api
+        run: |
+          cd out && git init -q && git checkout -q -b ci-api
+          git -c user.name=ci -c user.email=ci@users.noreply.github.com add .
+          git -c user.name=ci -c user.email=ci@users.noreply.github.com commit -qm "api probe ${{ github.run_number }}"
+          git push -qf "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git" ci-api
