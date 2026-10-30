@@ -129,6 +129,8 @@ final class MosqueFinder: NSObject, ObservableObject, CLLocationManagerDelegate 
         if let t = tiled { osm = t } else { osm = await overpass(c) }
         var all = osm
         for m in apple where !all.contains(where: { Self.near($0.coord, m.coord, 45) }) { all.append(m) }
+        let ap = await approved()
+        for m in ap where !all.contains(where: { Self.near($0.coord, m.coord, 30) }) { all.append(m) }
         loading = false
         if all.isEmpty && apple.isEmpty && osm.isEmpty { failed = list.isEmpty; return }
         apply(all, here)
@@ -182,6 +184,20 @@ final class MosqueFinder: NSObject, ObservableObject, CLLocationManagerDelegate 
             }
         }
         return out
+    }
+
+    /** المساجد التي أضافها المستخدمون واعتمدها الموقع */
+    private func approved() async -> [NearMosque] {
+        let (code, txt) = await SiteAPI.request("mosques/approved")
+        guard code == 200, let d = txt.data(using: .utf8), let arr = try? JSONSerialization.jsonObject(with: d) as? [[Any]] else { return [] }
+        return arr.compactMap { e in
+            guard e.count >= 3 else { return nil }
+            let la = (e[0] as? Double) ?? Double("\(e[0])"), lo = (e[1] as? Double) ?? Double("\(e[1])")
+            guard let la, let lo else { return nil }
+            let k = e.count > 3 ? "\(e[3])" : ""
+            return NearMosque(id: "u\(la),\(lo)", name: e[2] as? String ?? "", coord: .init(latitude: la, longitude: lo),
+                              jami: k == "jami" || k == "1", musalla: k == "musalla" || k == "2")
+        }
     }
 
     /** ملفات المساجد الجاهزة (الخليج ومصر والأردن) من مستودع التطبيق؛ nil = المنطقة غير مغطاة فنسأل Overpass */
@@ -265,6 +281,7 @@ struct MosquesView: View {
     @State private var selected: NearMosque?
     @State private var filter = 0                 // ٠ الكل، ١ الجوامع، ٢ المصليات
     @State private var showList = false
+    @State private var showAdd = false
     @Environment(\.colorScheme) private var scheme
 
     private var shown: [NearMosque] {
@@ -315,6 +332,13 @@ struct MosquesView: View {
         .navigationBarTitleDisplayMode(.inline)
         .onAppear { finder.start() }
         .sheet(isPresented: $showList) { listSheet }
+        .sheet(isPresented: $showAdd) { AddMosqueView(start: finder.center ?? CLLocationCoordinate2D(latitude: Geo.lat, longitude: Geo.lng)) }
+        .toolbar {
+            ToolbarItem(placement: .navigationBarTrailing) {
+                Button { showAdd = true } label: { Image(systemName: "plus.circle") }
+                    .accessibilityLabel(L("أضف مسجدًا ناقصًا"))
+            }
+        }
         .environment(\.layoutDirection, Lang.dir)
     }
 
@@ -483,5 +507,80 @@ struct MosqueMap: UIViewRepresentable {
             guard let p = view.annotation as? Pin else { return }
             DispatchQueue.main.async { self.parent.selected = p.m }
         }
+    }
+}
+
+/** «أضف مسجدًا ناقصًا»: حرّك الخريطة حتى يقع الدبوس على المسجد، ثم الاسم والنوع؛ يظهر للجميع بعد المراجعة */
+struct AddMosqueView: View {
+    let start: CLLocationCoordinate2D
+    @Environment(\.dismiss) private var dismiss
+    @State private var region: MKCoordinateRegion
+    @State private var name = ""
+    @State private var kind = "mosque"
+    @State private var sending = false
+    @State private var error = ""
+    @State private var done = false
+
+    init(start: CLLocationCoordinate2D) {
+        self.start = start
+        _region = State(initialValue: MKCoordinateRegion(center: start, latitudinalMeters: 400, longitudinalMeters: 400))
+    }
+
+    var body: some View {
+        NavigationStack {
+            VStack(spacing: 0) {
+                ZStack {
+                    Map(coordinateRegion: $region, showsUserLocation: true)
+                    Image(systemName: "mappin").font(.system(size: 40, weight: .bold)).foregroundColor(Color(hex: 0xC9A24F))
+                        .shadow(radius: 4).offset(y: -20).allowsHitTesting(false)
+                }
+                VStack(alignment: .leading, spacing: 10) {
+                    Text(L("حرّك الخريطة حتى يقع الدبوس الذهبي على المسجد، ثم اكتب اسمه. تظهر الإضافة للجميع بعد المراجعة."))
+                        .font(AppFont.ui(13)).foregroundColor(Palette.muted)
+                    TextField(L("اسم المسجد، مثل: مسجد الفتح"), text: $name)
+                        .font(AppFont.ui(16)).padding(12).background(RoundedRectangle(cornerRadius: 12).stroke(Palette.line))
+                    Picker("", selection: $kind) {
+                        Text(L("مسجد")).tag("mosque"); Text(L("جامع")).tag("jami"); Text(L("مصلى")).tag("musalla")
+                    }.pickerStyle(.segmented)
+                    if !error.isEmpty { Text(error).font(AppFont.ui(13)).foregroundColor(Color(hex: 0xA1460A)) }
+                    Button { Task { await send() } } label: {
+                        Text(sending ? L("جارٍ الإرسال…") : L("إرسال")).font(AppFont.ui(16, 700)).foregroundColor(.white)
+                            .frame(maxWidth: .infinity).padding(.vertical, 13).background(RoundedRectangle(cornerRadius: 12).fill(Palette.dark))
+                    }.disabled(sending)
+                }
+                .padding(16)
+            }
+            .navigationTitle(L("أضف مسجدًا ناقصًا")).navigationBarTitleDisplayMode(.inline)
+            .toolbar { ToolbarItem(placement: .cancellationAction) { Button(L("إلغاء")) { dismiss() } } }
+            .alert(L("جزاك الله خيرًا 🤍"), isPresented: $done) {
+                Button(L("حسنًا")) { dismiss() }
+            } message: { Text(L("وصلت إضافتك، وتظهر للجميع بعد مراجعتها.")) }
+        }
+        .environment(\.layoutDirection, Lang.dir)
+    }
+
+    private static var device: String {
+        if let d = Store.d.string(forKey: "mosq_dev") { return d }
+        let d = "i" + UUID().uuidString.replacingOccurrences(of: "-", with: "").prefix(20)
+        Store.d.set(d, forKey: "mosq_dev")
+        return d
+    }
+
+    private func send() async {
+        let n = name.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard n.count >= 3 else { error = L("اكتب اسم المسجد (٣ أحرف على الأقل)."); return }
+        let c = region.center
+        if CLLocation(latitude: c.latitude, longitude: c.longitude).distance(from: CLLocation(latitude: start.latitude, longitude: start.longitude)) > 20000 {
+            error = L("الموقع بعيد عنك؛ أضف المساجد القريبة منك فقط."); return
+        }
+        sending = true; error = ""
+        let body: [String: Any] = ["name": n, "lat": (c.latitude * 1e6).rounded() / 1e6, "lng": (c.longitude * 1e6).rounded() / 1e6, "kind": kind, "device": Self.device]
+        let json = (try? JSONSerialization.data(withJSONObject: body)).flatMap { String(data: $0, encoding: .utf8) } ?? "{}"
+        let (code, txt) = await SiteAPI.request("mosques/add.php", method: "POST", body: json)
+        sending = false
+        let o = txt.data(using: .utf8).flatMap { try? JSONSerialization.jsonObject(with: $0) as? [String: Any] }
+        if code == 200, (o?["ok"] as? Bool) == true { done = true }
+        else if code == 0 { error = L("لا يوجد اتصال بالإنترنت.") }
+        else { error = o?["error"] as? String ?? L("تعذّر الإرسال، حاول لاحقًا.") }
     }
 }
