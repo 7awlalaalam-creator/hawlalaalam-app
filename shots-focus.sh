@@ -28,7 +28,7 @@ adb exec-out screencap -p > shots/f1.png
 tapText "Tools"; tapText "الأدوات"; sleep 4
 adb exec-out screencap -p > shots/f2.png
 adb logcat -c
-tapText "Nearby mosques"; tapText "مساجد قريبة"; sleep 20
+tapText "Nearby mosques"; tapText "مساجد قريبة"; sleep 9; adb exec-out screencap -p > shots/f3a.png; sleep 5
 adb exec-out screencap -p > shots/f3-mosques.png
 adb logcat -d > /tmp/all.txt
 grep -E "AndroidRuntime|FATAL|$P|chromium|Console|ActivityTaskManager" /tmp/all.txt | tail -200 > shots/f3-log.txt
