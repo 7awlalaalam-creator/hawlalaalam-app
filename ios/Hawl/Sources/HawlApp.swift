@@ -32,6 +32,7 @@ struct HawlApp: App {
         UINavigationBar.appearance().standardAppearance = nav
         UINavigationBar.appearance().scrollEdgeAppearance = nav
         WebConfig.prepareRules()
+        CrashReports.shared.start()
     }
 
     var body: some Scene {

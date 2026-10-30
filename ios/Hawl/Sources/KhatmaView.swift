@@ -79,7 +79,10 @@ struct KhatmaView: View {
         }
         .alert(L("ختمت القرآن الكريم، تقبّل الله منك"), isPresented: $celebrate) {
             Button(L("آمين"), role: .cancel) { }
-        } message: { Text(L("اللهم ارحمني بالقرآن واجعله لي إمامًا ونورًا وهدًى ورحمة.")) }
+            Button(L("ادعُ أهلك للختمة")) {
+                Share.present([L("الحمد لله، أتممت ختمة القرآن الكريم مع تطبيق «القرآن حول العالم» 🤍\nمصحف كامل ومواقيت وأذكار وختمة يومية، مجاني بلا إعلانات. ابدأ ختمتك:") + "\nhttps://7awlalaalam.com/app"])
+            }
+        } message: { Text(L("اللهم ارحمني بالقرآن واجعله لي إمامًا ونورًا وهدًى ورحمة.") + "\n\n" + L("«من دلّ على خير فله مثل أجر فاعله»، ادعُ أهلك وأحبابك ليختموا معك.")) }
         .alert(L("إنهاء الختمة؟"), isPresented: $confirmStop) {
             Button(L("نعم"), role: .destructive) { Khatma.stop(); setupLoaded = false; loadSetup() }
             Button(L("إلغاء"), role: .cancel) { }

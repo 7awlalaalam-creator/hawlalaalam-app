@@ -187,7 +187,7 @@ enum Notifications {
     static let adhanCategory = "ADHAN", sunriseCategory = "SUNRISE", fastCategory = "FAST"
     static let wirdCategory = "WIRD", verseCategory = "VERSE", remindCategory = "REMIND"
 
-    static let actAzkar = "AZKAR", actShare = "SHARE", actSnooze = "SNOOZE", actOpenPage = "OPEN_PAGE"
+    static let actAzkar = "AZKAR", actMosques = "MOSQUES", actShare = "SHARE", actSnooze = "SNOOZE", actOpenPage = "OPEN_PAGE"
     static let actCard = "CARD", actText = "TEXT", actTafsir = "TAFSIR", actStart = "START", actMorning = "MORNING", actPrayed = "PRAYED"
 
     static func registerCategories() {
@@ -195,7 +195,7 @@ enum Notifications {
             UNNotificationAction(identifier: id, title: title, options: fg ? [.foreground] : [])
         }
         UNUserNotificationCenter.current().setNotificationCategories([
-            UNNotificationCategory(identifier: adhanCategory, actions: [a(actPrayed, L("✓ صلّيت"), fg: false), a(actAzkar, L("أذكار بعد الصلاة")), a(actShare, L("شارك الأجر"))],
+            UNNotificationCategory(identifier: adhanCategory, actions: [a(actPrayed, L("✓ صلّيت"), fg: false), a(actMosques, L("أقرب مسجد")), a(actAzkar, L("أذكار بعد الصلاة")), a(actShare, L("شارك الأجر"))],
                                    intentIdentifiers: [], options: []),
             UNNotificationCategory(identifier: sunriseCategory, actions: [a(actMorning, L("أذكار الصباح")), a(actShare, L("شارك الأجر"))],
                                    intentIdentifiers: [], options: []),
@@ -656,6 +656,8 @@ final class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCent
                     PrayerLog.toggle(day: d, prayer: i)
                     s.touch()
                 }
+            case Notifications.actMosques:
+                s.show(.mosques)
             case Notifications.actAzkar:
                 s.tab = .today
                 s.showPrayerAzkar = true

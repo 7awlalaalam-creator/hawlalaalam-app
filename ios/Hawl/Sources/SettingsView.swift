@@ -323,6 +323,11 @@ struct SettingsView: View {
                 Button { Browser.open(Links.contact) } label: { Pill(title: L("أرسل ملاحظة"), systemImage: "envelope", height: 50) }
                 Button { state.showTour = true } label: { Pill(title: L("جولة في المميزات"), systemImage: "sparkles", height: 50) }
             }
+            if let crash = CrashReports.latest {
+                Button {
+                    Share.present([L("تقرير عطل من تطبيق «القرآن حول العالم» — الإصدار ") + WebConfig.version, crash])
+                } label: { Pill(title: L("أرسل تقرير العطل الأخير"), systemImage: "ladybug", height: 50) }
+            }
             Text(L("✦  الإصدار ") + ar(WebConfig.version) + "  ✦").font(AppFont.ui(13, 500)).foregroundColor(Palette.muted)
                 .padding(.top, 20)
                 .onTapGesture {
