@@ -61,10 +61,13 @@ jobs:
               except Exception as e: print("lookup", cc, e)
 
           # آخر المراجعات المكتوبة (النجوم والعنوان فقط)
-          rv = get(f"/v1/apps/{APP}/customerReviews?sort=-createdDate&limit=10").get("data", [])
-          note(f"Reviews", f"{len(rv)} written review(s)")
-          for r in rv[:10]:
-              a = r["attributes"]; note(f"Review {a.get('rating')}★ {a.get('territory')} {a.get('createdDate','')[:10]}", ((a.get('title') or '') + " — " + (a.get('body') or '').replace(chr(10), ' '))[:400])
+          rj = get(f"/v1/apps/{APP}/customerReviews?sort=-createdDate&limit=50&include=response")
+          rv = rj.get("data", [])
+          answered = {r["id"] for r in rv if ((r.get("relationships") or {}).get("response") or {}).get("data")}
+          note(f"Reviews", f"{len(rv)} written review(s), unanswered={len(rv) - len(answered)}")
+          for r in rv[:20]:
+              a = r["attributes"]; tag = "REPLIED" if r["id"] in answered else "NO-REPLY"
+              note(f"Review {tag} {a.get('rating')}★ {a.get('territory')} {a.get('createdDate','')[:10]}", ((a.get('title') or '') + " — " + (a.get('body') or '').replace(chr(10), ' '))[:300])
 
           # التحميلات من تقارير التحليلات (أول تشغيل يطلب التقارير، وتجهز خلال يوم أو يومين)
           import gzip, io, csv
