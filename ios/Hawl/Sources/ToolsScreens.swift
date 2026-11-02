@@ -61,6 +61,7 @@ struct ToolsView: View {
         }
         .background(Palette.page.ignoresSafeArea())
         .task { await SiteServices.shared.refresh() }
+        .refreshable { await SiteServices.shared.refresh(force: true) }         // اسحب للأسفل: جلب «من الموقع» فورًا
         .navigationTitle(L("الأدوات"))
         .toolbar {
             ToolbarItem(placement: .navigationBarTrailing) {

@@ -35,6 +35,7 @@ struct TodayView: View {
         .toolbar(.hidden, for: .navigationBar)
         .task { await state.refreshVerse() }
         .task { await SiteServices.shared.refresh() }
+        .refreshable { await SiteServices.shared.refresh(force: true) }         // اسحب للأسفل: الإعلان فورًا
         .onAppear { if RatePrompt.due() { requestReview() } }          // نافذة تقييم App Store بعد قراءة ورد اليوم
         .onChange(of: phase) { p in if p == .active && RatePrompt.due() { requestReview() } }
     }
