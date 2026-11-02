@@ -1,0 +1,10 @@
+{
+  "rev": 1,
+  "services": [
+    {"id":"t1","title":"تدبر رمضان","title_en":"Ramadan reflections","icon":"🌙","url":"https://7awlalaalam.com/quran/ramadan-tadabbur-ar.html","badge":"new","platforms":["android","ios"],"from":"","to":""},
+    {"id":"t2","title":"بطاقة آية","title_en":"Verse card","icon":"🖼️","url":"https://7awlalaalam.com/quran/verse-story-card.html","badge":"new","platforms":["android","ios"],"from":"","to":""},
+    {"id":"t3","title":"سورة الكهف","title_en":"Surah Al-Kahf","icon":"📜","url":"https://7awlalaalam.com/quran/surah-18.html","badge":"","platforms":["android","ios"],"from":"","to":""},
+    {"id":"t4","title":"تواصل معنا","title_en":"Contact us","icon":"✉️","url":"https://7awlalaalam.com/quran/contact.html","badge":"","platforms":["android","ios"],"from":"","to":""}
+  ],
+  "announcement": {"id":"a1","title":"جديد: خدمات من الموقع","body":"هذه البطاقة والخدمات في «الأدوات» تأتي من الموقع مباشرة دون تحديث التطبيق.","button":"جرّب تدبر رمضان","url":"https://7awlalaalam.com/quran/ramadan-tadabbur-ar.html","platforms":["android","ios"],"from":"","to":""}
+}

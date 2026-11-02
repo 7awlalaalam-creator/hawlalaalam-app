@@ -20,6 +20,7 @@ struct TodayView: View {
                 mainCard
                     .padding(.horizontal, 10)
                     .padding(.top, -46)
+                SiteNoticeCard()
                 if state.hasLocation { PrayerLogCard().padding(.top, 14) }
                 if let h = hifzCard { h.padding(.top, 14) }
                 if let ctx = ramadanCard ?? azkarPrompt { ctx.padding(.top, 14) }
@@ -33,6 +34,7 @@ struct TodayView: View {
         .background(Palette.page.ignoresSafeArea())
         .toolbar(.hidden, for: .navigationBar)
         .task { await state.refreshVerse() }
+        .task { await SiteServices.shared.refresh() }
         .onAppear { if RatePrompt.due() { requestReview() } }          // نافذة تقييم App Store بعد قراءة ورد اليوم
         .onChange(of: phase) { p in if p == .active && RatePrompt.due() { requestReview() } }
     }

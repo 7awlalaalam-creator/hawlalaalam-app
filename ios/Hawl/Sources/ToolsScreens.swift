@@ -15,6 +15,7 @@ struct ToolsView: View {
                 if let n = latestNews { NavigationLink(value: Screen.news) { newsCard(n) } }
                 NavigationLink(value: Screen.journey) { streakCard }
                     .accessibilityHint(L("افتح «رحلتي»"))
+                SiteServicesSection()
                 section(L("القرآن"))
                 LazyVGrid(columns: columns, spacing: 8) {
                     NavigationLink(value: Screen.index) { ToolTile(title: L("الفهرس"), systemImage: "list.bullet") }
@@ -59,6 +60,7 @@ struct ToolsView: View {
             .padding(16)
         }
         .background(Palette.page.ignoresSafeArea())
+        .task { await SiteServices.shared.refresh() }
         .navigationTitle(L("الأدوات"))
         .toolbar {
             ToolbarItem(placement: .navigationBarTrailing) {
