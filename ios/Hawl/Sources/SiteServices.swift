@@ -24,9 +24,9 @@ final class SiteServices: ObservableObject {
 
     private init() { rebuild() }
 
-    /** تحديث في الخلفية، مرة كل ١٠ دقائق على الأكثر */
+    /** تحديث في الخلفية، مرة كل دقيقتين على الأكثر */
     func refresh() async {
-        if Date().timeIntervalSince1970 - Store.d.double(forKey: kAt) < 600 { return }
+        if Date().timeIntervalSince1970 - Store.d.double(forKey: kAt) < 120 { return }
         var txt: String?
         let (code, body) = await SiteAPI.request("app-services")
         if code == 200, Self.valid(body) { txt = body }
