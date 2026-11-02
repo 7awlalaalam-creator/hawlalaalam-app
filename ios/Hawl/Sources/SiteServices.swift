@@ -72,7 +72,7 @@ final class SiteServices: ObservableObject {
             let id = s["id"] as? String ?? ""
             let ar = s["title"] as? String ?? "", en = s["title_en"] as? String ?? ""
             let title = Lang.en && !en.isEmpty ? en : ar
-            guard !title.isEmpty, let u = URL(string: s["url"] as? String ?? ""), u.scheme == "https" else { continue }
+            guard !title.isEmpty, let u = URL(string: s["url"] as? String ?? ""), u.scheme == "https" || u.scheme == "hawlapp" else { continue }
             let isNew = (s["badge"] as? String) == "new" && !opened.contains("|\(id)|")
             out.append(SiteItem(id: id.isEmpty ? u.absoluteString : id, title: title, icon: s["icon"] as? String ?? "✦", url: u, isNew: isNew))
         }
@@ -100,7 +100,20 @@ final class SiteServices: ObservableObject {
         rebuild()
     }
 
-    static func isSite(_ u: URL) -> Bool { ["7awlalaalam.com", "www.7awlalaalam.com"].contains(u.host ?? "") }
+    static func isSite(_ u: URL) -> Bool { ["7awlalaalam.com", "www.7awlalaalam.com"].contains(u.host ?? "") && appLink(u) == nil }
+
+    /** شاشة في التطبيق نفسه: hawlapp://tools ...، وصفحة «كل الأدوات» في الموقع تفتح «الأدوات» */
+    static func appLink(_ u: URL) -> URL? {
+        if u.scheme == "hawlapp" { return u }
+        if u.path.hasSuffix("/all-tools.html") { return URL(string: "hawlapp://tools") }
+        return nil
+    }
+
+    /** يفتح الرابط حيث يجب: شاشة التطبيق، أو صفحة الموقع داخله، أو المتصفح */
+    static func open(_ u: URL, title: String, state: AppState) {
+        if let a = appLink(u) { state.open(a); return }
+        if isSite(u) { state.show(.web(u, title)) } else { UIApplication.shared.open(u) }
+    }
 }
 
 /** خانة «من الموقع» (إيموجي واسم وشارة «جديد») */
@@ -132,6 +145,7 @@ struct SiteTile: View {
 
 /** قسم «✦ من الموقع» في الأدوات */
 struct SiteServicesSection: View {
+    @EnvironmentObject var state: AppState
     @ObservedObject var svc = SiteServices.shared
     private let columns = Array(repeating: GridItem(.flexible(), spacing: 8), count: 4)
 
@@ -150,7 +164,7 @@ struct SiteServicesSection: View {
                             NavigationLink(value: Screen.web(it.url, it.title)) { SiteTile(item: it) }
                                 .simultaneousGesture(TapGesture().onEnded { svc.markOpened(it.id) })
                         } else {
-                            Button { svc.markOpened(it.id); UIApplication.shared.open(it.url) } label: { SiteTile(item: it) }
+                            Button { svc.markOpened(it.id); SiteServices.open(it.url, title: it.title, state: state) } label: { SiteTile(item: it) }
                         }
                     }
                 }
@@ -191,7 +205,7 @@ struct SiteNoticeCard: View {
             .contentShape(Rectangle())
             .onTapGesture {
                 guard let u = n.url else { return }
-                if SiteServices.isSite(u) { state.show(.web(u, n.title)) } else { UIApplication.shared.open(u) }
+                SiteServices.open(u, title: n.title, state: state)
             }
             .overlay(alignment: .topTrailing) {
                 Button { withAnimation { svc.close(n) } } label: {
