@@ -1,0 +1,75 @@
+name: تجهيز إصدار App Store (دون إرسال)
+# يُنشئ إصدار App Store (إن لم يوجد)، ويكتب «ما الجديد» من ملفات fastlane، ويربط البناء المطلوب.
+# لا يُرسل للمراجعة: الإرسال يضغطه صاحب الحساب بنفسه من App Store Connect.
+on:
+  workflow_dispatch:
+    inputs:
+      version: { description: 'رقم الإصدار', default: '2.2' }
+      build: { description: 'رقم البناء', required: true }
+permissions:
+  contents: read
+jobs:
+  prep:
+    runs-on: ubuntu-latest
+    env:
+      ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
+      ASC_ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
+      ASC_KEY_P8: ${{ secrets.ASC_KEY_P8 }}
+      VER: ${{ inputs.version }}
+      BUILD: ${{ inputs.build }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: التجهيز
+        run: |
+          pip install -q pyjwt cryptography requests
+          python3 - <<'PY'
+          import os, time, jwt, requests, json, sys
+          APP = "6823910862"; B = "https://api.appstoreconnect.apple.com/v1"
+          def H():
+              t = jwt.encode({"iss": os.environ["ASC_ISSUER_ID"], "iat": int(time.time()), "exp": int(time.time()) + 900, "aud": "appstoreconnect-v1"},
+                             os.environ["ASC_KEY_P8"], algorithm="ES256", headers={"kid": os.environ["ASC_KEY_ID"], "typ": "JWT"})
+              return {"Authorization": "Bearer " + t, "Content-Type": "application/json"}
+          def req(m, p, body=None):
+              r = requests.request(m, B + p, headers=H(), data=json.dumps(body) if body else None)
+              if r.status_code >= 400: print("::warning::", m, p, r.status_code, r.text[:400])
+              return r
+          ver, build = os.environ["VER"], os.environ["BUILD"]
+          # ١) البناء جاهز؟
+          bid = None
+          for i in range(40):
+              d = req("GET", f"/builds?filter[app]={APP}&filter[version]={build}&filter[preReleaseVersion.version]={ver}&limit=5").json().get("data", [])
+              if d:
+                  st = d[0]["attributes"].get("processingState"); print("build", build, st)
+                  if st == "VALID": bid = d[0]["id"]; break
+                  if st in ("FAILED", "INVALID"): sys.exit("build processing failed")
+              else: print("build not found yet")
+              time.sleep(60)
+          if not bid: sys.exit("build not ready")
+          # تصريح التشفير إن لم يُحدَّد
+          b = req("GET", f"/builds/{bid}").json()["data"]["attributes"]
+          if b.get("usesNonExemptEncryption") is None:
+              req("PATCH", f"/builds/{bid}", {"data": {"type": "builds", "id": bid, "attributes": {"usesNonExemptEncryption": False}}})
+          # ٢) الإصدار
+          vs = req("GET", f"/apps/{APP}/appStoreVersions?filter[platform]=IOS&limit=20").json().get("data", [])
+          v = next((x for x in vs if x["attributes"]["versionString"] == ver), None)
+          if not v:
+              v = req("POST", "/appStoreVersions", {"data": {"type": "appStoreVersions", "attributes": {"platform": "IOS", "versionString": ver, "releaseType": "AFTER_APPROVAL"},
+                     "relationships": {"app": {"data": {"type": "apps", "id": APP}}}}}).json()["data"]
+          vid = v["id"]; print("version", ver, vid, v["attributes"].get("appStoreState"))
+          # ٣) «ما الجديد»
+          notes = {}
+          for loc in ("ar-SA", "en-US"):
+              f = f"ios/fastlane/metadata/{loc}/release_notes.txt"
+              if os.path.exists(f): notes[loc] = open(f, encoding="utf-8").read().strip()
+          locs = req("GET", f"/appStoreVersions/{vid}/appStoreVersionLocalizations?limit=50").json().get("data", [])
+          have = {x["attributes"]["locale"]: x["id"] for x in locs}
+          for loc, txt in notes.items():
+              if loc in have:
+                  req("PATCH", f"/appStoreVersionLocalizations/{have[loc]}", {"data": {"type": "appStoreVersionLocalizations", "id": have[loc], "attributes": {"whatsNew": txt}}})
+              else:
+                  req("POST", "/appStoreVersionLocalizations", {"data": {"type": "appStoreVersionLocalizations", "attributes": {"locale": loc, "whatsNew": txt},
+                       "relationships": {"appStoreVersion": {"data": {"type": "appStoreVersions", "id": vid}}}}})
+          # ٤) ربط البناء
+          r = req("PATCH", f"/appStoreVersions/{vid}/relationships/build", {"data": {"type": "builds", "id": bid}})
+          print("::notice title=ready::App Store version", ver, "build", build, "attached:", r.status_code, "— submit for review from App Store Connect")
+          PY
