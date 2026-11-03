@@ -141,6 +141,7 @@ enum Khatma {
         put("last_read", t - 1)
         put("extended_note", false)
         put("today_from", nextPage)
+        put("to_day", nil)
         if !Store.bool("wird_on", false) { Store.d.set(true, forKey: "wird_on") }
         didChange?()
     }
@@ -160,8 +161,8 @@ enum Khatma {
         put("end", plan.end(remaining: remaining))
         put("label", plan.label)
         put("day", today())
-        put("today_count", 0)
-        put("today_from", nextPage)
+        put("today_from", nextPage)          // قراءة اليوم تبقى محسوبة
+        put("to_day", nil)
         put("extended_note", false)
         didChange?()
     }
@@ -231,7 +232,8 @@ enum Khatma {
 
     static var read: Int { bits.filter { $0 == "1" }.count }
 
-    static var percent: Int { Int((Double(read) * 100 / Double(pages)).rounded()) }
+    /** لا يظهر ١٠٠٪ قبل أن تكتمل الختمة فعلًا */
+    static var percent: Int { let r = read; return r >= pages ? 100 : min(99, Int((Double(r) * 100 / Double(pages)).rounded())) }
 
     static var done: Bool { read >= pages }
 
@@ -262,24 +264,44 @@ enum Khatma {
         return max(1, Int(ceil(Double(remainingAtDayStart) / Double(daysLeft))))
     }
 
-    /** (من، إلى) صفحات ورد اليوم، ينتهي عند نهاية الجزء إن كانت على بُعد صفحتين */
+    /**
+     * (من، إلى) صفحات ورد اليوم (نفس أندرويد). تُحسب مرة في اليوم: من أول صفحة لم تُقرأ، ونمشي حتى نجمع عدد الورد
+     * من الصفحات غير المقروءة، ونكمل من أول المصحف إن بدأت الختمة من وسطه. ينتهي عند نهاية الجزء إن كانت على بُعد صفحتين.
+     */
     static var todayRange: (Int, Int) {
         ensureDay()
         let from = max(1, getInt("today_from", nextPage))
+        if getInt("to_day", -1) == today() { return (from, getInt("today_to", from - 1)) }
         let target = rawTarget
-        if target == 0 { return (from, from - 1) }
-        var to = min(pages, from + target - 1)
-        for js in Quran.juzStart {
-            let juzEnd = js - 1
-            if juzEnd >= from && abs(juzEnd - to) <= 2 && juzEnd != to { to = juzEnd; break }
+        let need = max(0, target - getInt("today_count", 0))
+        let b = bits
+        let wrap = startPage > 1
+        var to = from - 1, got = 0, pg = from, steps = 0
+        while got < need && steps < pages {
+            if b[pg - 1] == "0" { got += 1 }
+            to = pg
+            steps += 1
+            if pg == pages { if !wrap { break }; pg = 1 } else { pg += 1 }
         }
+        if to >= from {
+            for js in Quran.juzStart {
+                let juzEnd = js - 1
+                if juzEnd >= from && abs(juzEnd - to) <= 2 && juzEnd != to {
+                    for q in (min(to, juzEnd) + 1)...max(to, juzEnd) where b[q - 1] == "0" { got += juzEnd > to ? 1 : -1 }
+                    to = juzEnd
+                    break
+                }
+            }
+        }
+        let dayTarget = target == 0 ? 0 : max(0, got) + getInt("today_count", 0)
+        put("to_day", today()); put("today_to", to); put("today_target", dayTarget)
         return (from, to)
     }
 
-    /** عدد صفحات ورد اليوم (٠ في يوم الراحة) */
+    /** عدد صفحات ورد اليوم غير المقروءة (٠ في يوم الراحة) */
     static var dailyTarget: Int {
-        let r = todayRange
-        return max(0, r.1 - r.0 + 1)
+        _ = todayRange
+        return max(0, getInt("today_target", 0))
     }
 
     static var todayCount: Int { ensureDay(); return getInt("today_count", 0) }

@@ -92,6 +92,15 @@ final class AppState: ObservableObject {
         }
         if !d.bool(forKey: "welcomed") { showWelcome = true }
         else if d.integer(forKey: "tour_v") < FeaturesView.tourVersion { showTour = true }
+        // سافر المستخدم أو غيّر المنطقة الزمنية: نحدّث الموقع ونعيد جدولة الأذان فورًا
+        NotificationCenter.default.addObserver(forName: .NSSystemTimeZoneDidChange, object: nil, queue: .main) { _ in
+            Task { @MainActor in
+                Store.d.set(0, forKey: "loc_time")
+                LocationService.shared.refreshIfStale()
+                AppState.shared.lastFullRefresh = 0
+                AppState.shared.foreground()
+            }
+        }
     }
 
     /** النسخة الأولى من تطبيق iOS حفظت إعداداتها في التخزين العادي: ننقلها مرة */

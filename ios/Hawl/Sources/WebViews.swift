@@ -125,6 +125,9 @@ final class HawlBridge: NSObject, WKScriptMessageHandler {
 
     @MainActor private func handle(_ cmd: String, _ o: [String: Any]) {
         switch cmd {
+        case "pageRead":
+            // الصفحة نفسها تُبلغ بعد بقاء القارئ عليها ١٢ ثانية (تُحسب الصفحة المعروضة ولو لم يتغير العنوان)؛ التكرار لا يُحسب مرتين
+            if let p = (o["page"] as? NSNumber)?.intValue, (1...Quran.pages).contains(p) { countPage(p) }
         case "share", "save":
             var items: [Any] = []
             var files = o["files"] as? [[String: Any]] ?? []
@@ -233,6 +236,7 @@ struct MushafWebView: UIViewRepresentable {
     /** أداة تُفتح مع الصفحة (مراجعة الحفظ أو البحث بالمعنى)، ورقم الطلب حتى تُفتح كل مرة تُطلب */
     var extra: String = ""
     var extraID: Int = 0
+    var requestID: Int = 0
 
     func makeCoordinator() -> Coordinator { Coordinator() }
 
@@ -271,12 +275,18 @@ struct MushafWebView: UIViewRepresentable {
         context.coordinator.night = night
         context.coordinator.zoom = zoom
         context.coordinator.extraID = extraID
+        context.coordinator.requestID = requestID
         context.coordinator.load(web, page: page, extra: extra)
         return web
     }
 
     func updateUIView(_ web: WKWebView, context: Context) {
         let c = context.coordinator
+        if requestID != c.requestID {
+            c.requestID = requestID
+            if page != c.currentPage { c.load(web, page: page); return }    // طلب صريح (الفهرس، الختمة) ولو كانت نفس الطلب السابق
+            c.requestedPage = page
+        }
         if extraID != c.extraID {
             c.extraID = extraID
             c.load(web, page: page != c.requestedPage ? page : (c.currentPage ?? page), extra: extra)
@@ -313,6 +323,7 @@ struct MushafWebView: UIViewRepresentable {
         var zoom = 100
         var dwellTask: Task<Void, Never>?
         var extraID = 0
+        var requestID = 0
 
         func load(_ web: WKWebView, page: Int, extra: String = "") {
             requestedPage = page
@@ -322,6 +333,11 @@ struct MushafWebView: UIViewRepresentable {
             if let url = URL(string: "hawl://app/__hawl/mushaf-pages-offline.html?page=\(p)\(more)") {
                 web.load(URLRequest(url: url))
             }
+        }
+
+        /** أوقف النظام محرّك الصفحة (ذاكرة أو بقاء طويل في الخلفية): نعيد تحميل نفس الصفحة بدل صفحة بيضاء */
+        func webViewWebContentProcessDidTerminate(_ webView: WKWebView) {
+            Task { @MainActor in self.load(webView, page: self.currentPage ?? self.requestedPage ?? Khatma.lastMushafPage()) }
         }
 
         /** الصفحة تغيّر ?page=N دون إعادة تحميل (history.replaceState): نتابع العنوان */

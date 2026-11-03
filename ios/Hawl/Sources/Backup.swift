@@ -14,7 +14,9 @@ enum Backup {
     ]
     /** قيم تتغيّر وحدها على كل جهاز (آية اليوم، الموقع، الجولة…) فلا تُعدّ تغييرًا في بيانات القارئ عند المزامنة */
     private static let volatile: Set<String> = ["lat", "lng", "city", "country", "read_time", "tour_v", "push_last_msg",
-                                                 "hifz_total", "hifz_next", "hifz_held", "hifz_pct"]
+                                                 "hifz_total", "hifz_next", "hifz_held", "hifz_pct",
+                                                 // حسابات يوم الختمة تُعاد على كل جهاز عند بداية اليوم، فليست تغييرًا من القارئ
+                                                 "khatma_day", "khatma_today_from", "khatma_to_day", "khatma_today_to", "khatma_today_target"]
     private static let volatilePrefixes = ["v_"]
     private static let skipPrefixes = ["live_", "push_", "dismiss", "NS", "Apple", "com.apple", "WebKit", "WebDatabase", "azkar_progress_"]
 
@@ -221,7 +223,15 @@ enum CloudSync {
     private static func apply(_ d: Data, at: Double) {
         applying = true
         defer { applying = false }
+        // صفحات الختمة نفسها من الجهازين: نجمعها (ما قُرئ على أي جهاز يبقى مقروءًا) بدل أن تمحو نسخة الأخرى
+        let localPages = Store.d.string(forKey: "khatma_pages") ?? ""
+        let localStart = Store.d.object(forKey: "khatma_start") as? Int
         guard (try? Backup.restore(d)) != nil else { return }
+        if let ls = localStart, ls == (Store.d.object(forKey: "khatma_start") as? Int),
+           let rp = Store.d.string(forKey: "khatma_pages"), rp.count == localPages.count, !rp.isEmpty {
+            let merged = String(zip(rp, localPages).map { $0 == "1" || $1 == "1" ? Character("1") : Character("0") })
+            if merged != rp { Store.d.set(merged, forKey: "khatma_pages"); Store.d.set(nil, forKey: "khatma_to_day") }
+        }
         markSynced(at: at)
         // صفحة المصحف تعيد إرسال حالتها بعد الاستعادة: نعدّها جزءًا منها لا تغييرًا جديدًا
         quietUntil = Date().addingTimeInterval(15)

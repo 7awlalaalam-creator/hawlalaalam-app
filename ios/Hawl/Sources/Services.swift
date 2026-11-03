@@ -317,7 +317,8 @@ enum Notifications {
     }
 
     private static func once(_ at: Date) -> UNCalendarNotificationTrigger {
-        let comps = Calendar.current.dateComponents([.year, .month, .day, .hour, .minute, .second], from: at)
+        var comps = Calendar.current.dateComponents([.year, .month, .day, .hour, .minute, .second], from: at)
+        comps.timeZone = TimeZone.current            // وقت مطلق: لا يتحرك التنبيه مع تغيّر المنطقة الزمنية
         return UNCalendarNotificationTrigger(dateMatching: comps, repeats: false)
     }
 
