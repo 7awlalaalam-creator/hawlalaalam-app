@@ -103,6 +103,7 @@ struct RootView: View {
             .tag(AppState.Tab.tools)
         }
         .overlay { ToastOverlay() }
+        .overlay { UpdateGateOverlay().environment(\.layoutDirection, Lang.dir) }
         .sheet(isPresented: $state.showPrayerAzkar) {
             NavigationStack { PrayerAzkarView() }
                 .environment(\.layoutDirection, Lang.dir)
