@@ -42,8 +42,8 @@ tapText "الاستماع"; sleep 6
 tapText "الإذاعات"; sleep 6
 tapText "استمع"; sleep 12          # تبدأ التلاوة ويظهر المشغّل
 adb shell input keyevent KEYCODE_HOME; sleep 8   # خارج التطبيق والتلاوة مستمرة
-adb shell cmd statusbar expand-notifications; sleep 9   # أزرار التحكم في الإشعار
-adb shell cmd statusbar collapse; sleep 3
+adb shell input swipe 540 10 540 1400 600; sleep 2; adb shell input swipe 540 300 540 1800 600; sleep 9   # أزرار التحكم في الإشعار
+adb shell input keyevent KEYCODE_BACK; sleep 3
 adb shell input keyevent KEYCODE_SLEEP; sleep 3; adb shell input keyevent KEYCODE_WAKEUP; sleep 8   # شاشة القفل
 adb shell input keyevent KEYCODE_MENU; sleep 2
 wait $REC
