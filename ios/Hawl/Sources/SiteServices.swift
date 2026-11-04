@@ -21,24 +21,6 @@ final class SiteServices: ObservableObject {
 
     @Published private(set) var items: [SiteItem] = []
     @Published private(set) var notice: SiteNotice?
-    /** إشعار التحديث من صفحة الإدارة: force = شاشة لا تُغلق، soft = نافذة مرة في اليوم */
-    @Published private(set) var update: UpdateInfo?
-
-    struct UpdateInfo: Equatable { let force: Bool; let current: String; let target: String; let message: String }
-
-    static func cmp(_ a: String, _ b: String) -> Int {
-        let x = a.split(separator: ".").map { Int($0.filter(\.isNumber)) ?? 0 }, y = b.split(separator: ".").map { Int($0.filter(\.isNumber)) ?? 0 }
-        for i in 0..<max(x.count, y.count) {
-            let p = i < x.count ? x[i] : 0, q = i < y.count ? y[i] : 0
-            if p != q { return p < q ? -1 : 1 }
-        }
-        return 0
-    }
-
-    func dismissSoftUpdate() {
-        Store.d.set(Date().timeIntervalSince1970, forKey: "upd_soft_at")
-        update = nil
-    }
 
     private init() { rebuild() }
 
@@ -95,18 +77,6 @@ final class SiteServices: ObservableObject {
             out.append(SiteItem(id: id.isEmpty ? u.absoluteString : id, title: title, icon: s["icon"] as? String ?? "✦", url: u, isNew: isNew))
         }
         items = out
-        update = nil
-        if let u = o["update"] as? [String: Any], let mode = u["mode"] as? String, mode != "none",
-           let p = u["ios"] as? [String: Any],
-           let cur = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String {
-            let latest = p["latest"] as? String ?? "", minV = p["min"] as? String ?? "", msg = u["message"] as? String ?? ""
-            if mode == "force", !minV.isEmpty, Self.cmp(cur, minV) < 0 {
-                update = UpdateInfo(force: true, current: cur, target: minV, message: msg)
-            } else if !latest.isEmpty, Self.cmp(cur, latest) < 0,
-                      Date().timeIntervalSince1970 - Store.d.double(forKey: "upd_soft_at") > 20 * 3600 {
-                update = UpdateInfo(force: false, current: cur, target: latest, message: msg)
-            }
-        }
         notice = nil
         if let a = o["announcement"] as? [String: Any], Self.live(a) {
             let id = a["id"] as? String ?? "", title = a["title"] as? String ?? ""
@@ -245,63 +215,6 @@ struct SiteNoticeCard: View {
                 .accessibilityLabel(L("إغلاق الإعلان"))
             }
             .padding(.top, 14)
-        }
-    }
-}
-
-/** إشعار التحديث فوق التطبيق كله (نفس أندرويد): لطيف مع «لاحقًا»، أو إجباري لا يُغلق */
-struct UpdateGateOverlay: View {
-    @ObservedObject var svc = SiteServices.shared
-    private let store = URL(string: "https://apps.apple.com/app/id6823910862")!
-
-    private func ar(_ v: String) -> String {
-        Lang.en ? v : String(v.map { c in c == "." ? "٫" : (c.wholeNumberValue.map { Character(UnicodeScalar(0x0660 + $0)!) } ?? c) })
-    }
-
-    var body: some View {
-        if let u = svc.update {
-            if u.force {
-                ZStack {
-                    PatternBackground().ignoresSafeArea()
-                    VStack(spacing: 14) {
-                        Image(uiImage: UIImage(named: "app_logo_png") ?? UIImage()).resizable().frame(width: 96, height: 96).clipShape(RoundedRectangle(cornerRadius: 22))
-                        Text(L("يلزم تحديث التطبيق")).font(AppFont.ui(22, 700)).foregroundColor(.white)
-                        Text((u.message.isEmpty ? L("أصلحنا خطأ مهمًّا في هذا الإصدار، ولن يعمل التطبيق بشكل صحيح حتى تحدّثه.") : u.message)
-                             + L("\nالتحديث مجاني ويستغرق أقل من دقيقة."))
-                            .font(AppFont.ui(14)).foregroundColor(Palette.onDarkMuted).multilineTextAlignment(.center).lineSpacing(4)
-                        Button { UIApplication.shared.open(store) } label: {
-                            Text(L("حدّث الآن")).font(AppFont.ui(16, 700)).foregroundColor(Palette.dark)
-                                .frame(maxWidth: .infinity, minHeight: 54).background(RoundedRectangle(cornerRadius: 16).fill(Palette.gold))
-                        }.padding(.top, 10)
-                        Text(L("إصدارك ") + ar(u.current) + L(" · أقل إصدار مطلوب ") + ar(u.target))
-                            .font(AppFont.ui(12)).foregroundColor(Palette.onDarkMuted)
-                    }
-                    .padding(30)
-                }
-                .transition(.opacity)
-            } else {
-                ZStack(alignment: .bottom) {
-                    Color.black.opacity(0.35).ignoresSafeArea().onTapGesture { svc.dismissSoftUpdate() }
-                    VStack(spacing: 8) {
-                        Capsule().fill(Palette.line).frame(width: 40, height: 4).padding(.bottom, 6)
-                        Image(uiImage: UIImage(named: "app_logo_png") ?? UIImage()).resizable().frame(width: 64, height: 64).clipShape(RoundedRectangle(cornerRadius: 15))
-                        Text(L("تحديث جديد متوفر")).font(AppFont.ui(19, 700)).foregroundColor(Palette.ink)
-                        Text(L("الإصدار ") + ar(u.target) + L(" جاهز · أنت على ") + ar(u.current)).font(AppFont.ui(13)).foregroundColor(Palette.muted)
-                        if !u.message.isEmpty {
-                            Text(u.message).font(AppFont.ui(13)).foregroundColor(Palette.ink).frame(maxWidth: .infinity)
-                                .padding(12).background(RoundedRectangle(cornerRadius: 14).fill(Palette.chip))
-                        }
-                        Button { svc.dismissSoftUpdate(); UIApplication.shared.open(store) } label: {
-                            Text(L("حدّث الآن")).font(AppFont.ui(15, 700)).foregroundColor(.white)
-                                .frame(maxWidth: .infinity, minHeight: 50).background(RoundedRectangle(cornerRadius: 16).fill(Palette.dark))
-                        }.padding(.top, 6)
-                        Button(L("لاحقًا")) { svc.dismissSoftUpdate() }.font(AppFont.ui(14)).foregroundColor(Palette.muted).padding(.top, 2)
-                    }
-                    .padding(20).padding(.bottom, 10)
-                    .background(RoundedRectangle(cornerRadius: 26, style: .continuous).fill(Palette.page).ignoresSafeArea(edges: .bottom))
-                }
-                .transition(.move(edge: .bottom))
-            }
         }
     }
 }
