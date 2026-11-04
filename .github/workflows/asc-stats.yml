@@ -53,6 +53,9 @@ jobs:
           vs = get(f"/v1/apps/{APP}/appStoreVersions?limit=5").get("data", [])
           note("App Store versions", " | ".join(f"{v['attributes']['versionString']}:{v['attributes']['appStoreState']}" for v in vs))
 
+          # حالة إصدارات App Store (قيد المراجعة، معتمد، منشور…)
+          for v in get(f"/v1/apps/{APP}/appStoreVersions?filter[platform]=IOS&limit=3").get("data", []):
+              note(f"Version {v['attributes'].get('versionString')}", f"state={v['attributes'].get('appStoreState')} created={str(v['attributes'].get('createdDate'))[:16]}")
           # التقييم العام في المتجر (واجهة أبل العامة، حسب الدولة)
           for cc in ["sa", "eg", "ae", "us"]:
               try:
