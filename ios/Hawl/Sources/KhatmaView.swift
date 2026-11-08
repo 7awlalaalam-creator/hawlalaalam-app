@@ -140,6 +140,15 @@ struct KhatmaView: View {
             }
             Text(L("وصلت إلى: ") + Khatma.whereIs(next) + L(" · صفحة ") + ar(next)).font(AppFont.ui(14, 500)).foregroundColor(Palette.ink)
                 .padding(.top, 10)
+            let m = Khatma.missed
+            if m.count > 0 {
+                Button { state.openMushaf(page: m.first) } label: {
+                    Text(ar(m.count) + L(" صفحة مررت بها سريعًا فلم تُحسب · راجعها من صفحة ") + ar(m.first) + "  ‹")
+                        .font(AppFont.ui(13, 500)).foregroundColor(Palette.goldDeep).multilineTextAlignment(.leading)
+                }
+                .buttonStyle(.plain)
+                .padding(.top, 6)
+            }
             Text(status).font(AppFont.ui(13, 500)).foregroundColor(ahead >= 0 ? Palette.goldDeep : Palette.muted).padding(.top, 4)
         }
         .padding(.horizontal, 18).padding(.vertical, 16)

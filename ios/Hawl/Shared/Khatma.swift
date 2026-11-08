@@ -213,6 +213,12 @@ enum Khatma {
     /** بداية يوم جديد: نثبّت نقطة انطلاق ورد اليوم، ونعالج التأخر دون ورد مُرهق */
     static func ensureDay() {
         let t = today()
+        if getInt("algo", 1) < 2 {
+            // الحساب القديم كان يبدأ الورد من أول صفحة لم تُحسب ولو كانت بعيدة خلف القارئ
+            put("algo", 2)
+            put("today_from", nextPage)
+            put("to_day", nil)
+        }
         if getInt("day", -1) == t { return }
         put("day", t)
         put("today_count", 0)
@@ -239,13 +245,40 @@ enum Khatma {
 
     static var running: Bool { active && !done }
 
-    /** أول صفحة لم تُقرأ ابتداءً من صفحة البداية (ثم من أول المصحف) */
-    static var nextPage: Int {
-        let b = bits
-        let from = startPage - 1
-        if let i = b[from...].firstIndex(of: "0") { return i + 1 }
-        if let i = b.firstIndex(of: "0") { return i + 1 }
-        return pages
+    /** صفحات متتالية غير مقروءة تكفي لنعدّها «المكان الذي وصل إليه القارئ» لا صفحات فاتته */
+    static let gap = 15
+
+    /**
+     * أين يكمل القارئ: نمشي بترتيب الختمة (من صفحة البداية ثم من أول المصحف) حتى أول مجموعة صفحات
+     * غير مقروءة طولها gap أو تمتد إلى نهاية الترتيب. الصفحات المتفرقة قبلها (تجاوزها القارئ بسرعة)
+     * لا تعيده إلى الوراء وتُراجَع في آخر الختمة، وإن لم يبقَ إلا هي فأولها. (نفس Khatma.nextPage في أندرويد)
+     */
+    static var nextPage: Int { nextPage(bits, startPage) }
+
+    static func nextPage(_ b: [Character], _ start: Int) -> Int {
+        var firstUnread = 0, runStart = 0, run = 0
+        for k in 0..<pages {
+            let pg = (start - 1 + k) % pages + 1
+            if b[pg - 1] == "0" {
+                if firstUnread == 0 { firstUnread = pg }
+                if run == 0 { runStart = pg }
+                run += 1
+                if run >= gap || k == pages - 1 { return runStart }
+            } else { run = 0 }
+        }
+        return firstUnread == 0 ? pages : firstUnread
+    }
+
+    /** صفحات قبل موضع القراءة لم تُحسب، وأولها */
+    static var missed: (count: Int, first: Int) {
+        let b = bits, start = startPage, next = nextPage(b, start)
+        var n = 0, first = 0
+        for k in 0..<pages {
+            let pg = (start - 1 + k) % pages + 1
+            if pg == next { break }
+            if b[pg - 1] == "0" { n += 1; if first == 0 { first = pg } }
+        }
+        return (n, first)
     }
 
     /** أيام القراءة المتبقية حتى الموعد (يوم واحد على الأقل) */
