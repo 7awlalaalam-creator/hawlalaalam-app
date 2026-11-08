@@ -72,6 +72,10 @@ seed 1 1-603; home t3-home; dump t3
 # ٤) ختمة تبدأ من صفحة ٥٩٨: الورد يلتف ٥٩٨ ← ٣
 seed 598; home t4-home; dump t4
 
+# ٥) صفحات متفرقة لم تُحسب خلف القارئ (٧٨–٧٩، ١٢١–١٢٢، ٢٠١–٢٠٤) وهو عند ٢٣٩: الورد يبدأ من ٢٣٩ لا ٧٨
+seed 1 1-77 80-120 123-200 205-238; home t5-home; dump t5
+adb shell am start -n $P/.KhatmaActivity >/dev/null; sleep 4; adb exec-out screencap -p > shots/t5-khatma.png
+
 adb logcat -d | grep -E "FATAL|AndroidRuntime" -A20 > shots/fatal.txt || true
 cat shots/summary.txt
 ls -la shots
