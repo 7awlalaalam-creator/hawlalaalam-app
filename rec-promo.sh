@@ -73,7 +73,7 @@ findTool() { for i in 1 2 3 4 5; do dump; grep -q "text=\"$1\"" /tmp/u.xml && re
 recStart() { CUR=$1; echo "REC $1 $(date +%s.%N)" >> shots/taps.txt; adb shell screenrecord --bit-rate 8000000 /sdcard/$1.mp4 & REC=$!; sleep 1.5; }
 recStop() { sleep 1; adb shell pkill -INT screenrecord; wait $REC; sleep 2; adb pull /sdcard/$1.mp4 shots/$1.mp4; }
 cap() { adb exec-out screencap -p > shots/$1.png; }
-clearAnr() { for i in 1 2 3; do dump; grep -q "responding" /tmp/u.xml || break; tapText "Wait" exact; sleep 2; done; }
+clearAnr() { for i in 1 2 3; do dump; grep -q "responding" /tmp/u.xml || break; tapText "Close app" exact; tapText "Wait" exact; sleep 2; done; }
 goTools() {
   clearAnr
   adb shell am force-stop $P; adb shell monkey -p $P -c android.intent.category.LAUNCHER 1 >/dev/null; sleep 8

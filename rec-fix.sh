@@ -20,8 +20,10 @@ adb logcat -c
 goTools
 findTool "مساجد قريبة"
 recStart p-mosque
-tapText "مساجد قريبة" exact; sleep 25; cap s1
+tapText "مساجد قريبة" exact; sleep 20; cap s1
+python3 cdp.py "JSON.stringify({u:location.href, t:document.body.innerText.slice(0,300), c:document.querySelectorAll('canvas').length, i:document.querySelectorAll('img').length, gl:!!document.createElement('canvas').getContext('webgl')})" > shots/s-dom.txt
+sleep 15; cap s1b
 adb shell input swipe 540 1600 540 1100 900; sleep 5; cap s2
 recStop p-mosque
-adb logcat -d | grep -iE "chromium|console|webgl|maplibre|leaflet|MosqJS|hawl" | tail -120 > shots/s-log.txt
+adb logcat -d | grep -iE "console|webgl|maplibre|leaflet|MosqJS|Mosque|location|GL_|error" | grep -v AppsFilter | tail -120 > shots/s-log.txt
 ls -la shots
