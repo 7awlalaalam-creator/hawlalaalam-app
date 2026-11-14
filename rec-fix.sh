@@ -9,14 +9,15 @@ read WX WY < <(wvTop); echo "WV $WX $WY" >> shots/taps.txt
 DPR=$(python3 cdp.py "devicePixelRatio" | tr -d '"')
 pos() { python3 cdp.py "(function(){var e=document.querySelector('$1'); if(!e) return ''; var r=e.getClientRects()[0]||e.getBoundingClientRect(); return Math.round((r.left+r.width/2)*$DPR+$WX)+' '+Math.round((r.top+r.height/2)*$DPR+$WY);})()" | tr -d '"'; }
 python3 cdp.py "JSON.stringify([...document.querySelectorAll('.w.gh')].slice(0,8).map(e=>e.textContent))" > shots/w-info.txt
-XY=$(pos '.w.gh'); echo "WORD $XY" >> shots/taps.txt
+XY=$(python3 cdp.py "(function(){var L=[...document.querySelectorAll('.w.gh')]; var e=L.find(x=>x.getBoundingClientRect().top>innerHeight*0.35)||L[3]; if(!e) return ''; var r=e.getClientRects()[0]; return Math.round((r.left+r.width/2)*$DPR+$WX)+' '+Math.round((r.top+r.height/2)*$DPR+$WY);})()" | tr -d '\"'); echo "WORD $XY" >> shots/taps.txt
 recStart p-word
 sleep 1
-[ -n "$XY" ] && { echo "LONG p-word $(date +%s.%N) $XY" >> shots/taps.txt; adb shell input swipe $XY $XY 900; }
-sleep 5; cap w1
+[ -n "$XY" ] && { echo "LONG p-word $(date +%s.%N) $XY" >> shots/taps.txt; adb shell input swipe $XY $XY 650; }
+sleep 1.5; cap w1; sleep 3
 recStop p-word
 # مساجد قريبة: انتظار أطول + سجل
 adb logcat -c
+adb emu geo fix 39.1925 21.4858
 goTools
 findTool "مساجد قريبة"
 recStart p-mosque

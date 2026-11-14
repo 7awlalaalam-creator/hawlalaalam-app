@@ -25,6 +25,9 @@ cat > /tmp/s.xml <<X
 <boolean name="welcomed" value="true" />
 <int name="tour_v" value="99" />
 <string name="app_lang">ar</string>
+<float name="lat" value="21.4858" />
+<float name="lng" value="39.1925" />
+<string name="city">جدة</string>
 <long name="update_checked" value="${NOW}000" />
 </map>
 X
