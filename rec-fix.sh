@@ -3,7 +3,7 @@
 source <(sed -n '1,/^# ١)/p' rec-promo.sh)
 # معنى الكلمة (الغريب): ضغط مطوّل على كلمة في الصفحة ٢
 goTools
-tapText "المصحف" exact; sleep 3; tapText "افتح المصحف"; sleep 9
+adb shell input tap 670 2248; sleep 9
 python3 cdp.py "location.href=location.pathname+'?page=2'" ; sleep 7; cap w0
 read WX WY < <(wvTop); echo "WV $WX $WY" >> shots/taps.txt
 DPR=$(python3 cdp.py "devicePixelRatio" | tr -d '"')

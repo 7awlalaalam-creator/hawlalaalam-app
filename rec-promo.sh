@@ -82,7 +82,8 @@ goTools() {
   adb shell am force-stop $P; adb shell monkey -p $P -c android.intent.category.LAUNCHER 1 >/dev/null; sleep 8
   tapText "لاحقًا" exact; tapText "Later" exact; sleep 1
   clearAnr
-  tapText "الأدوات" exact; sleep 4; cap tools
+  # الرئيسية فيها عدّاد متحرك يمنع قراءة الشاشة، فنضغط زر «الأدوات» في الشريط السفلي مباشرة
+  adb shell input tap 151 2248; echo "TAP $CUR $(date +%s.%N) 151 2248" >> shots/taps.txt; sleep 4; cap tools
 }
 
 # ١) الأحاديث الصحيحة
@@ -123,7 +124,7 @@ adb shell input keyevent KEYCODE_BACK
 
 # ٤) المصحف: اسأل عن الآية  ٥) معنى الكلمة (الغريب)
 goTools
-tapText "المصحف" exact; sleep 3; tapText "افتح المصحف"; sleep 9; cap q0
+adb shell input tap 670 2248; sleep 9; cap q0
 python3 cdp.py "location.href" > shots/q-url.txt
 python3 cdp.py "location.href=location.pathname+'?page=252'" ; sleep 6; cap q1
 read WX WY < <(wvTop); echo "WV $WX $WY" >> shots/taps.txt
