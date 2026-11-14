@@ -68,6 +68,8 @@ for m in re.finditer(r'<node [^>]*class="android.webkit.WebView"[^>]*>',s):
 PY
 }
 REC=""
+# findTool "اسم": ينزل في شاشة الأدوات حتى يظهر العنصر (بدون ضغط)
+findTool() { for i in 1 2 3 4 5; do dump; grep -q "text=\"$1\"" /tmp/u.xml && return 0; adb shell input swipe 540 1700 540 1100 600; sleep 1.5; done; return 1; }
 recStart() { CUR=$1; echo "REC $1 $(date +%s.%N)" >> shots/taps.txt; adb shell screenrecord --bit-rate 8000000 /sdcard/$1.mp4 & REC=$!; sleep 1.5; }
 recStop() { sleep 1; adb shell pkill -INT screenrecord; wait $REC; sleep 2; adb pull /sdcard/$1.mp4 shots/$1.mp4; }
 cap() { adb exec-out screencap -p > shots/$1.png; }
@@ -82,6 +84,7 @@ goTools() {
 
 # ١) الأحاديث الصحيحة
 goTools
+findTool "الأحاديث"
 recStart p-hadith
 tapText "الأحاديث" exact; sleep 4; cap h1
 adb shell input swipe 540 1700 540 1000 900; sleep 2
@@ -91,6 +94,7 @@ recStop p-hadith
 
 # ٢) آية لحالك
 goTools
+findTool "آية لحالك"
 recStart p-mood
 tapText "آية لحالك" exact; sleep 4; cap m1
 tapText "ضيق" exact; sleep 7; cap m2
@@ -98,16 +102,16 @@ recStop p-mood
 
 # ٣) فحص الأذان + تجربة الأذان (الصوت يُضاف في المونتاج من ملف التطبيق نفسه)
 goTools
-adb shell input swipe 540 1700 540 900 700; sleep 2
+findTool "فحص الأذان"
 recStart p-adhan
 tapText "فحص الأذان" exact; sleep 4; cap a1
-tapText "جرّب الأذان الآن"; sleep 7; cap a2
+tapText "جرّب الأذان الآن"; sleep 4; adb shell cmd statusbar expand-notifications; sleep 5; cap a2; adb shell cmd statusbar collapse; sleep 1
 recStop p-adhan
 adb shell input keyevent KEYCODE_BACK
 
 # ٤) المصحف: اسأل عن الآية  ٥) معنى الكلمة (الغريب)
 goTools
-tapText "القرآن" exact; sleep 3; tapText "افتح المصحف"; sleep 9; cap q0
+tapText "المصحف" exact; sleep 3; tapText "افتح المصحف"; sleep 9; cap q0
 python3 cdp.py "location.href" > shots/q-url.txt
 python3 cdp.py "location.href=location.pathname+'?page=253'" ; sleep 6; cap q1
 read WX WY < <(wvTop); echo "WV $WX $WY" >> shots/taps.txt
