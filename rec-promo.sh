@@ -71,9 +71,12 @@ REC=""
 recStart() { CUR=$1; echo "REC $1 $(date +%s.%N)" >> shots/taps.txt; adb shell screenrecord --bit-rate 8000000 /sdcard/$1.mp4 & REC=$!; sleep 1.5; }
 recStop() { sleep 1; adb shell pkill -INT screenrecord; wait $REC; sleep 2; adb pull /sdcard/$1.mp4 shots/$1.mp4; }
 cap() { adb exec-out screencap -p > shots/$1.png; }
+clearAnr() { for i in 1 2 3; do dump; grep -q "responding" /tmp/u.xml || break; tapText "Wait" exact; sleep 2; done; }
 goTools() {
+  clearAnr
   adb shell am force-stop $P; adb shell monkey -p $P -c android.intent.category.LAUNCHER 1 >/dev/null; sleep 8
   tapText "لاحقًا" exact; tapText "Later" exact; sleep 1
+  clearAnr
   tapText "الأدوات" exact; sleep 4; cap tools
 }
 
@@ -104,7 +107,8 @@ adb shell input keyevent KEYCODE_BACK
 
 # ٤) المصحف: اسأل عن الآية  ٥) معنى الكلمة (الغريب)
 goTools
-tapText "القرآن" exact; sleep 9; cap q0
+tapText "القرآن" exact; sleep 3; tapText "افتح المصحف"; sleep 9; cap q0
+python3 cdp.py "location.href" > shots/q-url.txt
 python3 cdp.py "location.href=location.pathname+'?page=253'" ; sleep 6; cap q1
 read WX WY < <(wvTop); echo "WV $WX $WY" >> shots/taps.txt
 DPR=$(python3 cdp.py "devicePixelRatio" | tr -d '"')
