@@ -88,7 +88,7 @@ findTool "الأحاديث"
 recStart p-hadith
 tapText "الأحاديث" exact; sleep 4; cap h1
 adb shell input swipe 540 1700 540 1000 900; sleep 2
-tapText "رسول الله"; sleep 4; cap h2
+tapText "كتاب بدء الوحي" exact; sleep 4; cap h2
 adb shell input swipe 540 1600 540 1100 900; sleep 3
 recStop p-hadith
 
@@ -97,7 +97,16 @@ goTools
 findTool "آية لحالك"
 recStart p-mood
 tapText "آية لحالك" exact; sleep 4; cap m1
-tapText "ضيق" exact; sleep 7; cap m2
+dump; B=$(python3 - <<'PY'
+import re
+s=open('/tmp/u.xml',encoding='utf-8').read()
+m=re.search(r'<node [^>]*text="ضيق"[^>]*bounds="\[(\d+),(\d+)\]\[(\d+),(\d+)\]"',s)
+if m:
+    x1,y1,x2,y2=map(int,m.groups()); print((x1+x2)//2, y1-50)
+PY
+)
+echo "TAP p-mood $(date +%s.%N) $B" >> shots/taps.txt; [ -n "$B" ] && adb shell input tap $B
+sleep 4; cap m2; sleep 6; cap m3
 recStop p-mood
 
 # ٣) فحص الأذان + تجربة الأذان (الصوت يُضاف في المونتاج من ملف التطبيق نفسه)
@@ -105,7 +114,7 @@ goTools
 findTool "فحص الأذان"
 recStart p-adhan
 tapText "فحص الأذان" exact; sleep 4; cap a1
-tapText "جرّب الأذان الآن"; sleep 4; adb shell cmd statusbar expand-notifications; sleep 5; cap a2; adb shell cmd statusbar collapse; sleep 1
+tapText "جرّب الأذان الآن"; sleep 11; adb shell cmd statusbar expand-notifications; sleep 6; cap a2; adb shell cmd statusbar collapse; sleep 1
 recStop p-adhan
 adb shell input keyevent KEYCODE_BACK
 
@@ -113,14 +122,14 @@ adb shell input keyevent KEYCODE_BACK
 goTools
 tapText "المصحف" exact; sleep 3; tapText "افتح المصحف"; sleep 9; cap q0
 python3 cdp.py "location.href" > shots/q-url.txt
-python3 cdp.py "location.href=location.pathname+'?page=253'" ; sleep 6; cap q1
+python3 cdp.py "location.href=location.pathname+'?page=252'" ; sleep 6; cap q1
 read WX WY < <(wvTop); echo "WV $WX $WY" >> shots/taps.txt
 DPR=$(python3 cdp.py "devicePixelRatio" | tr -d '"')
 pos() {  # pos "css selector" → إحداثيات الشاشة لمنتصف العنصر
   python3 cdp.py "(function(){var e=document.querySelector('$1'); if(!e) return ''; e.scrollIntoView({block:'center'}); var r=e.getClientRects()[0]||e.getBoundingClientRect(); return Math.round((r.left+r.width/2)*$DPR+$WX)+' '+Math.round((r.top+r.height/2)*$DPR+$WY);})()" | tr -d '"'
 }
 python3 cdp.py "JSON.stringify({ay:document.querySelectorAll('.ay').length, gh:document.querySelectorAll('.w.gh').length, k:[...document.querySelectorAll('.ay')].slice(0,40).map(e=>e.getAttribute('data-k')).join(',')})" > shots/q-info.txt
-XY=$(pos '.ay[data-k=\"13:28\"]'); echo "AYAH $XY" >> shots/taps.txt
+XY=$(pos '.ay[data-k=\"13:28\"]'); [ -z "$XY" ] && XY=$(pos '.ay'); echo "AYAH $XY" >> shots/taps.txt
 recStart p-ask
 sleep 1
 [ -n "$XY" ] && { echo "TAP p-ask $(date +%s.%N) $XY" >> shots/taps.txt; adb shell input tap $XY; }
@@ -131,7 +140,6 @@ adb shell input swipe 540 1700 540 1100 900; sleep 3; cap q5
 recStop p-ask
 adb shell input keyevent KEYCODE_BACK; sleep 2
 python3 cdp.py "location.href=location.pathname+'?page=2'" ; sleep 6
-read WX WY < <(wvTop)
 python3 cdp.py "JSON.stringify([...document.querySelectorAll('.w.gh')].slice(0,12).map(e=>e.textContent))" > shots/w-info.txt
 XY=$(pos '.w.gh'); echo "WORD $XY" >> shots/taps.txt
 recStart p-word
@@ -139,4 +147,12 @@ sleep 1
 [ -n "$XY" ] && { echo "LONG p-word $(date +%s.%N) $XY" >> shots/taps.txt; adb shell input swipe $XY $XY 900; }
 sleep 4; cap w1
 recStop p-word
+
+# ٦) مساجد قريبة
+goTools
+findTool "مساجد قريبة"
+recStart p-mosque
+tapText "مساجد قريبة" exact; sleep 12; cap s1
+adb shell input swipe 540 1600 540 1100 900; sleep 4; cap s2
+recStop p-mosque
 ls -la shots
