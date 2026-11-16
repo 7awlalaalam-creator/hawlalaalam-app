@@ -7,6 +7,7 @@ import SwiftUI
  */
 struct SiteItem: Identifiable, Hashable {
     let id: String, title: String, icon: String, url: URL, isNew: Bool
+    var iconURL: URL? = nil      // icon_url: صورة PNG مربعة بدل الإيموجي إن وُجدت
 }
 
 struct SiteNotice: Hashable {
@@ -74,7 +75,9 @@ final class SiteServices: ObservableObject {
             let title = Lang.en && !en.isEmpty ? en : ar
             guard !title.isEmpty, let u = URL(string: s["url"] as? String ?? ""), u.scheme == "https" || u.scheme == "hawlapp" else { continue }
             let isNew = (s["badge"] as? String) == "new" && !opened.contains("|\(id)|")
-            out.append(SiteItem(id: id.isEmpty ? u.absoluteString : id, title: title, icon: s["icon"] as? String ?? "✦", url: u, isNew: isNew))
+            let iu = (s["icon_url"] as? String ?? "").trimmingCharacters(in: .whitespaces)
+            let iconURL = iu.hasPrefix("https://") ? URL(string: iu) : nil
+            out.append(SiteItem(id: id.isEmpty ? u.absoluteString : id, title: title, icon: s["icon"] as? String ?? "✦", url: u, isNew: isNew, iconURL: iconURL))
         }
         items = out
         notice = nil
@@ -121,7 +124,23 @@ struct SiteTile: View {
     let item: SiteItem
     var body: some View {
         VStack(spacing: 6) {
-            Text(item.icon).font(.system(size: 24)).frame(height: 28)
+            Group {
+                if let iu = item.iconURL {
+                    // صورة مربعة بزوايا دائرية بحجم أيقونات الأدوات؛ الإيموجي حتى تُحمَّل أو إن فشلت
+                    AsyncImage(url: iu) { phase in
+                        if let img = phase.image {
+                            img.resizable().scaledToFill()
+                                .frame(width: 32, height: 32)
+                                .clipShape(RoundedRectangle(cornerRadius: 9, style: .continuous))
+                        } else {
+                            Text(item.icon).font(.system(size: 24))
+                        }
+                    }
+                } else {
+                    Text(item.icon).font(.system(size: 24))
+                }
+            }
+            .frame(height: 32)
             Text(item.title).font(AppFont.ui(12, 700)).foregroundColor(.white)
                 .multilineTextAlignment(.center).lineLimit(2).minimumScaleFactor(0.8)
         }
