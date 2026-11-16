@@ -168,7 +168,7 @@ struct AzkarView: View {
                     if !done {
                         Text(L("اضغط للعدّ")).font(AppFont.ui(13, 700)).foregroundColor(.white)
                             .padding(.horizontal, 14).frame(minHeight: 34)
-                            .background(Capsule().fill(Palette.primary))
+                            .background(Capsule().fill(Palette.primaryGrad))
                     }
                 }
             }

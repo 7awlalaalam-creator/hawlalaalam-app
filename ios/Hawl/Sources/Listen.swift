@@ -339,7 +339,7 @@ struct ListenView: View {
             }
             .padding(16)
             .frame(maxWidth: .infinity, alignment: .leading)
-            .background(RoundedRectangle(cornerRadius: 20).fill(Palette.dark))
+            .background(RoundedRectangle(cornerRadius: 20).fill(Palette.darkGrad))
         }
         .buttonStyle(.plain)
     }
@@ -550,7 +550,7 @@ struct ReciterView: View {
                 }
                 .padding(18)
                 .frame(maxWidth: .infinity)
-                .background(RoundedRectangle(cornerRadius: 22).fill(Palette.dark))
+                .background(RoundedRectangle(cornerRadius: 22).fill(Palette.darkGrad))
 
                 if r.moshaf.count > 1 {
                     Menu {
@@ -678,7 +678,7 @@ struct MiniPlayerBar: View {
             }
             .buttonStyle(.plain)
             .padding(.horizontal, 12).padding(.vertical, 8)
-            .background(RoundedRectangle(cornerRadius: 18).fill(Palette.dark))
+            .background(RoundedRectangle(cornerRadius: 18).fill(Palette.darkGrad))
             .padding(.horizontal, 12).padding(.bottom, 6)
             .sheet(isPresented: $open) {
                 NowPlayingView().environment(\.layoutDirection, Lang.dir)
@@ -773,7 +773,7 @@ struct NowPlayingView: View {
                             .font(AppFont.ui(14, 700))
                             .foregroundColor(player.speed == v ? .white : Palette.ink)
                             .frame(maxWidth: .infinity, minHeight: 40)
-                            .background(Capsule().fill(player.speed == v ? Palette.primary : Palette.chip))
+                            .background(Capsule().fill(player.speed == v ? AnyShapeStyle(Palette.primaryGrad) : AnyShapeStyle(Palette.chip)))
                     }
                     .buttonStyle(.plain)
                 }
@@ -824,7 +824,7 @@ struct NowPlayingView: View {
         return Button { player.setSleep(minutes: minutes); sleepChoice = minutes } label: {
             Text(title).font(AppFont.ui(13, 700)).foregroundColor(on ? .white : Palette.ink).lineLimit(1).minimumScaleFactor(0.8)
                 .frame(maxWidth: .infinity, minHeight: 40)
-                .background(Capsule().fill(on ? Palette.primary : Palette.chip))
+                .background(Capsule().fill(on ? AnyShapeStyle(Palette.primaryGrad) : AnyShapeStyle(Palette.chip)))
         }
         .buttonStyle(.plain)
     }

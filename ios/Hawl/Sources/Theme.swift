@@ -4,10 +4,27 @@ import UIKit
 /** خلفية داكنة بزخرفة نجوم ثمانية ذهبية خفيفة (مثل Ui.PatternDrawable في أندرويد) */
 struct PatternBackground: View {
     var color: Color = Palette.dark
+    @Environment(\.colorScheme) private var scheme
+
+    /** تدرّج اللون نفسه: أفتح في الأعلى وأغمق في الأسفل (مثل Ui.brandGradient في أندرويد) */
+    private var stops: [Color] {
+        let ui = UIColor(color).resolvedColor(with: UITraitCollection(userInterfaceStyle: scheme == .dark ? .dark : .light))
+        var h: CGFloat = 0, s: CGFloat = 0, b: CGFloat = 0, a: CGFloat = 0
+        ui.getHue(&h, saturation: &s, brightness: &b, alpha: &a)
+        return [Color(UIColor(hue: h, saturation: s, brightness: min(1, b * 1.42), alpha: a)),
+                Color(ui),
+                Color(UIColor(hue: h, saturation: s, brightness: b * 0.62, alpha: a))]
+    }
 
     var body: some View {
-        Canvas { ctx, size in
-            ctx.fill(Path(CGRect(origin: .zero, size: size)), with: .color(color))
+        let stops = self.stops
+        return Canvas { ctx, size in
+            ctx.fill(Path(CGRect(origin: .zero, size: size)),
+                     with: .linearGradient(Gradient(stops: [.init(color: stops[0], location: 0),
+                                                            .init(color: stops[1], location: 0.55),
+                                                            .init(color: stops[2], location: 1)]),
+                                           startPoint: CGPoint(x: size.width, y: 0),
+                                           endPoint: CGPoint(x: 0, y: size.height)))
             let cell: CGFloat = 44
             let half = cell * 0.2
             let stroke = Color(hex: 0xC9A876, alpha: 0.15)
@@ -88,7 +105,7 @@ struct Pill: View {
         .foregroundColor(primary ? .white : Palette.ink)
         .padding(.horizontal, 12)
         .frame(maxWidth: .infinity, minHeight: height)
-        .background(Capsule().fill(primary ? Palette.primary : Palette.card))
+        .background(Capsule().fill(primary ? AnyShapeStyle(Palette.primaryGrad) : AnyShapeStyle(Palette.card)))
         .overlay(Capsule().stroke(primary ? Color.clear : Palette.fieldBorder, lineWidth: 1))
         .contentShape(Capsule())
     }
@@ -101,15 +118,54 @@ struct ToolTile: View {
 
     var body: some View {
         VStack(spacing: 8) {
-            Image(systemName: systemImage)
-                .font(.system(size: 22, weight: .regular))
-                .foregroundColor(Palette.goldDeep)
-                .frame(height: 26)
+            Icon3D(systemImage: systemImage)
             Text(title).font(AppFont.ui(12, 700)).foregroundColor(Palette.ink).lineLimit(1).minimumScaleFactor(0.8)
         }
+        .padding(.vertical, 12)
         .frame(maxWidth: .infinity, minHeight: 84)
         .card(radius: 16)
         .contentShape(Rectangle())
+    }
+}
+
+/** أيقونة ذهبية مجسّمة داخل قرص بارز (مثل Ui.icon3d و MedallionDrawable في أندرويد) */
+struct Icon3D: View {
+    var systemImage: String
+    var size: CGFloat = 22
+    @Environment(\.colorScheme) private var scheme
+
+    private static let face = LinearGradient(colors: [Color(hex: 0xFFF2C4), Color(hex: 0xEEC46A), Color(hex: 0xC58F2E), Color(hex: 0x8F6119)],
+                                             startPoint: .top, endPoint: .bottom)
+
+    private func glyph() -> some View {
+        Image(systemName: systemImage).font(.system(size: size, weight: .medium))
+    }
+
+    var body: some View {
+        let night = scheme == .dark
+        let u = size / 22
+        ZStack {
+            Circle()
+                .fill(RadialGradient(colors: night ? [Color(hex: 0x2B6979), Color(hex: 0x1E4A55), Color(hex: 0x122D34)]
+                                                   : [Color(hex: 0xFFFDF6), Color(hex: 0xF1E6CC), Color(hex: 0xE4D3AB)],
+                                     center: UnitPoint(x: 0.5, y: 0.3), startRadius: 0, endRadius: 32))
+                .overlay(Circle().strokeBorder(LinearGradient(colors: [night ? Color.white.opacity(0.2) : .white, .clear],
+                                                              startPoint: .top, endPoint: .bottom), lineWidth: 1.5))
+                .overlay(Circle().strokeBorder(LinearGradient(colors: [.clear, night ? Color.black.opacity(0.4) : Color(hex: 0xB0904E, alpha: 0.25)],
+                                                              startPoint: .center, endPoint: .bottom), lineWidth: 3))
+                .shadow(color: .black.opacity(night ? 0.35 : 0.12), radius: 4, y: 2)
+            ZStack {
+                glyph().foregroundColor(.black.opacity(0.28)).blur(radius: 0.8 * u).offset(y: 1.7 * u)
+                ForEach([1.2, 0.9, 0.6, 0.3], id: \.self) { dy in
+                    glyph().foregroundColor(Color(hex: 0x6B4512)).offset(y: dy * u)
+                }
+                glyph().foregroundColor(.white.opacity(0.55)).offset(y: -0.35 * u)
+                glyph().foregroundStyle(Self.face)
+            }
+            .offset(y: -0.5 * u)
+        }
+        .frame(width: 50, height: 50)
+        .accessibilityHidden(true)
     }
 }
 

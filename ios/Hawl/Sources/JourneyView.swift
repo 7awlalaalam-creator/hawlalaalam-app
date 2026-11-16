@@ -23,7 +23,7 @@ struct JourneyView: View {
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .padding(18)
-                .background(RoundedRectangle(cornerRadius: 22).fill(Palette.dark))
+                .background(RoundedRectangle(cornerRadius: 22).fill(Palette.darkGrad))
 
                 HStack(spacing: 8) {
                     stat(ar(readCount), L("يومًا قرأت\nمن آخر ٣٠"))

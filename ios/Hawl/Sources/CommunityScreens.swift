@@ -431,7 +431,7 @@ struct AdhanCheckView: View {
                                 Button(f) { act() }
                                     .font(AppFont.ui(13, 700)).foregroundColor(.white)
                                     .padding(.horizontal, 14).frame(minHeight: 38)
-                                    .background(Capsule().fill(Palette.primary))
+                                    .background(Capsule().fill(Palette.primaryGrad))
                             }
                         }
                         .padding(.vertical, 12)

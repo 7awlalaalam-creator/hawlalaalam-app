@@ -282,7 +282,7 @@ struct SettingsView: View {
                         Button { state.themeMode = i } label: {
                             Text(n).font(AppFont.ui(14, 500)).foregroundColor(state.themeMode == i ? .white : Palette.ink)
                                 .frame(maxWidth: .infinity, minHeight: 42)
-                                .background(Capsule().fill(state.themeMode == i ? Palette.primary : Palette.card))
+                                .background(Capsule().fill(state.themeMode == i ? AnyShapeStyle(Palette.primaryGrad) : AnyShapeStyle(Palette.card)))
                                 .overlay(Capsule().stroke(state.themeMode == i ? Color.clear : Palette.fieldBorder))
                         }
                     }
@@ -562,7 +562,7 @@ struct LanguagePicker: View {
                     } label: {
                         Text(name).font(AppFont.ui(14, 500)).foregroundColor(saved == code ? .white : Palette.ink)
                             .frame(maxWidth: .infinity, minHeight: 42)
-                            .background(Capsule().fill(saved == code ? Palette.primary : Palette.card))
+                            .background(Capsule().fill(saved == code ? AnyShapeStyle(Palette.primaryGrad) : AnyShapeStyle(Palette.card)))
                             .overlay(Capsule().stroke(saved == code ? Color.clear : Palette.fieldBorder))
                     }
                 }

@@ -325,7 +325,7 @@ struct MosquesView: View {
                         Button { showList = true } label: {
                             Label(L("القائمة"), systemImage: "list.bullet").font(AppFont.ui(14, 700)).foregroundColor(.white)
                                 .padding(.horizontal, 14).padding(.vertical, 10)
-                                .background(Capsule().fill(Palette.dark))
+                                .background(Capsule().fill(Palette.darkGrad))
                         }
                     }
                 }
@@ -353,7 +353,7 @@ struct MosquesView: View {
         VStack(alignment: .leading, spacing: 10) {
             HStack(spacing: 12) {
                 Image(systemName: "building.columns.fill").font(.system(size: 22)).foregroundColor(Color(hex: 0xE4C58A))
-                    .frame(width: 46, height: 46).background(RoundedRectangle(cornerRadius: 14).fill(Palette.dark))
+                    .frame(width: 46, height: 46).background(RoundedRectangle(cornerRadius: 14).fill(Palette.darkGrad))
                 VStack(alignment: .leading, spacing: 2) {
                     Text(m.name.isEmpty ? L("مسجد") : m.name).font(AppFont.ui(17, 700)).foregroundColor(Palette.ink).lineLimit(2)
                     Text(m.jami ? L("مسجد جامع") : (m.musalla ? L("مصلى") : L("مسجد"))).font(AppFont.ui(12)).foregroundColor(Palette.muted)
@@ -371,7 +371,7 @@ struct MosquesView: View {
                 Button { directions(m) } label: {
                     Text(L("الاتجاهات")).font(AppFont.ui(15, 700)).foregroundColor(.white)
                         .frame(maxWidth: .infinity).padding(.vertical, 12)
-                        .background(RoundedRectangle(cornerRadius: 12).fill(Palette.dark))
+                        .background(RoundedRectangle(cornerRadius: 12).fill(Palette.darkGrad))
                 }
                 Button { share(m) } label: {
                     Image(systemName: "square.and.arrow.up").foregroundColor(Palette.ink)
@@ -401,7 +401,7 @@ struct MosquesView: View {
                         Button { selected = m; showList = false } label: {
                             HStack(spacing: 12) {
                                 Image(systemName: "building.columns").foregroundColor(Color(hex: 0xE4C58A))
-                                    .frame(width: 38, height: 38).background(RoundedRectangle(cornerRadius: 11).fill(Palette.dark))
+                                    .frame(width: 38, height: 38).background(RoundedRectangle(cornerRadius: 11).fill(Palette.darkGrad))
                                 VStack(alignment: .leading, spacing: 2) {
                                     Text(m.name.isEmpty ? L("مسجد") : m.name).font(AppFont.ui(15, 700)).foregroundColor(Palette.ink)
                                     Text(m.jami ? L("مسجد جامع") : (m.musalla ? L("مصلى") : L("مسجد"))).font(AppFont.ui(12)).foregroundColor(Palette.muted)
@@ -555,7 +555,7 @@ struct AddMosqueView: View {
                     if !error.isEmpty { Text(error).font(AppFont.ui(13)).foregroundColor(Color(hex: 0xA1460A)) }
                     Button { Task { await send() } } label: {
                         Text(sending ? L("جارٍ الإرسال…") : L("إرسال")).font(AppFont.ui(16, 700)).foregroundColor(.white)
-                            .frame(maxWidth: .infinity).padding(.vertical, 13).background(RoundedRectangle(cornerRadius: 12).fill(Palette.dark))
+                            .frame(maxWidth: .infinity).padding(.vertical, 13).background(RoundedRectangle(cornerRadius: 12).fill(Palette.darkGrad))
                     }.disabled(sending)
                 }
                 .padding(16)

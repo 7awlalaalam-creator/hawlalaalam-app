@@ -160,7 +160,7 @@ struct DedicateView: View {
                             Text(Self.titles[i]).font(AppFont.ui(13, 500))
                                 .foregroundColor(i == honor ? .white : Palette.ink)
                                 .frame(maxWidth: .infinity, minHeight: 38)
-                                .background(Capsule().fill(i == honor ? Palette.primary : Palette.card))
+                                .background(Capsule().fill(i == honor ? AnyShapeStyle(Palette.primaryGrad) : AnyShapeStyle(Palette.card)))
                                 .overlay(Capsule().stroke(i == honor ? Color.clear : Palette.fieldBorder))
                         }
                         .buttonStyle(.plain)
@@ -240,7 +240,7 @@ struct DownloadsView: View {
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .padding(.horizontal, 18).padding(.vertical, 16)
-                .background(RoundedRectangle(cornerRadius: 20).fill(Palette.dark))
+                .background(RoundedRectangle(cornerRadius: 20).fill(Palette.darkGrad))
 
                 if dl.items.isEmpty {
                     Text(L("افتح صفحة أي قارئ في «الاستماع» واضغط ⬇ بجانب السورة لتستمع إليها دون إنترنت."))
@@ -298,7 +298,7 @@ struct DownloadsView: View {
                 NavigationLink(value: Screen.player(it.url)) {
                     Text(player.current?.url == it.url && player.playing ? L("◼︎ يعمل") : L("▶ تشغيل")).font(AppFont.ui(13, 700)).foregroundColor(.white)
                         .padding(.horizontal, 14).frame(minHeight: 36)
-                        .background(Capsule().fill(Palette.primary))
+                        .background(Capsule().fill(Palette.primaryGrad))
                 }
             case .running:
                 Text(ar(it.percent) + L("٪")).font(AppFont.ui(13, 700)).foregroundColor(Palette.goldDeep)
@@ -616,7 +616,7 @@ struct FeaturesView: View {
             VStack(spacing: 0) {
                 Image(systemName: s.2).font(.system(size: 34)).foregroundColor(Palette.gold)
                     .frame(width: 76, height: 76)
-                    .background(RoundedRectangle(cornerRadius: 36).fill(Palette.dark))
+                    .background(RoundedRectangle(cornerRadius: 36).fill(Palette.darkGrad))
                     .padding(.top, 28)
                 if s.3 != 0 {
                     Text(s.3 == 1 ? L("جديد") : L("مطوّر")).font(AppFont.ui(13, 700)).foregroundColor(Palette.widgetDark)

@@ -199,7 +199,7 @@ struct FamilyListView: View {
                         .font(AppFont.ui(13)).foregroundColor(Palette.onDarkMuted)
                 }
                 .padding(18).frame(maxWidth: .infinity, alignment: .leading)
-                .background(RoundedRectangle(cornerRadius: 20).fill(Palette.dark))
+                .background(RoundedRectangle(cornerRadius: 20).fill(Palette.darkGrad))
 
                 if !saved.isEmpty {
                     Text(L("ختماتي")).font(AppFont.ui(15, 700)).foregroundColor(Palette.ink)
@@ -381,7 +381,7 @@ struct FamilyGroupView: View {
                 ProgressView(value: Double(g.doneCount), total: 30).tint(Palette.gold)
             }
             .padding(18).frame(maxWidth: .infinity, alignment: .leading)
-            .background(RoundedRectangle(cornerRadius: 20).fill(Palette.dark))
+            .background(RoundedRectangle(cornerRadius: 20).fill(Palette.darkGrad))
 
             if g.doneCount == 30 {
                 VStack(spacing: 8) {
@@ -416,7 +416,7 @@ struct FamilyGroupView: View {
                                     .font(AppFont.ui(13, 700)).foregroundColor(Palette.goldDeep).padding(.horizontal, 6)
                                 Button(L("أتممته")) { Task { await run { try await FamilyAPI.act("done", id, part: p.n) } } }
                                     .font(AppFont.ui(13, 700)).foregroundColor(.white)
-                                    .padding(.horizontal, 12).frame(minHeight: 34).background(Capsule().fill(Palette.primary))
+                                    .padding(.horizontal, 12).frame(minHeight: 34).background(Capsule().fill(Palette.primaryGrad))
                             }
                         }
                         .buttonStyle(.plain)
@@ -451,7 +451,7 @@ struct FamilyGroupView: View {
                     ForEach(g.members, id: \.name) { m in
                         HStack {
                             Text(String(m.name.first ?? "؟")).font(AppFont.ui(15, 700)).foregroundColor(Palette.gold)
-                                .frame(width: 36, height: 36).background(Circle().fill(Palette.dark))
+                                .frame(width: 36, height: 36).background(Circle().fill(Palette.darkGrad))
                             VStack(alignment: .leading, spacing: 2) {
                                 Text(m.name).font(AppFont.ui(14, 700)).foregroundColor(Palette.ink)
                                 Text(L("الأجزاء ") + m.parts.map { ar($0) }.joined(separator: L("، "))).font(AppFont.ui(12)).foregroundColor(Palette.muted)

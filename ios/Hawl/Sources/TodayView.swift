@@ -249,7 +249,7 @@ struct TodayView: View {
                     Spacer()
                     Text(L("راجع")).font(AppFont.ui(14, 700)).foregroundColor(.white)
                         .padding(.horizontal, 16).frame(minHeight: 38)
-                        .background(Capsule().fill(Palette.primary))
+                        .background(Capsule().fill(Palette.primaryGrad))
                 }
                 .padding(.horizontal, 14).padding(.vertical, 12)
                 .card()
@@ -273,7 +273,7 @@ struct TodayView: View {
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .padding(.horizontal, 18).padding(.vertical, 16)
-                .background(RoundedRectangle(cornerRadius: 22).fill(Palette.dark))
+                .background(RoundedRectangle(cornerRadius: 22).fill(Palette.darkGrad))
             )
         }
         return AnyView(
@@ -308,7 +308,7 @@ struct TodayView: View {
                 .padding(.top, 12)
             }
             .padding(.horizontal, 18).padding(.vertical, 16)
-            .background(RoundedRectangle(cornerRadius: 22).fill(Palette.dark))
+            .background(RoundedRectangle(cornerRadius: 22).fill(Palette.darkGrad))
         )
     }
 

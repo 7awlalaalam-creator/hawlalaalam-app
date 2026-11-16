@@ -286,7 +286,7 @@ struct ArticlesView: View {
                                         Text(c.isEmpty ? L("الكل") : c).font(AppFont.ui(14, 700))
                                             .foregroundColor(on ? .white : Palette.ink)
                                             .padding(.horizontal, 16).frame(minHeight: 38)
-                                            .background(Capsule().fill(on ? Palette.primary : Palette.card))
+                                            .background(Capsule().fill(on ? AnyShapeStyle(Palette.primaryGrad) : AnyShapeStyle(Palette.card)))
                                             .overlay(Capsule().stroke(on ? Color.clear : Palette.line, lineWidth: 1))
                                     }
                                     .accessibilityAddTraits(on ? .isSelected : [])

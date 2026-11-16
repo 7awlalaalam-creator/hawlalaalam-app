@@ -181,7 +181,7 @@ struct KhatmaView: View {
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(.horizontal, 18).padding(.top, 16).padding(.bottom, 18)
-        .background(RoundedRectangle(cornerRadius: 20).fill(Palette.dark))
+        .background(RoundedRectangle(cornerRadius: 20).fill(Palette.darkGrad))
     }
 
     private func goldButton(_ label: String, _ page: Int) -> some View {
@@ -315,7 +315,7 @@ struct KhatmaView: View {
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .padding(18)
-                .background(RoundedRectangle(cornerRadius: 20).fill(Palette.dark))
+                .background(RoundedRectangle(cornerRadius: 20).fill(Palette.darkGrad))
             }
 
             VStack(alignment: .leading, spacing: 0) {
@@ -513,7 +513,7 @@ struct KhatmaView: View {
                     .multilineTextAlignment(.center).lineLimit(3)
                     .padding(6)
                     .frame(maxWidth: .infinity, minHeight: 44)
-                    .background(RoundedRectangle(cornerRadius: 20).fill(selected ? Palette.primary : Palette.card))
+                    .background(RoundedRectangle(cornerRadius: 20).fill(selected ? AnyShapeStyle(Palette.primaryGrad) : AnyShapeStyle(Palette.card)))
                     .overlay(RoundedRectangle(cornerRadius: 20).stroke(selected ? Color.clear : Palette.fieldBorder))
             }
             .buttonStyle(.plain)

@@ -47,6 +47,12 @@ enum Palette {
     static let logoBg = Color(hex: 0x0E2C31)
     static let onDarkSoft = Color(hex: 0xEFE4CF)
     static let widgetDark = Color(hex: 0x123640)
+
+    /** تدرّج لون الهوية (مثل Ui.brandGradient في أندرويد): أفتح في الأعلى، الأصل، أغمق في الأسفل */
+    static let darkGrad = LinearGradient(colors: [Color.dyn(0x1A4D5B, 0x153C44), dark, Color.dyn(0x0B2128, 0x091A1E)],
+                                         startPoint: .topLeading, endPoint: .bottomTrailing)
+    static let primaryGrad = LinearGradient(colors: [Color.dyn(0x1F4B57, 0x418D9F), primary, Color.dyn(0x0E2126, 0x1D3D45)],
+                                            startPoint: .topLeading, endPoint: .bottomTrailing)
 }
 
 enum AppFont {

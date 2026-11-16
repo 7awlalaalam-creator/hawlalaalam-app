@@ -458,7 +458,7 @@ struct TasbeehView: View {
                             Text(Self.dhikrs[i]).font(AppFont.ui(14, 500))
                                 .foregroundColor(i == dhikr ? .white : Palette.ink)
                                 .padding(.horizontal, 14).padding(.vertical, 8)
-                                .background(Capsule().fill(i == dhikr ? Palette.primary : Palette.card))
+                                .background(Capsule().fill(i == dhikr ? AnyShapeStyle(Palette.primaryGrad) : AnyShapeStyle(Palette.card)))
                                 .overlay(Capsule().stroke(i == dhikr ? Color.clear : Palette.fieldBorder))
                         }
                     }
@@ -474,7 +474,7 @@ struct TasbeehView: View {
                 let side = max(96, min(240, min(geo.size.width, geo.size.height) - 8))
                 Button(action: tap) {
                     ZStack {
-                        Circle().fill(Palette.dark)
+                        Circle().fill(Palette.darkGrad)
                         Circle().stroke(Palette.gold, lineWidth: 2)
                         if target > 0 {
                             Ring(fraction: Double(count) / Double(target), track: .clear, tint: Palette.gold, width: 6)
