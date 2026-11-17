@@ -128,43 +128,37 @@ struct ToolTile: View {
     }
 }
 
-/** أيقونة ذهبية مجسّمة داخل قرص بارز (مثل Ui.icon3d و MedallionDrawable في أندرويد) */
+/** أيقونة ذهبية لامعة داخل مربع زجاجي بلون الهوية (مثل GlassTileDrawable و Ui.icon3d في أندرويد) */
 struct Icon3D: View {
     var systemImage: String
-    var size: CGFloat = 22
-    @Environment(\.colorScheme) private var scheme
+    var box: CGFloat = 52
 
-    private static let face = LinearGradient(colors: [Color(hex: 0xFFF2C4), Color(hex: 0xEEC46A), Color(hex: 0xC58F2E), Color(hex: 0x8F6119)],
+    private static let face = LinearGradient(colors: [Color(hex: 0xFFF4CF), Color(hex: 0xF0C766), Color(hex: 0xB07A24)],
                                              startPoint: .top, endPoint: .bottom)
-
-    private func glyph() -> some View {
-        Image(systemName: systemImage).font(.system(size: size, weight: .medium))
-    }
+    private static let tile = LinearGradient(colors: [Color(hex: 0x2A6878), Color(hex: 0x16353D), Color(hex: 0x0A1D22)],
+                                             startPoint: .topLeading, endPoint: .bottomTrailing)
 
     var body: some View {
-        let night = scheme == .dark
-        let u = size / 22
+        let r = box * 17 / 64
+        let shape = RoundedRectangle(cornerRadius: r, style: .continuous)
         ZStack {
-            Circle()
-                .fill(RadialGradient(colors: night ? [Color(hex: 0x2B6979), Color(hex: 0x1E4A55), Color(hex: 0x122D34)]
-                                                   : [Color(hex: 0xFFFDF6), Color(hex: 0xF1E6CC), Color(hex: 0xE4D3AB)],
-                                     center: UnitPoint(x: 0.5, y: 0.3), startRadius: 0, endRadius: 32))
-                .overlay(Circle().strokeBorder(LinearGradient(colors: [night ? Color.white.opacity(0.2) : .white, .clear],
-                                                              startPoint: .top, endPoint: .bottom), lineWidth: 1.5))
-                .overlay(Circle().strokeBorder(LinearGradient(colors: [.clear, night ? Color.black.opacity(0.4) : Color(hex: 0xB0904E, alpha: 0.25)],
-                                                              startPoint: .center, endPoint: .bottom), lineWidth: 3))
-                .shadow(color: .black.opacity(night ? 0.35 : 0.12), radius: 4, y: 2)
-            ZStack {
-                glyph().foregroundColor(.black.opacity(0.28)).blur(radius: 0.8 * u).offset(y: 1.7 * u)
-                ForEach([1.2, 0.9, 0.6, 0.3], id: \.self) { dy in
-                    glyph().foregroundColor(Color(hex: 0x6B4512)).offset(y: dy * u)
-                }
-                glyph().foregroundColor(.white.opacity(0.55)).offset(y: -0.35 * u)
-                glyph().foregroundStyle(Self.face)
-            }
-            .offset(y: -0.5 * u)
+            shape.fill(Self.tile)
+            shape.fill(RadialGradient(colors: [Color(hex: 0xE9C06A, alpha: 0.35), .clear],
+                                      center: UnitPoint(x: 0.5, y: 0.55), startRadius: 0, endRadius: box / 2))
+            // لمعة زجاجية في النصف الأعلى
+            Ellipse()
+                .fill(LinearGradient(colors: [.white.opacity(0.38), .white.opacity(0)], startPoint: .top, endPoint: .bottom))
+                .frame(width: box * 1.3, height: box * 0.75)
+                .offset(y: -box * 0.4)
+                .clipShape(shape)
+            shape.strokeBorder(Color(hex: 0xE9C06A, alpha: 0.55), lineWidth: 1)
+            Image(systemName: systemImage)
+                .font(.system(size: box * 0.42, weight: .medium))
+                .foregroundStyle(Self.face)
+                .shadow(color: .black.opacity(0.55), radius: 1.2, y: 1.2)
         }
-        .frame(width: 50, height: 50)
+        .frame(width: box, height: box)
+        .shadow(color: .black.opacity(0.18), radius: 3, y: 2)
         .accessibilityHidden(true)
     }
 }
