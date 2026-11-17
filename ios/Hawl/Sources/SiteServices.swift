@@ -8,6 +8,7 @@ import SwiftUI
 struct SiteItem: Identifiable, Hashable {
     let id: String, title: String, icon: String, url: URL, isNew: Bool
     var iconURL: URL? = nil      // icon_url: صورة PNG مربعة بدل الإيموجي إن وُجدت
+    var desc: String = ""        // وصف قصير اختياري يظهر في الخانة الكبيرة (الخدمة الأولى)
 }
 
 struct SiteNotice: Hashable {
@@ -77,7 +78,9 @@ final class SiteServices: ObservableObject {
             let isNew = (s["badge"] as? String) == "new" && !opened.contains("|\(id)|")
             let iu = (s["icon_url"] as? String ?? "").trimmingCharacters(in: .whitespaces)
             let iconURL = iu.hasPrefix("https://") ? URL(string: iu) : nil
-            out.append(SiteItem(id: id.isEmpty ? u.absoluteString : id, title: title, icon: s["icon"] as? String ?? "✦", url: u, isNew: isNew, iconURL: iconURL))
+            let dAr = s["desc"] as? String ?? "", dEn = s["desc_en"] as? String ?? ""
+            out.append(SiteItem(id: id.isEmpty ? u.absoluteString : id, title: title, icon: s["icon"] as? String ?? "✦", url: u, isNew: isNew,
+                                iconURL: iconURL, desc: Lang.en && !dEn.isEmpty ? dEn : dAr))
         }
         items = out
         notice = nil
@@ -119,77 +122,145 @@ final class SiteServices: ObservableObject {
     }
 }
 
-/** خانة «من الموقع» (إيموجي واسم وشارة «جديد») */
+/** أيقونة خدمة: صورة icon_url بزوايا دائرية، والإيموجي حتى تُحمَّل أو إن لم توجد */
+struct SiteIcon: View {
+    let item: SiteItem
+    var size: CGFloat
+    var body: some View {
+        Group {
+            if let iu = item.iconURL {
+                AsyncImage(url: iu) { phase in
+                    if let img = phase.image {
+                        img.resizable().scaledToFill()
+                            .frame(width: size, height: size)
+                            .clipShape(RoundedRectangle(cornerRadius: size * 0.3, style: .continuous))
+                    } else {
+                        Text(item.icon).font(.system(size: size * 0.62))
+                    }
+                }
+            } else {
+                Text(item.icon).font(.system(size: size * 0.62))
+            }
+        }
+        .frame(width: size, height: size)
+    }
+}
+
+private struct NewBadge: View {
+    var body: some View {
+        Text(L("جديد")).font(AppFont.ui(9, 700)).foregroundColor(.white)
+            .padding(.horizontal, 6).padding(.vertical, 1)
+            .background(Capsule().fill(Color(hex: 0xC94A3A)))
+            .padding(6)
+    }
+}
+
+/** خانة «من الموقع» الصغيرة: شعار واسم في سطر */
 struct SiteTile: View {
     let item: SiteItem
     var body: some View {
-        VStack(spacing: 6) {
-            Group {
-                if let iu = item.iconURL {
-                    // صورة مربعة بزوايا دائرية بحجم أيقونات الأدوات؛ الإيموجي حتى تُحمَّل أو إن فشلت
-                    AsyncImage(url: iu) { phase in
-                        if let img = phase.image {
-                            img.resizable().scaledToFill()
-                                .frame(width: 32, height: 32)
-                                .clipShape(RoundedRectangle(cornerRadius: 9, style: .continuous))
-                        } else {
-                            Text(item.icon).font(.system(size: 24))
-                        }
-                    }
-                } else {
-                    Text(item.icon).font(.system(size: 24))
-                }
-            }
-            .frame(height: 32)
-            Text(item.title).font(AppFont.ui(12, 700)).foregroundColor(.white)
-                .multilineTextAlignment(.center).lineLimit(2).minimumScaleFactor(0.8)
+        VStack(spacing: 5) {
+            SiteIcon(item: item, size: 38)
+            Text(item.title).font(AppFont.ui(11, 700)).foregroundColor(Palette.ink)
+                .lineLimit(1).minimumScaleFactor(0.8)
         }
-        .padding(.horizontal, 2)
-        .frame(maxWidth: .infinity, minHeight: 84)
-        .background(RoundedRectangle(cornerRadius: 16, style: .continuous).fill(Color.white.opacity(0.1)))
-        .overlay(RoundedRectangle(cornerRadius: 16, style: .continuous).stroke(Color.white.opacity(0.2), lineWidth: 1))
-        .overlay(alignment: .topTrailing) {
-            if item.isNew {
-                Text(L("جديد")).font(AppFont.ui(9, 700)).foregroundColor(.white)
-                    .padding(.horizontal, 6).padding(.vertical, 1)
-                    .background(Capsule().fill(Color(hex: 0xC94A3A)))
-                    .offset(x: 4, y: -6)
-            }
-        }
+        .padding(.horizontal, 4)
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .card(radius: 18)
+        .overlay(alignment: .topTrailing) { if item.isNew { NewBadge() } }
         .contentShape(Rectangle())
         .accessibilityElement(children: .ignore)
         .accessibilityLabel(item.title + (item.isNew ? "، " + L("جديد") : ""))
     }
 }
 
-/** قسم «✦ من الموقع» في الأدوات */
+/** الخانة الكبيرة: الخدمة الأولى بلون الهوية مع وصفها وزر «افتح» */
+struct SiteBigTile: View {
+    let item: SiteItem
+    var body: some View {
+        VStack(alignment: .leading, spacing: 3) {
+            SiteIcon(item: item, size: 50)
+            Spacer(minLength: 4)
+            Text(item.title).font(AppFont.ui(16, 700)).foregroundColor(.white).lineLimit(2)
+            if !item.desc.isEmpty {
+                Text(item.desc).font(AppFont.ui(11)).foregroundColor(Palette.onDarkMuted).lineLimit(2)
+            }
+            Text(L("افتح ‹")).font(AppFont.ui(12, 700)).foregroundColor(Color(hex: 0x2B1D06))
+                .padding(.horizontal, 12).padding(.vertical, 5)
+                .background(RoundedRectangle(cornerRadius: 11).fill(LinearGradient(colors: [Color(hex: 0xF3DFA8), Color(hex: 0xC9A876)],
+                                                                                 startPoint: .top, endPoint: .bottom)))
+                .padding(.top, 5)
+        }
+        .padding(14)
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .leading)
+        .background(PatternBackground().clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous)))
+        .overlay(alignment: .topTrailing) { if item.isNew { NewBadge() } }
+        .contentShape(Rectangle())
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel(item.title + (item.desc.isEmpty ? "" : "، " + item.desc) + (item.isNew ? "، " + L("جديد") : ""))
+    }
+}
+
+/**
+ * قسم «✦ من الموقع» في الأدوات بتخطيط «بينتو»: الخدمة الأولى خانة كبيرة (عرض خانتين وارتفاع خانتين)
+ * وبجانبها أربع صغيرة؛ وما زاد صفوف من أربع تحتها. بلا سحب جانبي ولا فراغات.
+ */
 struct SiteServicesSection: View {
     @EnvironmentObject var state: AppState
     @ObservedObject var svc = SiteServices.shared
-    private let columns = Array(repeating: GridItem(.flexible(), spacing: 8), count: 4)
+    private let cell: CGFloat = 82, gap: CGFloat = 8
+
+    @ViewBuilder private func link<V: View>(_ it: SiteItem, @ViewBuilder _ label: () -> V) -> some View {
+        if SiteServices.isSite(it.url) {
+            NavigationLink(value: Screen.web(it.url, it.title)) { label() }
+                .simultaneousGesture(TapGesture().onEnded { svc.markOpened(it.id) })
+        } else {
+            Button { svc.markOpened(it.id); SiteServices.open(it.url, title: it.title, state: state) } label: { label() }
+        }
+    }
 
     var body: some View {
-        if !svc.items.isEmpty {
-            VStack(alignment: .leading, spacing: 10) {
+        let items = svc.items
+        if !items.isEmpty {
+            let rest = min(4, items.count - 1)
+            let extra = Array(items.dropFirst(1 + rest))
+            VStack(alignment: .leading, spacing: gap) {
                 HStack {
-                    Text(L("✦ من الموقع")).font(AppFont.ui(14, 700)).foregroundColor(Palette.gold)
+                    Text(L("✦ من الموقع")).font(AppFont.ui(15, 700)).foregroundColor(Palette.ink)
                     Spacer()
-                    Text(L("يُحدَّث تلقائيًا")).font(AppFont.ui(11)).foregroundColor(Palette.onDarkMuted)
+                    Text(L("يُحدَّث تلقائيًا")).font(AppFont.ui(11)).foregroundColor(Palette.muted)
                 }
                 .padding(.horizontal, 4)
-                LazyVGrid(columns: columns, spacing: 8) {
-                    ForEach(svc.items) { it in
-                        if SiteServices.isSite(it.url) {
-                            NavigationLink(value: Screen.web(it.url, it.title)) { SiteTile(item: it) }
-                                .simultaneousGesture(TapGesture().onEnded { svc.markOpened(it.id) })
-                        } else {
-                            Button { svc.markOpened(it.id); SiteServices.open(it.url, title: it.title, state: state) } label: { SiteTile(item: it) }
+                HStack(spacing: gap) {
+                    link(items[0]) { SiteBigTile(item: items[0]) }
+                        .frame(maxWidth: .infinity)
+                        .frame(height: rest == 0 ? cell : cell * 2 + gap)
+                    if rest > 0 {
+                        let side = Array(items[1...rest])
+                        let rows = rest <= 2 ? 1 : 2
+                        VStack(spacing: gap) {
+                            ForEach(0..<rows, id: \.self) { r in
+                                HStack(spacing: gap) {
+                                    ForEach(0..<2, id: \.self) { k in
+                                        let i = r * 2 + k
+                                        if i < side.count { link(side[i]) { SiteTile(item: side[i]) } }
+                                        else { Color.clear }
+                                    }
+                                }
+                            }
                         }
+                        .frame(maxWidth: .infinity)
+                        .frame(height: cell * 2 + gap)
                     }
                 }
+                .buttonStyle(.plain)
+                if !extra.isEmpty {
+                    LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: gap), count: 4), spacing: gap) {
+                        ForEach(extra) { it in link(it) { SiteTile(item: it) }.frame(height: cell) }
+                    }
+                    .buttonStyle(.plain)
+                }
             }
-            .padding(12)
-            .background(PatternBackground().clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous)))
             .padding(.top, 8)
         }
     }
