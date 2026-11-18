@@ -183,7 +183,7 @@ struct SiteBigTile: View {
             Spacer(minLength: 4)
             Text(item.title).font(AppFont.ui(16, 700)).foregroundColor(.white).lineLimit(2)
             if !item.desc.isEmpty {
-                Text(item.desc).font(AppFont.ui(11)).foregroundColor(Palette.onDarkMuted).lineLimit(2)
+                Text(item.desc).font(AppFont.ui(11)).foregroundColor(Palette.onDarkMuted).lineLimit(1).truncationMode(.tail)
             }
             Text(L("افتح ‹")).font(AppFont.ui(12, 700)).foregroundColor(Color(hex: 0x2B1D06))
                 .padding(.horizontal, 12).padding(.vertical, 5)
