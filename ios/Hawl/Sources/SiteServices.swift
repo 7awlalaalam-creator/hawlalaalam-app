@@ -9,6 +9,7 @@ struct SiteItem: Identifiable, Hashable {
     let id: String, title: String, icon: String, url: URL, isNew: Bool
     var iconURL: URL? = nil      // icon_url: صورة PNG مربعة بدل الإيموجي إن وُجدت
     var desc: String = ""        // وصف قصير اختياري يظهر في الخانة الكبيرة (الخدمة الأولى)
+    var featured: Bool = false   // «بطاقة مميزة»: داكنة عريضة بجوار الأولى (حتى اثنتين)
 }
 
 struct SiteNotice: Hashable {
@@ -80,7 +81,8 @@ final class SiteServices: ObservableObject {
             let iconURL = iu.hasPrefix("https://") ? URL(string: iu) : nil
             let dAr = s["desc"] as? String ?? "", dEn = s["desc_en"] as? String ?? ""
             out.append(SiteItem(id: id.isEmpty ? u.absoluteString : id, title: title, icon: s["icon"] as? String ?? "✦", url: u, isNew: isNew,
-                                iconURL: iconURL, desc: Lang.en && !dEn.isEmpty ? dEn : dAr))
+                                iconURL: iconURL, desc: Lang.en && !dEn.isEmpty ? dEn : dAr,
+                                featured: (s["featured"] as? Bool) ?? false))
         }
         items = out
         notice = nil
@@ -201,6 +203,30 @@ struct SiteBigTile: View {
     }
 }
 
+/** بطاقة مميزة: داكنة عريضة بأيقونة واسم ووصف بسطر واحد */
+struct SiteWideTile: View {
+    let item: SiteItem
+    var body: some View {
+        HStack(spacing: 10) {
+            SiteIcon(item: item, size: 40)
+            VStack(alignment: .leading, spacing: 2) {
+                Text(item.title).font(AppFont.ui(14, 700)).foregroundColor(.white).lineLimit(1)
+                if !item.desc.isEmpty {
+                    Text(item.desc).font(AppFont.ui(11)).foregroundColor(Palette.onDarkMuted).lineLimit(1).truncationMode(.tail)
+                }
+            }
+            Spacer(minLength: 0)
+        }
+        .padding(.horizontal, 12)
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .background(PatternBackground().clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous)))
+        .overlay(alignment: .topTrailing) { if item.isNew { NewBadge() } }
+        .contentShape(Rectangle())
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel(item.title + (item.desc.isEmpty ? "" : "، " + item.desc) + (item.isNew ? "، " + L("جديد") : ""))
+    }
+}
+
 /**
  * قسم «✦ من الموقع» في الأدوات بتخطيط «بينتو»: الخدمة الأولى خانة كبيرة (عرض خانتين وارتفاع خانتين)
  * وبجانبها أربع صغيرة؛ وما زاد صفوف من أربع تحتها. بلا سحب جانبي ولا فراغات.
@@ -219,18 +245,47 @@ struct SiteServicesSection: View {
         }
     }
 
+    private var sectionHeader: some View {
+        HStack {
+            Text(L("✦ من الموقع")).font(AppFont.ui(15, 700)).foregroundColor(Palette.ink)
+            Spacer()
+            Text(L("يُحدَّث تلقائيًا")).font(AppFont.ui(11)).foregroundColor(Palette.muted)
+        }
+        .padding(.horizontal, 4)
+    }
+
     var body: some View {
         let items = svc.items
-        if !items.isEmpty {
+        let others = Array(items.dropFirst())
+        let feat = Array(others.filter { $0.featured }.prefix(2))
+        let featIDs = Set(feat.map(\.id))
+        if !items.isEmpty && !feat.isEmpty {
+            // «بطاقة مميزة»: حتى بطاقتين داكنتين عريضتين بجوار الأولى، والباقي صغيرة في صفوف تحتها
+            let small = others.filter { !featIDs.contains($0.id) }
+            VStack(alignment: .leading, spacing: gap) {
+                sectionHeader
+                HStack(spacing: gap) {
+                    link(items[0]) { SiteBigTile(item: items[0]) }.frame(maxWidth: .infinity)
+                    VStack(spacing: gap) {
+                        ForEach(feat) { it in link(it) { SiteWideTile(item: it) } }
+                    }
+                    .frame(maxWidth: .infinity)
+                }
+                .frame(height: cell * 2 + gap)
+                .buttonStyle(.plain)
+                if !small.isEmpty {
+                    LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: gap), count: 4), spacing: gap) {
+                        ForEach(small) { it in link(it) { SiteTile(item: it) }.frame(height: cell) }
+                    }
+                    .buttonStyle(.plain)
+                }
+            }
+            .padding(.top, 8)
+        } else if !items.isEmpty {
             let rest = min(4, items.count - 1)
             let extra = Array(items.dropFirst(1 + rest))
             VStack(alignment: .leading, spacing: gap) {
-                HStack {
-                    Text(L("✦ من الموقع")).font(AppFont.ui(15, 700)).foregroundColor(Palette.ink)
-                    Spacer()
-                    Text(L("يُحدَّث تلقائيًا")).font(AppFont.ui(11)).foregroundColor(Palette.muted)
-                }
-                .padding(.horizontal, 4)
+                sectionHeader
                 HStack(spacing: gap) {
                     link(items[0]) { SiteBigTile(item: items[0]) }
                         .frame(maxWidth: .infinity)
