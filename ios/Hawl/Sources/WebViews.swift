@@ -3,6 +3,18 @@ import WebKit
 
 /** إعدادات صفحات الموقع داخل التطبيق: علامة التطبيق، وجسر bridge.js المشترك مع أندرويد */
 enum WebConfig {
+    /**
+     * صفحات الموقع تقبل ?mode=dark أو ?mode=light: نمرّر وضع التطبيق ليتطابق الوضع الليلي (مثل Nav.themed في أندرويد).
+     * لا نغيّر رابطًا فيه mode، ولا الواجهة البرمجية، ولا غير صفحات الموقع.
+     */
+    static func themed(_ url: URL, night: Bool) -> URL {
+        guard let host = url.host, host.hasSuffix("7awlalaalam.com"), url.path.hasPrefix("/quran/"), !url.path.contains("/api/"),
+              var c = URLComponents(url: url, resolvingAgainstBaseURL: false),
+              !(c.queryItems ?? []).contains(where: { $0.name == "mode" }) else { return url }
+        c.queryItems = (c.queryItems ?? []) + [URLQueryItem(name: "mode", value: night ? "dark" : "light")]
+        return c.url ?? url
+    }
+
     static var version: String { Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "1.0" }
     /** يُضاف إلى userAgent فيعرف الموقع وbridge.js أن الزائر داخل التطبيق (نفس علامة أندرويد) */
     static var appName: String { "HawlalaalamApp/" + version }
@@ -420,17 +432,19 @@ struct WebPage: UIViewRepresentable {
         let refresh = UIRefreshControl()
         refresh.addTarget(context.coordinator, action: #selector(Coordinator.reload(_:)), for: .valueChanged)
         web.scrollView.refreshControl = refresh
-        context.coordinator.requested = url
-        web.load(URLRequest(url: url))
+        let themed = WebConfig.themed(url, night: night)
+        context.coordinator.requested = themed
+        web.load(URLRequest(url: themed))
         return web
     }
 
     func updateUIView(_ web: WKWebView, context: Context) {
         let c = context.coordinator
         c.parent = self
-        if url != c.requested {
-            c.requested = url
-            web.load(URLRequest(url: url))
+        let themed = WebConfig.themed(url, night: night)
+        if themed != c.requested {
+            c.requested = themed
+            web.load(URLRequest(url: themed))
         } else if reloadToken != c.reloadToken {
             c.reloadToken = reloadToken
             if let u = c.failedURL ?? web.url { web.load(URLRequest(url: u)) } else { web.reload() }

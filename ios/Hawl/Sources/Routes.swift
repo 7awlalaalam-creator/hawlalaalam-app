@@ -43,7 +43,7 @@ enum Browser {
               ["http", "https"].contains((url.scheme ?? "").lowercased()) else { UIApplication.shared.open(url); return }
         var top = root
         while let p = top.presentedViewController { top = p }
-        let vc = SFSafariViewController(url: url)
+        let vc = SFSafariViewController(url: WebConfig.themed(url, night: top.traitCollection.userInterfaceStyle == .dark))
         vc.preferredControlTintColor = UIColor(hex: 0x9A7332)
         vc.dismissButtonStyle = .close
         top.present(vc, animated: true)
