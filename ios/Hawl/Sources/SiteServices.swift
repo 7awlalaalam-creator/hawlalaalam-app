@@ -176,25 +176,26 @@ struct SiteTile: View {
     }
 }
 
-/** الخانة الكبيرة: الخدمة الأولى بلون الهوية مع وصفها وزر «افتح» */
-struct SiteBigTile: View {
+/** الشريط: الخدمة الأولى بلون الهوية، أيقونة واسم ووصف بسطر واحد وزر «افتح» */
+struct SiteBanner: View {
     let item: SiteItem
     var body: some View {
-        VStack(alignment: .leading, spacing: 3) {
-            SiteIcon(item: item, size: 50)
-            Spacer(minLength: 4)
-            Text(item.title).font(AppFont.ui(16, 700)).foregroundColor(.white).lineLimit(2)
-            if !item.desc.isEmpty {
-                Text(item.desc).font(AppFont.ui(11)).foregroundColor(Palette.onDarkMuted).lineLimit(1).truncationMode(.tail)
+        HStack(spacing: 12) {
+            SiteIcon(item: item, size: 52)
+            VStack(alignment: .leading, spacing: 2) {
+                Text(item.title).font(AppFont.ui(16, 700)).foregroundColor(.white).lineLimit(1)
+                if !item.desc.isEmpty {
+                    Text(item.desc).font(AppFont.ui(12)).foregroundColor(Palette.onDarkMuted).lineLimit(1).truncationMode(.tail)
+                }
             }
-            Text(L("افتح ‹")).font(AppFont.ui(12, 700)).foregroundColor(Color(hex: 0x2B1D06))
-                .padding(.horizontal, 12).padding(.vertical, 5)
-                .background(RoundedRectangle(cornerRadius: 11).fill(LinearGradient(colors: [Color(hex: 0xF3DFA8), Color(hex: 0xC9A876)],
+            Spacer(minLength: 4)
+            Text(L("افتح ‹")).font(AppFont.ui(13, 700)).foregroundColor(Color(hex: 0x2B1D06))
+                .padding(.horizontal, 14).padding(.vertical, 7)
+                .background(RoundedRectangle(cornerRadius: 12).fill(LinearGradient(colors: [Color(hex: 0xF3DFA8), Color(hex: 0xC9A876)],
                                                                                  startPoint: .top, endPoint: .bottom)))
-                .padding(.top, 5)
         }
-        .padding(14)
-        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .leading)
+        .padding(.horizontal, 14).padding(.vertical, 12)
+        .frame(maxWidth: .infinity)
         .background(PatternBackground().clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous)))
         .overlay(alignment: .topTrailing) { if item.isNew { NewBadge() } }
         .contentShape(Rectangle())
@@ -259,63 +260,25 @@ struct SiteServicesSection: View {
         let others = Array(items.dropFirst())
         let feat = Array(others.filter { $0.featured }.prefix(2))
         let featIDs = Set(feat.map(\.id))
-        if !items.isEmpty && !feat.isEmpty {
-            // «بطاقة مميزة»: حتى بطاقتين داكنتين عريضتين بجوار الأولى، والباقي صغيرة في صفوف تحتها
-            let small = others.filter { !featIDs.contains($0.id) }
+        let small = others.filter { !featIDs.contains($0.id) }
+        if !items.isEmpty {
+            // الخدمة الأولى شريط عريض، ثم المميزة (حتى اثنتين) جنبًا إلى جنب، ثم الصغيرة صفوفًا من أربع
             VStack(alignment: .leading, spacing: gap) {
                 sectionHeader
-                HStack(spacing: gap) {
-                    link(items[0]) { SiteBigTile(item: items[0]) }.frame(maxWidth: .infinity)
-                    VStack(spacing: gap) {
-                        ForEach(feat) { it in link(it) { SiteWideTile(item: it) } }
+                link(items[0]) { SiteBanner(item: items[0]) }
+                if !feat.isEmpty {
+                    HStack(spacing: gap) {
+                        ForEach(feat) { it in link(it) { SiteWideTile(item: it) }.frame(maxWidth: .infinity) }
                     }
-                    .frame(maxWidth: .infinity)
+                    .frame(height: 76)
                 }
-                .frame(height: cell * 2 + gap)
-                .buttonStyle(.plain)
                 if !small.isEmpty {
                     LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: gap), count: 4), spacing: gap) {
                         ForEach(small) { it in link(it) { SiteTile(item: it) }.frame(height: cell) }
                     }
-                    .buttonStyle(.plain)
                 }
             }
-            .padding(.top, 8)
-        } else if !items.isEmpty {
-            let rest = min(4, items.count - 1)
-            let extra = Array(items.dropFirst(1 + rest))
-            VStack(alignment: .leading, spacing: gap) {
-                sectionHeader
-                HStack(spacing: gap) {
-                    link(items[0]) { SiteBigTile(item: items[0]) }
-                        .frame(maxWidth: .infinity)
-                        .frame(height: rest == 0 ? cell : cell * 2 + gap)
-                    if rest > 0 {
-                        let side = Array(items[1...rest])
-                        let rows = rest <= 2 ? 1 : 2
-                        VStack(spacing: gap) {
-                            ForEach(0..<rows, id: \.self) { r in
-                                HStack(spacing: gap) {
-                                    ForEach(0..<2, id: \.self) { k in
-                                        let i = r * 2 + k
-                                        if i < side.count { link(side[i]) { SiteTile(item: side[i]) } }
-                                        else { Color.clear }
-                                    }
-                                }
-                            }
-                        }
-                        .frame(maxWidth: .infinity)
-                        .frame(height: cell * 2 + gap)
-                    }
-                }
-                .buttonStyle(.plain)
-                if !extra.isEmpty {
-                    LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: gap), count: 4), spacing: gap) {
-                        ForEach(extra) { it in link(it) { SiteTile(item: it) }.frame(height: cell) }
-                    }
-                    .buttonStyle(.plain)
-                }
-            }
+            .buttonStyle(.plain)
             .padding(.top, 8)
         }
     }
