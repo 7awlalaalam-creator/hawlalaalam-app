@@ -21,6 +21,11 @@ today() {
   cap $1-today-1
   adb shell input swipe 540 1900 540 700 600; sleep 3; cap $1-today-2
   adb shell input swipe 540 1900 540 700 600; sleep 3; cap $1-today-3
+  adb shell am force-stop $P
+  adb shell am start -n "$P/.ToolsActivity"; sleep 10
+  cap $1-tools-1
+  adb shell input swipe 540 1900 540 700 600; sleep 3; cap $1-tools-2
+  adb shell input swipe 540 1900 540 700 600; sleep 3; cap $1-tools-3
 }
 adb logcat -c
 today light
