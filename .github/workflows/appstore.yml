@@ -121,6 +121,7 @@ jobs:
           for L in ar-SA en-US; do
             for f in shots/iphone/*.png; do cp "$f" "fastlane/screenshots/$L/iphone-$(basename "$f")"; done
             for f in shots/ipad/*.png; do cp "$f" "fastlane/screenshots/$L/ipad-$(basename "$f")"; done
+            for f in shots/watch/*.png; do [ -f "$f" ] && cp "$f" "fastlane/screenshots/$L/watch-$(basename "$f")"; done
           done
           printf '%s' "$ASC_KEY_P8" > /tmp/key.p8
           python3 - <<'PY'
