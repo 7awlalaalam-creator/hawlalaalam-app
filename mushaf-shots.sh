@@ -19,7 +19,7 @@ today() {
   adb shell am force-stop $P
   adb shell am start -n "$P/.HomeActivity"; sleep 10
   # شاشة الترحيب في أول تشغيل: زر «ابدأ رحلتك مع القرآن»
-  adb shell input tap 540 1500; sleep 8
+  adb shell input tap 540 1875; sleep 8
   cap $1-today-1
   adb shell input swipe 540 1900 540 700 600; sleep 3; cap $1-today-2
   adb shell input swipe 540 1900 540 700 600; sleep 3; cap $1-today-3
