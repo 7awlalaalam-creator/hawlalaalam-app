@@ -86,6 +86,8 @@ final class HawlSchemeHandler: NSObject, WKURLSchemeHandler {
         "/__hawl/tajweed.json": ("tajweed", "json", "application/json"),
         "/__hawl/morph.json": ("morph", "json", "application/json"),
         "/__hawl/mutashabihat.json": ("mutashabihat", "json", "application/json"),
+        "/__hawl/qpc2.json": ("qpc2", "json", "application/json"),
+        "/__hawl/qpc2-bsml.ttf": ("qpc2-bsml", "ttf", "font/ttf"),
     ]
 
     func webView(_ webView: WKWebView, start task: WKURLSchemeTask) {
