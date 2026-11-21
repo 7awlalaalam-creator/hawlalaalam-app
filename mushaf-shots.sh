@@ -17,22 +17,18 @@ openPage() {
 }
 today() {
   adb shell am force-stop $P
-  adb shell am start -n "$P/.HomeActivity"; sleep 12
+  adb shell am start -n "$P/.HomeActivity"; sleep 10
+  # شاشة الترحيب في أول تشغيل: زر «ابدأ رحلتك مع القرآن»
+  adb shell input tap 540 1500; sleep 8
   cap $1-today-1
   adb shell input swipe 540 1900 540 700 600; sleep 3; cap $1-today-2
   adb shell input swipe 540 1900 540 700 600; sleep 3; cap $1-today-3
-  adb shell am force-stop $P
-  adb shell am start -n "$P/.ToolsActivity"; sleep 10
+  adb shell input tap 135 2235; sleep 8     # «الأدوات» في الشريط السفلي (يسار في العربية)
   cap $1-tools-1
   adb shell input swipe 540 1900 540 700 600; sleep 3; cap $1-tools-2
   adb shell input swipe 540 1900 540 700 600; sleep 3; cap $1-tools-3
 }
-adb logcat -c
 today light
-adb shell am force-stop $P
-adb shell am start -n "$P/.MainActivity"; sleep 12
-for p in 106 604 50; do openPage $p; cap light-mushaf-$p; done
-adb logcat -d | grep -iE "AndroidRuntime|FATAL|crash|lowmemory|killing|died|hawlalaalam" | tail -150 > shots/light-log.txt
 adb shell cmd uimode night yes; sleep 3
 today dark
 ls -la shots
