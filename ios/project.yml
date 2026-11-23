@@ -148,6 +148,7 @@ targets:
         NSMicrophoneUsageDescription: "للتسميع: تقرأ من حفظك فيتابعك التطبيق كلمة بكلمة. لا يُسجَّل صوتك ولا يُحفظ."
         NSSpeechRecognitionUsageDescription: "للتسميع: نحوّل تلاوتك إلى نص لنقارنه بالآيات ونريك ما تجاوزته. لا يُحفظ صوتك."
         NSPhotoLibraryAddUsageDescription: "لحفظ بطاقات الآيات التي تختار حفظها في الصور."
+        NSCameraUsageDescription: "لتصوير آية من مصحف أو لوحة فنعرف السورة ورقم الآية ومعناها. تُصغَّر الصورة على جهازك ولا تُحفظ."
         ITSAppUsesNonExemptEncryption: false
         # الصلاة القادمة في الجزيرة الديناميكية وشاشة القفل (نشاط حيّ)
         NSSupportsLiveActivities: true

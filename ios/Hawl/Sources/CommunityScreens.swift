@@ -40,7 +40,7 @@ enum Stats {
     }
 
     static var mapOn: Bool {
-        get { Store.bool("st_map", false) }
+        get { Store.bool("st_map", true) }
         set { Store.d.set(newValue, forKey: "st_map") }
     }
 
@@ -380,7 +380,7 @@ struct PrivacyView: View {
                 (Text(L("للشفافية: ")).foregroundColor(Palette.ink).bold()
                  + Text(L("الإشعارات الفورية تصل عبر خدمة Firebase بمعرّف جهاز مجهول لا يُربط باسمك، ويمكنك إيقافها من «التنبيهات». ")
                         + L("واسم مدينتك يعرفه الجوال من خدمة نظامه (أبل). ")
-                        + L("وإن فعّلت «أضِف قراءتي للخريطة» أو أدخلت رمز دعوة، يُرسل عدد الصفحات واسم الدولة أو رمز الدعوة فقط، بلا أي معرّف.")))
+                        + L("ولخريطة «القرآن حول العالم» يُرسل عدد الصفحات واسم الدولة فقط، بلا أي معرّف، ويمكنك إيقاف ذلك من «أضِف قراءتي للخريطة». وإن أدخلت رمز دعوة يُرسل الرمز فقط.")))
                     .font(AppFont.ui(12)).foregroundColor(Palette.muted).lineSpacing(4).padding(.horizontal, 4)
                 Button { Share.present([Self.shareText]) } label: {
                     Pill(title: L("شارك هذا مع من يسأل عن تطبيق آمن"), systemImage: "square.and.arrow.up")
@@ -596,8 +596,19 @@ private struct WorldDots {
 }
 
 struct WorldMapView: View {
-    @State private var data: [String: Any] = (Store.d.dictionary(forKey: "st_world_cache") ?? [:])
+    /// الفترة: now | today | 7 | 30، من pulse.php (زيارات الموقع + صفحات التطبيق لكل دولة)
+    @State private var range: String = Store.string("st_world_r").isEmpty ? "30" : Store.string("st_world_r")
+    @State private var data: [String: Any] = (Store.d.dictionary(forKey: "st_world_cache_" + (Store.string("st_world_r").isEmpty ? "30" : Store.string("st_world_r"))) ?? [:])
     @State private var failed = false
+    private static let ranges = ["now", "today", "7", "30"]
+    private func rangeLabel(_ r: String) -> String {
+        switch r { case "now": return L("الآن"); case "today": return L("اليوم"); case "7": return L("٧ أيام"); default: return L("٣٠ يومًا") }
+    }
+    private static func flag(_ cc: String) -> String {
+        let u = cc.uppercased()
+        guard u.count == 2 else { return "" }
+        return u.unicodeScalars.compactMap { UnicodeScalar(0x1F1E6 + $0.value - 65) }.map { String($0) }.joined()
+    }
     @State private var mapOn = Stats.mapOn
 
     private static let bg = Color(hex: 0x0B1F24), cardC = Color(hex: 0x102A30), lineC = Color(hex: 0x1F3A41)
@@ -609,13 +620,44 @@ struct WorldMapView: View {
     var body: some View {
         ScrollView {
             VStack(spacing: 12) {
-                let total = (data["total"] as? Int) ?? 0
+                HStack(spacing: 4) {
+                    ForEach(Self.ranges, id: \.self) { r in
+                        Button {
+                            guard r != range else { return }
+                            range = r
+                            Store.d.set(r, forKey: "st_world_r")
+                            data = Store.d.dictionary(forKey: "st_world_cache_" + r) ?? [:]
+                            failed = false
+                            Task { await load() }
+                        } label: {
+                            Text(rangeLabel(r)).font(AppFont.ui(13, r == range ? 700 : 500))
+                                .foregroundColor(r == range ? Color(hex: 0x0E2C31) : Palette.onDarkMuted)
+                                .frame(maxWidth: .infinity).padding(.vertical, 8)
+                                .background(RoundedRectangle(cornerRadius: 11).fill(r == range ? Palette.gold : Color.clear))
+                        }
+                        .buttonStyle(.plain)
+                        .accessibilityAddTraits(r == range ? .isSelected : [])
+                    }
+                }
+                .padding(4)
+                .background(RoundedRectangle(cornerRadius: 14).fill(Self.cardC))
+                .overlay(RoundedRectangle(cornerRadius: 14).stroke(Self.lineC))
+                let fb = (data["fallback"] as? Bool) ?? false
+                let isNow = range == "now"
+                let total = (isNow && !fb ? data["now"] as? Int : data["total"] as? Int) ?? 0
                 let countries = (data["countries"] as? Int) ?? 0
-                Text(L("صفحات قرأها المشاركون اليوم")).font(AppFont.ui(13)).foregroundColor(Palette.onDarkMuted)
+                let nowN = (data["now"] as? Int) ?? 0
+                Text(fb ? L("صفحات قرأها المشاركون اليوم") : isNow ? L("يقرؤون القرآن الآن (آخر ٥ دقائق)")
+                     : range == "today" ? L("قراءات اليوم في الموقع والتطبيق")
+                     : range == "7" ? L("قراءات آخر ٧ أيام في الموقع والتطبيق") : L("قراءات آخر ٣٠ يومًا في الموقع والتطبيق"))
+                    .font(AppFont.ui(13)).foregroundColor(Palette.onDarkMuted)
                 Text(data.isEmpty ? (failed ? "—" : "…") : num(total)).font(AppFont.ui(44, 700)).foregroundColor(Palette.goldLight)
                 Text(countries > 0 ? L("في ") + ar(countries) + (countries <= 10 ? L(" دول") : L(" دولة"))
                      : failed ? L("تعذّر الاتصال الآن") : L("تضيء الخريطة كلما قرأ المشاركون"))
                     .font(AppFont.ui(12)).foregroundColor(Palette.onDarkMuted)
+                if !isNow && nowN > 0 {
+                    Text("● " + L("يقرأ الآن ") + ar(nowN)).font(AppFont.ui(12, 700)).foregroundColor(Palette.gold)
+                }
 
                 TimelineView(.animation) { tl in
                     Canvas { ctx, size in draw(ctx, size, t: tl.date.timeIntervalSinceReferenceDate) }
@@ -624,16 +666,16 @@ struct WorldMapView: View {
                 .background(RoundedRectangle(cornerRadius: 18).fill(Self.cardC))
                 .overlay(RoundedRectangle(cornerRadius: 18).stroke(Self.lineC))
                 .environment(\.layoutDirection, .leftToRight)
-                .accessibilityLabel(L("خريطة نقاط تضيء حيث يُقرأ القرآن اليوم"))
+                .accessibilityLabel(L("خريطة نقاط تضيء حيث يُقرأ القرآن"))
 
                 if !top.isEmpty {
                     VStack(spacing: 0) {
-                        ForEach(Array(top.prefix(5).enumerated()), id: \.offset) { i, c in
+                        ForEach(Array(top.prefix(10).enumerated()), id: \.offset) { i, c in
                             if i > 0 { Rectangle().fill(Self.lineC).frame(height: 1) }
                             HStack {
-                                Text(Stats.countryName(c.0)).font(AppFont.ui(14, 700)).foregroundColor(.white)
+                                Text(ar(i + 1) + "  " + Self.flag(c.0) + "  " + Stats.countryName(c.0)).font(AppFont.ui(14, 700)).foregroundColor(.white)
                                 Spacer()
-                                Text(ar(c.1) + L(" صفحة")).font(AppFont.ui(14, 700)).foregroundColor(Palette.goldLight)
+                                Text(ar(c.1) + (((data["fallback"] as? Bool) ?? false) ? L(" صفحة") : L(" قراءة"))).font(AppFont.ui(14, 700)).foregroundColor(Palette.goldLight)
                             }
                             .padding(.vertical, 11)
                         }
@@ -677,11 +719,35 @@ struct WorldMapView: View {
 
     private func load() async {
         await Stats.sync()
-        if let d = await Stats.get("action=world") {
+        let r0 = range
+        var d = await Self.pulse(r0)
+        if d == nil, r0 != "now", var w = await Stats.get("action=world") { w["fallback"] = true; d = w }
+        guard r0 == range else { return }
+        if let d {
             data = d
-            Store.d.set(d, forKey: "st_world_cache")
+            Store.d.set(d, forKey: "st_world_cache_" + r0)
             failed = false
         } else { failed = true }
+    }
+
+    /// يحوّل pulse.php إلى { total, countries, now, top:[{cc,pages}] } مرتّبة تنازليًا
+    static func pulse(_ r: String) async -> [String: Any]? {
+        guard let url = URL(string: Links.homeString + "api/v1/pulse.php?r=" + r) else { return nil }
+        var q = URLRequest(url: url, timeoutInterval: 15)
+        q.setValue(WebConfig.userAgentMark, forHTTPHeaderField: "User-Agent")
+        guard let (d, resp) = try? await URLSession.shared.data(for: q), ((resp as? HTTPURLResponse)?.statusCode ?? 500) < 400,
+              let j = (try? JSONSerialization.jsonObject(with: d)) as? [String: Any] else { return nil }
+        var list: [[String: Any]] = []
+        var total = 0
+        for o in (j["countries"] as? [[String: Any]]) ?? [] {
+            let cc = ((o["cc"] as? String) ?? "").uppercased()
+            let v = ((o["site"] as? Int) ?? 0) + ((o["app"] as? Int) ?? 0)
+            guard cc.count == 2, v > 0 else { continue }
+            total += v
+            list.append(["cc": cc, "pages": v])
+        }
+        list.sort { (($0["pages"] as? Int) ?? 0) > (($1["pages"] as? Int) ?? 0) }
+        return ["total": total, "countries": list.count, "now": (j["now"] as? Int) ?? 0, "top": list, "range": r]
     }
 
     private func draw(_ ctx: GraphicsContext, _ size: CGSize, t: Double) {

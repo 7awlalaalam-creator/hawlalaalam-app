@@ -23,6 +23,7 @@ struct ToolsView: View {
                     NavigationLink(value: Screen.downloads) { ToolTile(title: L("المحمّلة"), systemImage: "headphones") }
                     Button { Browser.open(Links.languages) } label: { ToolTile(title: L("الترجمات"), systemImage: "globe") }
                     Button { state.openMushaf(page: nil, extra: "hifz=1") } label: { ToolTile(title: L("الحفظ"), systemImage: "puzzlepiece") }
+                    Button { state.openMushaf(page: nil, extra: "tasmee=1") } label: { ToolTile(title: L("سمّع لي"), systemImage: "mic") }
                     Button { state.openMushaf(page: nil, extra: "find=1") } label: { ToolTile(title: L("بحث بالمعنى"), systemImage: "text.magnifyingglass") }
                     NavigationLink(value: Screen.family(nil)) { ToolTile(title: L("ختمة العائلة"), systemImage: "person.3") }
                     NavigationLink(value: Screen.articles) { ToolTile(title: L("المقالات"), systemImage: "doc.text") }
