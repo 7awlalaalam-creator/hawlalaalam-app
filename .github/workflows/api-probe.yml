@@ -36,6 +36,8 @@ jobs:
           get ask_bad "$B/ask.php" -X POST -H 'Content-Type: application/json' --data '{"s":112,"a":1,"q":""}'
           get opt "$B/ask.php" -X OPTIONS -H 'Access-Control-Request-Method: POST' -H 'Access-Control-Request-Headers: content-type'
           get docs "$B/docs.html"
+          for r in now today 7 30; do get "pulse_$r" "$B/pulse.php?r=$r"; done
+          get tasmee "$B/tasmee.php?s=112&from=1&to=4"
       - name: حفظ في فرع ci-api
         run: |
           cd out && git init -q && git checkout -q -b ci-api
